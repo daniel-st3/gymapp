@@ -7,6 +7,6 @@
 - [x] Exercise delivery, duplicate rejection and recovery on isolated paired simulators.
 - [x] Update README and security documentation; exclude private data from Git.
 - [x] Install in place on available devices after backups; preserve history and signing.
-- [ ] Commit reviewed source and deliver to the intended GitHub repository.
+- [x] Commit reviewed source and deliver to [daniel-st3/gymapp](https://github.com/daniel-st3/gymapp).
 
 Phone foreground launch is blocked by the device lock. Watch launch succeeded. No app publication or paid enrollment occurred. Physical haptics, background motion reliability and live ChatGPT remain outside this pass.
