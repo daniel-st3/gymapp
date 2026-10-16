@@ -1,0 +1,307 @@
+# Verification
+
+## Build 10: local Progress and input hardening, 15 October 2026
+
+Implemented a read-only Progress dashboard with Monday-based 4/12-week ranges, actual logged sets, training days and median elapsed session time. Only completed Little Lift sessions containing actual sets count; early finishes count only logged work. Imported history is separate. Exercise records group exact variation IDs, units and load conventions, then filter by actual repetition count. Highest logged load (lowest assistance setting for assisted work) links to its original session. No mixed-load total, estimated strength, causation or medical score is produced.
+
+Security changes: authenticated App Intents; actual-byte-limited Files/Photos/motion readers; bounded OCR output; semantic sync validation before mutation; bounded unique receipt IDs; rejection of conflicting session IDs; chronological set/sequence/date checks; motion confirmation validation. Identical completed-session retries remain idempotent. Durable storage protection, atomic writes and persist-before-ack ordering remain in place. See [SECURITY](../SECURITY.md) for exact boundaries and limitations.
+
+Observed verification:
+
+- 92 Swift tests in ten suites, 10 launcher tests, reproducible project/resource/icon checks and both simulator SDK builds passed. Added tests cover malicious/oversize inputs, invalid receipts, conflicting duplicates, date/sequence errors, failed storage writes, analytics range boundaries, actual-versus-target values, exact matching, imported separation, assistance and read-only recovery.
+- The signed app’s generated App Intents metadata explicitly declares authentication on all four actions. This is verified build configuration, not a claim of observing a physical authentication prompt or unattended ChatGPT run.
+- Existing simulator phone/Watch files round-tripped semantically unchanged before generic fixtures were installed. Actual phone screenshots showed six workouts/18 sets for four weeks and ten workouts/30 sets for twelve weeks. Native links opened exercise records and the underlying original workout. The 46 mm Watch retained fixed Start, Log, rest and Done controls.
+- Actual generic Watch taps logged 10.5 kg × 9, extended rest by exactly 30 seconds, preserved the deadline after relaunch, undid the set, relogged and completed all three sets. The phone saved identical completed contents. Replaying the valid outbox entry produced one History session and one review job; phone relaunch retained them. Progress then showed seven workouts/21 sets in four weeks.
+- Accessibility-size inspection identified crowded chart date labels and vertically uneven statistic values. The final UI adds scaled chart height, fewer date ticks and top-aligned grid cells. Native motion continues to respect Reduce Motion.
+- Build 10 installed in place on both real devices with existing free signing. Pre/post-install JSON was exactly equal for both. Watch launched; iOS rejected foreground and background launch because the phone was locked. No real test workouts were added.
+
+Final follow-through: inspected the corrected accessibility layout, including readable spaced date ticks and aligned metrics, and the empty Progress state. Runtime checks confirmed Reduce Motion off before testing and on during the range switch; it was restored off afterwards. The bounded Photos transfer performed local OCR, opened an editable preview, saved the exact 3 × 8 at 40 kg / 90s and 2 × 10 at 30 kg / 60s prescriptions, and synced the same plan to Watch. Only the temporary photo was removed; original photos were retained. The original simulator phone state and active Watch workout were restored, allowing only a fresh Watch receipt timestamp, and the original text sizes were restored.
+
+Final physical delivery readbacks remained exactly equal on both devices. Phone, Watch and launcher signatures passed; all report Build 10. The final iPhone build disables unused Documents file sharing. Its in-place install succeeded with another unchanged data readback; foreground launch remains blocked by the locked phone. The Watch launched successfully. Original bundle configuration, private signing settings, Watch entitlement and both app icons match the pre-change checkpoint byte for byte.
+
+Final build logs: `BuildLogs/progress10-delivery-verify.log`, `progress10-phone-final.log` and `progress10-device-final.log`. The first full build emitted a non-fatal Apple App Intents SSU archiving diagnostic; final delivery builds succeeded and the generated authentication metadata was checked. Repository source was checked for private paths, credential patterns and personal device identifiers before commit. Private logs and generic fixtures are under `.verification/progress-10/`; public documentation images are generic only. Physical haptics, double tap, wrist-down capture, battery behavior, live ChatGPT and locked notifications remain unverified in this pass.
+
+
+The older Linux and first-Mac notes below are historical. The current Mac verification is recorded first.
+
+## Build 9: complete interface redesign, 15 October 2026
+
+Implemented a shared phone design system and redesigned Today, History, workout records, Routines, routine details, Settings and smart import. Native editors, review, time planning and motion views share matching form/list surfaces. Serif page/workout titles contrast with compact system controls and tabular values. Watch Today and set logging were refined; a clipped number-panel edge found at large Watch text was corrected through spacing and type adjustments. The monochrome icon, 11 checked configuration/icon files, Foundation engine, storage schema and existing signing setup are unchanged. See [design decisions and sources](design-9.md).
+
+Observed verification:
+
+- **80 engine tests in 8 suites, 10 launcher tests, project/resource/icon checks, both simulator builds and the free-signed physical build passed.** Delivery logs: `BuildLogs/design9-delivery-verify.log`, `BuildLogs/design9-delivery-device.log`. Phone, Watch and launcher are version 9 and passed `codesign --verify --deep --strict`. An earlier signed build emitted Apple's nonfatal SSU archive diagnostic despite a successful build; no live model capability is inferred from compilation.
+- Actual existing paired iPhone and 46 mm Watch screenshots inspected Today, logging, rest, summary, Settings, Routines, History/record, smart import and the editor. iPhone accessibility-medium and Watch XXXL were inspected; fixed actions remained visible. The final Watch panel correction was rechecked at XXXL.
+- Native Watch controls logged **10.5 kg × 9** before undo; undo removed the entry. Relogging, exact **30-second** rest extension, identical persisted deadline after relaunch, Skip, full three-set completion, exact phone delivery and outbox acknowledgment passed. Duplicate replay retained one History record and one review job for the session ID.
+- Local Vision OCR read the generic screenshot into two exercises with the correct loads, reps, sets and rest. The redesigned preview explicitly saved the plan and delivered an identical copy to Watch. The active Watch session retained its original prescription. Native long-drag reordering saved the new order and retained three fixture routines without creating a duplicate revision entry. A short automated drag did not move the row; the slower native gesture verified the actual path.
+- Long workout/exercise names and empty Today/History states were inspected. Long Watch text uses the existing two-line truncation and internal scrolling fallback, while Start/Log remain fixed. Original simulator data (including the active workout) was restored and compared: exact phone equality, with only a fresh Watch sync timestamp allowed. Original phone L / Watch XL and Reduce Motion off were read back after restoration. No clipboard changes were made.
+- Recorded actual simulator videos and inspected frames for Watch number changes and set-to-rest transitions and phone disclosure expansion. With system Reduce Motion enabled and read back on both devices, the custom transition was immediate; normal motion showed the brief reveal. Fixed controls did not wait for the incoming-content fade. These captures do not measure physical frame rate or haptic feel.
+- **Final Build 9 installed in place on both real devices.** Fresh preinstall and postinstall JSON matched exactly. The Watch foreground launch succeeded. iOS blocked both foreground and background phone launch because the phone was locked; an unlock request was sent. No app was uninstalled, no real test workout was added, and no pairing or enrollment changed.
+
+Private evidence is under `.verification/design-9/`, with screenshots under `.verification/screenshots/design9-*`. This includes the fresh source/data checkpoints, exact-delivery/reorder/import assertions, video frame extracts, signing checks, installation results and preservation comparisons. The generic OCR photo is removed through Photos; its normal Recently Deleted retention is left to the system.
+
+Physical haptics, wrist-down/background motion capture, battery cost, repetition accuracy and live ChatGPT/Shortcut execution remain unverified or experimental as previously documented. The only delivery interaction requested for this redesign is unlocking the installed phone app for foreground launch.
+
+## Build 8: native visual and interaction pass, 15 October 2026
+
+Implemented Apple SF Symbols for clear, labelled actions; rounded system headings and workout numbers; stronger primary-button contrast; grouped iPhone Settings and Watch Preferences; and brief disclosure, press, numeric and completion feedback. The original monochrome app icon is unchanged. History import moved to History, while creation and scheduling remain in Routines. See [visual design and primary sources](visual-design.md).
+
+Fixed stale async import publication: OCR, photo loading and model extraction now share a generation guard and cancellable timeout, with late completions/errors ignored after cancellation. The same photo can be selected again. This does not change the review-before-accept boundary. Visual QA also caught and corrected overlapping rows during disclosure expansion and a subtitle indent that drifted at larger text sizes. Single-exercise summaries use singular wording; report copying has visible confirmation.
+
+Observed on this Mac:
+
+- **80 engine tests / 8 suites, 10 launcher tests, project/resource/icon checks, both simulator builds and the signed physical-device build passed.** Final logs: `BuildLogs/design8-delivery-verify.log` and `BuildLogs/design8-delivery-device.log`. No engine or storage schema changed. Early iterations included compiler corrections; only the final successful products were delivered.
+- Actual existing paired iPhone 18 Pro Max and **46 mm Watch** simulators: Today, set logging, rest, summary, Settings, coach modes, Watch controls/preferences, routine library, history-import navigation, screenshot input and editable preview inspected. Primary Watch buttons remained outside scrolling and visible at normal and XXXL Watch text. iPhone Today and Settings were also inspected at accessibility-medium; the final Settings subtitle alignment was rechecked after its fix.
+- Native UI logged **10.5 kg × 9**, extended rest by exactly 30 seconds, retained its deadline after relaunch and undid the set. A complete three-set session then arrived in phone History with exact semantic equality and a cleared Watch outbox. Replaying that same completed session produced one History record and one review job, with acknowledgment retained. No real-device test workouts were inserted.
+- A generic image was read by local Vision OCR twice using the same photo. Its two exercises, units, loads, reps and rest reached the editable preview correctly. Exiting without acceptance left Today unchanged. The generation/cancellation race protection was reviewed in source; a deliberately stalled physical on-device model was not tested. Apple Intelligence and ChatGPT model execution were not claimed verified.
+- Captured actual videos and inspected frames for phone disclosure expansion, Watch number changes, set-to-rest and completion. The initial expansion overlap was corrected with a clipped reveal. System Reduce Motion was explicitly enabled and read back on both simulators: custom disclosure motion and incoming Watch fades/movement were removed. Original Reduce Motion off and phone L / Watch XL sizes were restored afterward. Some simulator captures contained transient missing glyph tiles, including OS status text; settled recaptures were used for layout judgments. Videos do not establish physical frame rates.
+- Watch Preferences toggled and durably saved the haptic flag, then restored it. The simulator displayed rest reminders as allowed. This is not verification of physical haptic feel, double-tap hardware recognition or locked/background notifications.
+- **Build 8 installed and launched successfully on both real devices with the existing free Personal Team.** Readback matched their pre-install workout JSON and motion record data; the only allowed Watch difference was a fresh sync timestamp. No uninstall, pairing reset, bundle change or paid enrollment occurred. Both apps were left running. Existing signing configuration and monochrome icon files were byte-identical to the source checkpoint.
+
+Evidence: `.verification/design-8/` holds private backups, generic fixtures, assertions, videos, frame extracts, signature records, installation/launch results, device preservation and simulator restoration reports. Screenshots use `.verification/screenshots/design8-*`. The generic photo added for OCR was removed from the simulator library; Photos retains it in Recently Deleted under its normal policy. Original app data, active simulator workout and pairing were preserved.
+
+An intermediate Xcode build emitted a nonfatal App Intents SSU archive diagnostic despite successful builds and emitted action metadata. The final incremental builds passed without that diagnostic. Live review Shortcut/ChatGPT execution remains a separate unverified platform/account workflow. Physical motion runtime, wrist-down reliability, battery cost and repetition accuracy retain their existing experimental status.
+
+## Build 7: daily-use product pass, 15 October 2026
+
+Today now opens a searchable routine picker with a scheduled suggestion, preview and explicit acceptance. Merely opening or closing it changes nothing. A direct Edit action opens a compact exercise list; each exercise has its own target editor, with comparison/optional-work fields behind a disclosure. Native reordering and confirmed removal operate on the draft. Save is pinned, validates the whole plan, and clearly chooses library-only or Today plus library. Import goes directly from **Preview workout** to this editor. Local Apple Intelligence and the coaching prompt remain under More import options.
+
+Fixed an actual save-path bug: saving a routine revision and sending Today previously performed separate commits and could create another library copy. One Foundation-only transaction now stores the exact saved revision in Today, retains the original archive and schedule identity, and does not create another revision on a repeated unchanged save. Missing routine IDs fail explicitly. The library’s selected label is derived from the current saved plan, so it cannot remain stale after editing.
+
+Today shows the last actual final set only when variation key, load convention and units match. Approved substitutions are matched by the exercise actually performed; the coach-context progression code previously searched the original prescription and could miss these results. Watch previous results use the same matching function and chronological ordering. No imported records or historical measurements are invented.
+
+Observed verification on this Mac:
+
+- **80 Swift tests**, **10 launcher tests**, project/resource/icon checks and both simulator SDK builds passed. Final logs: `BuildLogs/product7-delivery-verify.log` and the signed-device `product7-delivery-device.log`. Six added regression cases cover atomic edits, failure preservation, repeat saves, identity collisions, linked-request removal, matching substitutions, units/conventions, missing evidence and storage round trips.
+- Current original simulator phone/Watch JSON decoded and re-encoded with exact semantic equality. No storage schema change was needed.
+- Native phone controls exercised preview/cancel, a load edit from **10 to 12 kg**, save, confirmed draft removal/cancel, long-drag reordering, and routine choice. The library retained two fixture routines; edits produced archived revisions instead of extra routines. The active Watch workout retained its original **10 kg** prescription while its next plan received **12 kg**.
+- Native ordinary-text Paste → Preview → Save imported **2 × 8 at 30 kg, 60-second rest**, then delivered the identical plan to Watch. The new preview opened directly. Out-of-range test input visibly disabled Save. Existing-chat report copying preserved the actual logged values; no message was sent to a ChatGPT conversation.
+- Watch Start, actual load adjustment to **10.5 kg**, Log, +30 seconds, relaunch, Undo, relog, Skip and full completion were exercised. The restored rest deadline was identical. All three completed sets arrived intact and were acknowledged. Replaying that session through the Watch outbox retained one History record and one review job for its ID; phone relaunch retained them.
+- Inspected actual phone Today, picker/preview, editor, exercise fields, import and History/detail screenshots, plus 46 mm Watch Today/log/rest/summary/options. Phone accessibility-medium retained fixed Send/Import/Save controls. Watch XXXL with runtime-confirmed Reduce Motion retained and accepted Start/Log/Skip/Done. Existing quiet transitions were retained; this pass does not claim new physical animation or frame-rate measurements.
+
+Build 7 was installed in place and launched on both actual devices with the existing free Personal Team. The phone, Watch and launcher signatures and provisioned-device coverage were verified. Fresh preinstall and postinstall app-state files matched exactly. No real test workouts were added, no app was uninstalled, and signing identities, pairings, icons and the refresh script were retained. The final phone-only selection-label correction was rebuilt, installed and read back with identical data. Its foreground launch was blocked after the phone locked; the supported `--no-activate` launch then succeeded, leaving the final phone app running in the background. The Watch foreground launch succeeded. Final phone evidence is under `.verification/product-7/delivery/`.
+
+Generic test data, source checkpoint, screenshots, private backups and read-back evidence are ignored under `.verification/product-7/` and `.verification/screenshots/product7-*`. The original simulator states, including the active workout, were restored and compared, allowing only a fresh Watch receipt timestamp. The phone’s original Large setting and Watch’s XL/Reduce Motion off state were restored. Clipboard restoration was guarded so newer user clipboard content would not be overwritten. Updated apps were left running.
+
+Motion remains opt-in and experimental. This pass does not verify wrist-down runtime, battery use, repetition accuracy, physical haptic feel, double tap, locked notifications, live ChatGPT or unattended Shortcut execution. Existing explicit-chat sharing and local logging remain independent of those limits. The current implementation/limitation status is maintained in `upgrade-checklist.md`; this increment is checked off in `product-pass-checklist.md`.
+
+## Build 6: compact typography and native motion polish, 15 October 2026
+
+The iPhone workout heading now uses the scalable 22-point title style instead of the 34-point large title. History, Routines, Settings and editing destinations use compact inline navigation titles. Today presents exercises first; the existing coaching prompt and collection disclosure remain accessible under **Coach & sharing**. Form labels use regular, scalable callout text; supporting footnotes retain an explicitly smaller semantic style.
+
+Watch typography uses explicit Dynamic Type-scaled base roles: 17-point headings, 15-point body/actions, 13-point supporting text and 12-point captions. The custom load/repetition values use 28 points and the rest clock 36. Touch targets remain at least 44 points for adjustments and 46 for primary actions. An observed clipped next-set line was corrected and then inspected again on the same 46 mm simulator.
+
+Added a 180 ms incoming-content fade with a four-point settling movement, 120 ms button feedback and numeric changes, and a short rest-progress interpolation. Primary actions remain immediately available. An exit animation never retains the outgoing workout controls. Reduce Motion bypasses the added movement and animations; user haptic preferences and workout logic are unchanged.
+
+Verification completed with isolated generic simulator data:
+
+- **74 Swift tests**, **10 launcher tests**, project/resource/icon checks and both SDK builds passed (`BuildLogs/polish6-delivery-verify.log`). The signed physical build also passed (`BuildLogs/polish6-delivery-device.log`). No engine/schema changes or new test-only production behavior were introduced.
+- Actual native controls exercised Start, load adjustment, three-set completion, rest extension/skip, summary and single History delivery. Screenshots inspected phone Today, Settings, Routines and motion setup, plus Watch Today, logging, rest, summary, options and motion.
+- Simulator video and extracted frames show the brief incoming fade and press feedback. A separate recorded pass with Reduce Motion enabled shows immediate full-opacity content. This is observed simulator behavior, not a physical frame-rate benchmark.
+- Runtime inspection confirmed the existing Watch category was `UICTContentSizeCategoryXL` and Reduce Motion was off. The accessibility pass used `UICTContentSizeCategoryXXXL` with Reduce Motion on; fixed Log/rest/Done controls remained visible. iPhone `accessibility-medium` kept both bottom actions visible. The original phone size, Watch launch settings and Reduce Motion preference were restored afterward.
+
+Local evidence is ignored under `.verification/polish-6/` and `.verification/screenshots/polish-*`. Original simulator data was restored and compared after asynchronous sync settled. The final apps installed in place on both physical devices using the current free profiles. Read-back exactly matched the fresh real phone and Watch state backups. The real Watch launched; the locked iPhone denied foreground and background launch, so its installed update is ready for the next manual open. The attempted physical Watch screenshot was black/asleep; visual and motion inspection claims above are from the simulators. Both updated simulators remain running. Evidence: `restoration.json` and `device-preservation.json` in that private evidence folder.
+
+## Build 6: full upgrade and usability follow-up, 15 October 2026
+
+Extended the current local project in successive compiled increments. Xcode 27.0 (27A266a), iOS/watchOS 27 SDKs, and the same existing paired iPhone 18 Pro Max / Series 12 **46 mm** simulators were used. The final apps and Watch launcher were installed over the existing physical apps with the current free Personal Team. Bundle identities, monochrome app icon, pairings and the private refresh script were preserved. No publishing, paid enrollment, hosted inference or API credentials were introduced.
+
+### Implemented and corrected
+
+- Smart text/JSON/screenshot import uses local Vision, availability-gated on-device Foundation Models, bounded validation and an editable preview. Missing or ambiguous information remains visible. Manual entry works without Apple Intelligence. Accepted plans retain exercise identity, units and load conventions.
+- Durable routines, previous revisions, a weekly schedule, separate previewed imported history, an editable training profile and compact coach context export. Imported history is distinguished from Little Lift observations; a plan change does not rewrite completed records.
+- Duration/finish-time planning with ranges derived from suitably matched Log intervals. Estimates update during a session. Approved optional work can be omitted and restored; required work, prescribed rest, loads, repetitions and completed sets are preserved. Log intervals include exercise/setup/rest and are not measurements of actual rest.
+- Busy-machine deferral/return and previously approved alternatives, with separate exercise identities and an audit of changes. Undo and relaunch retain actual values and original prescriptions.
+- WidgetKit Watch launcher and optional native primary-action double tap with duplicate, modal and rest guards. Core logging controls remain fixed. The launcher dumbbell now scales with padding to avoid cropping; the original app icon is unchanged.
+- Durable post-workout review jobs, bounded attempts, cancellation/retry, stale/duplicate rejection, explicit proposal acceptance, optional completion notifications and a one-tap Shortcut launch. Existing-chat report/context sharing remains explicit.
+- Build 5 coach observations and evidence reports remain supported and regression-tested. Timing, prescription, actual values, optional effort and missing data remain distinct.
+- Opt-in, bounded motion capture and native iPhone timing replay. Setup/exercise selection moved to iPhone. Watch menus now use shorter task labels; details and setup have separate screens. Motion Start shows permission progress, cancellation and useful errors. Denied Workouts access points to the exact Watch Health setting. Start/Stop haptic calls respect the existing preference, and a saved recording queues automatically for iPhone. No automatic capture was added. A failed final disk save reports the failure and leaves the previous checkpoint recoverable; it cannot accidentally send an older replay as the new capture.
+
+### Executed checks and native simulator flows
+
+`bash scripts/verify-mac.sh` passed **74 Swift tests in seven suites**, **10 launcher tests**, generated-project/resource/icon checks, and both simulator SDK builds. The haptic/transfer build passed in `BuildLogs/upgrade6-motion-feedback.log`; the final checkpoint-error guard passed the same full suite in `BuildLogs/upgrade6-final-checkpoint.log`. The suite covers legacy decoding, bounded schema validation, missing/skipped observations, undo, factual reports, routine revisions, imported-history conflicts, matched pace, optional-work changes, double-action guards, review receipts/cancellation/timeouts, motion timestamps/gaps and duplicate replay preservation. No historical timing measurements were invented.
+
+- Selected the generic workout screenshot through native Photos, ran Vision OCR and the available on-device model, inspected the editable preview, accepted it, saved a routine and observed the identical plan on the paired Watch. The local model returned a draft; this does not establish infallible extraction.
+- Exercised a generic flexible workout through native Watch controls: optional-work omission/reversal, approved substitution, deferral, actual weight/repetition editing, Log, +30 seconds, Skip, Undo and relaunch. The deferred alternative returned at the appropriate set. Four completed sets across three exercise identities arrived intact in phone History.
+- Replayed the completed fixture through the actual Watch outbox/WatchConnectivity path. The phone kept one session and one review job; the Watch queue drained after acknowledgment. Relaunch retained the same records. Imported history stayed separate.
+- Inspected routine/schedule/history/profile/time-planning screens. Thursday selection persisted. Historical JSON was pasted, previewed and explicitly accepted into separate imported history.
+- A clearly synthetic 450-sample replay rendered a gap and estimated markers. Changing its suggested count to seven persisted the confirmed value without altering raw samples. Synthetic samples were not used for personal model training or claimed as physical accuracy evidence.
+- Inspected actual phone screenshots and paired 46 mm Watch Today, logging, rest, summary, options, adjustment and motion screens. Native taps reached the fixed actions. At `xxxLarge`, Start/Log/rest actions remained visible while secondary content could scroll. Runtime inspection confirmed `UIAccessibilityIsReduceMotionEnabled() == true` during the accessibility pass; no frame-rate or physical haptic claim follows from that check.
+- Toggled review notifications using the simulator's existing permission and verified the persisted opt-in/off paths. Disabling cancels the app's pending notices. A fresh Apple permission dialog and locked physical notification delivery were not observed.
+
+### Physical install, recording and delivery
+
+The unchanged refresh script backed up both physical app states, refreshed free signing and installed the haptic/automatic-transfer iPhone app, Watch app and launcher in place (`BuildLogs/upgrade6-final-device-retry.log`). The script stopped at its final foreground iPhone launch because the phone had locked. A subsequent supported background launch succeeded without another user unlock; the Watch launch also succeeded. Installation success and background process launch do not claim the locked iPhone screen was visible.
+
+The final checkpoint-error guard passed the full simulator verification. The next refresh backed up both devices again, but Xcode timed out resolving the physical Watch destination. Building the same project for `generic/platform=iOS` succeeded with the existing valid free profiles (`BuildLogs/upgrade6-final-generic-device.log`). Profile device coverage and phone/Watch/launcher signatures were checked, then both final apps installed in place using devicectl. The final phone background launch and normal Watch launch both succeeded. The refresh script itself was left unchanged; `.verification/upgrade-6/final-device/` contains signature/install/launch evidence.
+
+The user enabled Workouts access in Watch Settings → Health → Apps → Little Lift, then reported that Start showed elapsed seconds and Stop worked. The stopped file contains **587 samples spanning 23.3929 seconds**, a median interval of **0.03992 seconds**, and no gap above **0.16 seconds**. Both coarse battery readings were approximately 90%; this short run cannot establish battery cost. Wrist position and repetition ground truth were not recorded. Physical haptic feel was not observed after the new cues were installed.
+
+Opening the final Watch motion screen automatically queued that retained stopped file. The real iPhone received it, and read-back matched the **entire original recording**, including every sample. A subsequent Watch relaunch left one durable phone replay; a second receive callback was not independently observed, so duplicate transport replay is not claimed from that alone. Core repository tests cover duplicate imports without replacing a user-confirmed count. The raw Watch original is preserved.
+
+Final physical state read-back exactly matched the fresh preinstall phone backup. Watch state matched apart from the expected snapshot receipt timestamp. Plans, history, profile, session state, outbox, haptic preference and the user's motion opt-in were preserved. Local private evidence: `.verification/upgrade-6/final-device/preservation.json`, `physical-motion-metrics.json`, the original/received recording files, and `.verification/device-backups/20261015-200519/`.
+
+### Separate Shortcuts and motion limitations
+
+The signed three-action review template has native Prepare → Use Model → Save bindings, including Text model output. The native Shortcuts editor confirmed both input/output connections. A device-specific copy is in the real phone's Little Lift Documents and available from setup; it contains no workout data or credentials. Preparing or importing the template is not end-to-end execution proof.
+
+The simulator's Use Model menu exposed Cloud, Cloud Pro, On-Device and Ask Each Time, but **no ChatGPT extension**. Executing the template was also blocked before Prepare by Shortcuts' app-access error; the displayed Privacy page did not offer a Little Lift access control. No paid/cloud model was invoked to bypass this. Real-account ChatGPT selection, model analysis, Save through Shortcuts and unattended notification-trigger automation remain **unconfigured/unverified**. Apple documents the iOS 27 notification route; the implementation supplies a stable, opt-in notice only after durable completion. Existing-chat report sharing and the one-tap review entry point remain usable independently. Proposed workouts always require acceptance.
+
+Free HealthKit signing and a short physical sensor/transfer path are established. Wrist-down continuity, app-switching/interruption recovery, realistic-duration power use, repetition accuracy, physical double tap, launcher placement and haptic feel remain unvalidated. Motion stays explicitly experimental and separate from ordinary logging. See [motion feasibility](motion-feasibility.md) and the [eight-feature checklist](upgrade-checklist.md).
+
+### Cleanup and preservation
+
+Original simulator phone data and the original active Watch session were restored from fresh backups and compared, allowing only the Watch receipt timestamp to advance. The synthetic replay was removed, the simulator clipboard and Reduce Motion setting were restored, and newer host clipboard contents were preserved. Only the generic workout screenshot added for this test was removed from the simulator Photos library (recoverable in Recently Deleted). The localhost-only fixture server was stopped. Updated simulators were left running on original data. Evidence: `.verification/upgrade-6/restoration.json` and actual screenshots under `.verification/screenshots/upgrade6-*`. Personal files, raw evidence, signing settings and device backups remain ignored.
+
+
+## Build 5: coach observations, 15 October 2026
+
+Updated this Mac's existing Build 4 in place. Xcode 27.0 (27A266a), iOS/watchOS 27 SDKs; the same existing iPhone 18 Pro Max / Series 12 **46 mm** simulator pair. The actual iPhone 15 Pro Max and paired Series 12 Watch now both report **0.1.0, build 5** and both launched successfully. Current free Personal Team signing, bundle identifiers, monochrome icons, pairings and the private refresh script are preserved. Nothing was published and no paid enrollment occurred.
+
+### Implemented
+
+- Optional, validated observation requests: prescribed versus logged load/reps, explicitly labelled Log-tap intervals, and one skippable final-set effort rating. Stable request/exercise IDs survive import, storage and sync. Unsupported kinds/options receive an explanation. Legacy JSON and sessions remain readable without invented measurements.
+- Collection disclosure appears before acceptance. Import Workout and Save Workout Review stage proposals; neither silently replaces Today. Fixed-height JSON editing prevents a long import from expanding the whole phone form.
+- The optional Watch question survives relaunch and foreground recovery. Its compact controls fit the 46 mm screen, including large text. The question is presented from the stable root so a workout phase change does not discard it. Undo removes the answer associated with the removed set. Final completed sessions wait for Save, Skip or Done before delivery, preserving the final answer.
+- Set-linked phone evidence, shared reports and Prepare Workout Review distinguish prescription, user-confirmed values and Log-tap events. Actual rest and physical set/repetition timing remain unavailable. Previous results require matching explicit variation IDs, load conventions and units.
+
+### Executed verification
+
+- `bash scripts/verify-mac.sh`: **43 Swift tests**, **10 launcher tests**, generated-project/resource/icon checks and **both simulator builds passed**. Final log: `BuildLogs/observations-verify-final.log`. Both signed physical-device builds also passed through the unchanged refresh script.
+- New tests cover legacy schema/storage, stable IDs, bounded/unsupported requests, malformed incoming evidence, pending/skipped/missing observations, undo, early finish, clock discontinuities, matching rules, report/Shortcut input accuracy, durable proposal acceptance, duplicate receipts and payload bounds. A separate compatibility executable decoded and re-encoded the actual pre-update simulator files with exact semantic equality; no historical uptime was added.
+- Native simulator touch flow: Paste → Preview disclosure → accept → entire plan synced to Watch → Start → change the target **5 kg × 8** to actual **4.5 kg × 6** → Log. Rest extension moved the persisted deadline by exactly 30 seconds; kill/relaunch preserved the set/deadline; Skip continued logging.
+- A final-set question survived kill/relaunch. Before an answer, the completed workout stayed out of the outbox and phone History. Saving **7/10** delivered the entire identical session to the phone and drained the Watch outbox after acknowledgment. Native History/detail and Copy report showed the requested evidence and labelled timing.
+- Replayed the delivered session through the actual simulator outbox/WatchConnectivity path: History retained one session for that ID and the duplicate was acknowledged. A second fixture exercised a question before the workout's final exercise, foreground catch-up after the rest deadline, answer → Undo → relog → Skip → finish. The answer was removed with its set; skipped effort stayed unavailable.
+- Actual screenshots inspected for phone Today, import disclosure, History and observation detail, and Watch Today, logging, rest, optional rating and summary. Main controls stay pinned. On the 46 mm Watch, native Skip and Done were successfully tapped at `xxxLarge` text size with no action-area scrolling. Runtime diagnostics confirmed `reduceMotion=true`; the existing haptic preference is respected in source. Physical haptic feel and frame-rate smoothness are not claimed.
+- The unchanged refresh script backed up both real app containers, built and installed both apps in place. The final locked-phone launch required the user's unlock; afterward both launch commands succeeded. Device app inventories independently confirmed build 5. After-install read-back matched all original workout data; only the Watch's snapshot receipt timestamp advanced. Local evidence: `BuildLogs/observations-device-refresh.log`, `observations-*-launch.log`, and `.verification/observations/physical-preservation.json`.
+
+Screenshots and fixture evidence are ignored under `.verification/screenshots/obs-*` and `.verification/observations/`. The original simulator phone state and active Watch workout were restored and compared with their fresh pre-test backups, allowing only the receipt timestamp to advance. The simulator clipboard and accessibility setting were restored; any newer user clipboard content was left alone. Both updated simulators were left running. The restoration result is recorded in `.verification/observations/restoration.json`. Original device data, signing settings and clipboard backups stay private and out of Git.
+
+### Separate motion and ChatGPT results
+
+The isolated [motion feasibility probe](motion-feasibility.md) compiled and signed with this free Personal Team, with a valid HealthKit entitlement. It was **not installed** and collected no motion or Health data. Apple documents a workout-session background path, but wrist-down continuity, battery consumption and repetition estimates have not been physically measured. None of that experimental runtime is included in Little Lift.
+
+The existing-chat import/report workflow was exercised using generic data. Prepare Workout Review uses the same tested evidence report; the earlier Build 4 native Shortcut output/discovery test remains recorded below. **Live ChatGPT analysis through Shortcuts is still unconfigured and unverified.** It is optional and does not inherit an existing conversation. No paid inference, API keys or cloud processing were added.
+
+New observation collection was exercised on simulators; the physical-device pass establishes installation, launch and data preservation, not physical Watch touch/Crown input, wrist haptics, background capture, locked notification delivery or an actual offline workout. Notification permission behavior is unchanged from the Build 4 checks below. No new permission was requested by this feature.
+
+## Build 4: free signing and real-device installation, 15 October 2026
+
+Installed the native build on the actual iPhone 15 Pro Max (iOS 27.0.1, 24A446) and paired Apple Watch Series 12 46 mm (watchOS 27.0, 24R359). Used the existing free Personal Team, with automatic signing and seven-day profiles expiring **22 October 2026**. No paid developer enrollment, TestFlight/App Store submission, server, or model API was used.
+
+### Fixes and signing
+
+- The empty iPhone Today screen now exposes **Copy coaching prompt**, so the existing-chat workflow works before the first plan has been imported. Its actual physical-device screenshot shows the prompt and pinned Import control fitting on screen.
+- Shortcuts setup now specifies **Output → Text** when passing model JSON to Save Workout Review.
+- Local signing uses a stable unique phone identity and matching Watch identity. SDK-specific overrides keep the existing simulator bundle identifiers and data containers. Private settings and device identifiers remain in ignored local files.
+- The first phone-destination build provisioned its embedded Watch app for only the phone. Building against the discovered physical Watch registered it, generated a profile covering both devices, and then rebuilding the phone embedded the corrected companion. Both code signatures and device coverage were checked before installation.
+- The user completed Apple Account, device trust, Developer Mode, and Personal Team trust prompts. Those approvals were performed by the user, not automated.
+
+### Actually verified
+
+- Both signed device builds succeeded. `bash scripts/verify-mac.sh` passed all 25 Swift tests, 10 launcher tests, project/icon checks, and both simulator builds after the final UI change. Logs: `BuildLogs/verify-personal-setup.log`, `personal-watch-signing-build.log`, and `personal-signing-first-use-fix.log`.
+- Before installing, the complete application lists showed no previous Little Lift installation on either physical device. Neither app was uninstalled. Phone–Watch and simulator pairings were kept.
+- Both installed physical apps launched. Actual screenshots were inspected for the iPhone empty/loaded Today screens and Watch loaded/empty Today screens. The Watch Start/Sync action stays visible.
+- The explicit generic demo launch seeded only the new phone install for transport testing. The physical Watch saved the entire identical plan, with a new snapshot timestamp. This was real WatchConnectivity and device storage, not a simulator receipt.
+- A completed generic session created through the simulator UI was temporarily placed in the physical Watch outbox. The running Watch delivered it to the real phone, which persisted the entire identical session once, including **4.5 kg × 6 reps** and **1 / 2 completed sets**. This verifies real-device transport and persistence with a seeded fixture; it does not claim physical Watch touch/Crown input. The subsequent physical outbox receipt read timed out, so physical queue-drain verification is not claimed.
+- The existing-chat flow was exercised through actual simulator UI: Copy coaching prompt → native Paste → Preview workout → Save and send to watch → Start → edit actual values → Log set → early finish → phone History → Copy report. The copied report preserves actual values and the partial set count, and asks the chosen chat to use those actuals. The generic JSON was a fixture authored here; no private ChatGPT conversation was opened or appended to automatically.
+- All practice sessions/plans were removed from the real devices. Read-back confirmed the original clean Watch state (no plan/session/outbox/recent workouts) and the equivalent initial empty phone state (no plan or History). Original simulator phone data and the active Watch workout were restored and compared with their fresh pre-test backups, allowing only the receipt timestamp to change.
+- The private **Refresh My Devices.command** was executed end to end: both app-data backups, Watch-first provisioning, phone rebuild, profile device-coverage checks, both in-place installs, and both launches succeeded. Log: `BuildLogs/refresh-devices-verified.log`. Backups are in ignored `.verification/device-backups/`. The launcher does not erase, uninstall, publish, or enroll.
+
+### Optional Shortcuts analysis: separate result
+
+The built iPhone contains discoverable metadata for **Prepare Workout Review**, **Save Workout Review**, and **Import Workout**. Apple's actual simulator Shortcuts app displayed Little Lift and its **Prepare review** App Shortcut. The non-fatal SSU language-training archive diagnostic therefore did not prevent this observed action discovery.
+
+The live **Use Model → ChatGPT extension → Save Workout Review → accept proposal** chain was **not verified or configured on the real phone**. A temporary native simulator Shortcut ran **Prepare Workout Review → Copy to Clipboard**. After Apple’s **Allow Once** output prompt, the clipboard contained the expected empty generic profile/history context and the explicit statement that no previous chat or memory should be assumed. This verifies the Prepare action and its String output; it does not verify model analysis, Save Workout Review, or proposal acceptance through Shortcuts. ChatGPT and Shortcuts are installed on the phone; installed apps alone do not establish Apple Intelligence/extension readiness. Automatic analysis remains optional. **My existing chat** stays selected, and explicit import/report copying remains usable without the Shortcut, paid enrollment, or API keys.
+
+### Remaining physical limits
+
+Physical Crown feel/focus, wrist haptics, locked/background reminder delivery, fresh notification permission/denial, and an actual offline workout performed through Watch controls were not verified in this installation pass. The earlier paired-simulator tests below cover the corresponding engine/UI persistence paths.
+
+Xcode's Mac-to-Watch developer connection intermittently returned black captures, timeouts, and “Failed to allocate RSD device.” Wearing/unlocking the Watch and restarting Device Hub recovered it. The final backup/build/install/launch refresh completed successfully. Restarting Device Hub also shut down the simulators; the same existing pair was booted again afterward with its data and pairing preserved. This developer-transport instability is distinct from the successful app-to-app delivery observed above.
+
+Local raw evidence is in ignored `.verification/` and `BuildLogs/`. Current signing settings, device identifiers, app-data backups, clipboard backups, and personal exports must stay out of Git.
+
+## Build 4: observed on this Mac, 15 October 2026
+
+Xcode 27.0 (27A266a), iOS 27.0 and watchOS 27.0. Used the existing connected pair: iPhone 18 Pro Max (`8152C2DA-7F18-43CD-8EF7-CF7FC60FEB7F`) and Apple Watch Series 12 46 mm (`7C18020D-7760-4F19-B865-DD8AED962400`). No simulator was erased, uninstalled, or re-paired.
+
+### Fixes
+
+- Replaced watchOS-incompatible `DisclosureGroup` with a native connection-details navigation screen.
+- Allowed the launcher to continue when this Xcode installation has integrated simulators and no standalone `Simulator.app`.
+- Compacted the watch values/units and reclaimed the oversized scrolling bottom inset. Normal-size exercise text, values, 44-point adjustment controls, and the fixed 46-point Log set action fit together on the 46 mm watch.
+- Removed the white-on-white options Done button; it now uses plain white text. Undo and early finish remain in Options.
+- Undo now restores the removed set's actual weight and reps, including the first set, instead of resetting them to the plan targets.
+- Displayed actual rest-notification authorization/errors in Options, with an explicit permission request when undecided. Removed duplicate reminder rescheduling after the first permission request.
+- Removed duplicate separators from native phone list metric rows.
+- Corrected a locale-sensitive test: this Mac formats 42.5 as `42,5`. The test checks both numeric actual values and the localized report text.
+- Updated the generated Xcode launcher identifier. Scheme verification now compares semantic XML, tolerating Xcode's whitespace, empty Testables, and optional display-name rewrites while retaining build/launch checks.
+
+### Executed checks and flows
+
+- `bash scripts/verify-mac.sh`: 25 Swift engine/protocol tests, 10 launcher tests, project/resource/icon checks, and both simulator SDK builds. Logs: `BuildLogs/verify-final.log`. Both builds succeeded; Xcode also logged a non-fatal SSU (App Intents language-training archive) diagnostic. Shortcut discovery/training was not certified in this pass.
+- Existing launcher built, installed, and launched both apps on the same pair and confirmed equality of the whole persisted phone/watch plan with a fresh receipt. Logs: `BuildLogs/launcher-final.log`.
+- Actual simulator touch events exercised Start, weight/reps adjustment, Log set, +30 sec, Skip, Options, Undo, early-finish confirmation, and Done.
+- Logged **42.5 kg × 8**, differing from the **40 kg × 10** target. Checked the stored actuals, the identical phone session, and undo/relog preservation.
+- Rest extension changed the persisted absolute deadline by exactly 30,000 milliseconds. Killing/relaunching the watch preserved the deadline and actual set. Skip worked. A short rest later expired through the running app's actual deadline task.
+- Early finish delivered exactly the completed set. A separate workout completed all nine sets without an extra final rest, then delivered once to History.
+- Replayed an already delivered completed session through the watch's actual outbox and WatchConnectivity transport. The phone retained one History row for that ID, then acknowledged the duplicate and drained the outbox.
+- Relaunched both apps and checked saved phone History and watch summary. Done returned to Today. A new phone plan synced during a workout without altering the active session's copied plan.
+- Captured and visually inspected phone Today/History/details and watch Today/set/rest/summary/options. At the normal watch text size, editable values and primary actions fit. At the largest watch text size with long names, content scrolls within its own area and Start, Log set, both rest actions, and Done stay visible and were tapped successfully.
+- iPhone maximum accessibility text size preserved the pinned Send/Import actions. Restored its original `large` setting afterward.
+- System Reduce Motion was enabled in watch preferences and confirmed in both Apple's Settings and SwiftUI's actual environment (`reduceMotion=true`). Process-scoped UIKit text-size arguments confirmed `dynamicTypeSize=xxxLarge`. Normal motion was also confirmed (`reduceMotion=false`, `dynamicTypeSize=xLarge`). Diagnostics are opt-in with `--littlelift-diagnostics` in simulator Debug builds; they print no workout contents.
+- The installed watch already allowed notifications. Native UserNotifications logs show successful reminder registration and cancellation during rest, undo, skip, and finish. Options reports the actual allowed state. A fresh permission prompt/denial was not claimed; `simctl privacy` has no notification-permission service on this runtime.
+
+Screenshots, raw recordings, diagnostic logs, and original-data backups are local in ignored `.verification/`. Test workouts used temporary generic fixtures after backing up the original app files; original History and the original active workout were restored afterward. The monochrome icon files are unchanged.
+
+### Capture and physical-device limits
+
+This runtime sometimes emits incomplete frames from both `simctl screenshot` and video recording, dropping static text or controls in individual frames. The same behavior was reproduced while recording Apple's own Settings app (`.verification/system-settings-capture.mov`), so these frames do not establish a Little Lift animation defect. Complete frames confirm layout; recorded interactions plus environment diagnostics confirm the motion paths. **No frame-rate or physical smoothness certification is claimed.**
+
+Physical Crown feel/focus, wrist haptics, locked/background rest-reminder delivery, Focus interaction, and real offline/background WatchConnectivity still need an actual paired watch and phone. Simulator foreground delivery, persistence, and duplicate replay do not substitute for those hardware checks. No paid AI calls, server, credentials, or HealthKit recording were added.
+
+
+## Observed in the Linux authoring workspace
+
+- Swift 6.2.3 installed from the official Swift download host.
+- Foundation-only WorkoutCore builds.
+- 25 Swift Testing cases pass, including the original workout/storage tests and live request/reply, plan receipts, duplicate workout receipts, out-of-order snapshots, and decoding of existing saved watch data.
+- 10 Python launcher tests pass, including selection of the actual paired phone when a different iPhone is booted, matching bundle IDs, install-before-launch order, stopping on build failure, and requiring a fresh complete saved plan for delivery confirmation. No simulator data is erased.
+- Swift frontend syntax parsing of the native Apple source files passes. **Syntax parsing does not resolve or type-check SwiftUI, WatchKit, AppIntents, or WatchConnectivity APIs.**
+- Xcode project reference, source membership, plist, and asset checks pass via `scripts/check_project.py`. Both icons match the new production artwork, are 1024 × 1024 RGB PNGs, and have no alpha channel.
+
+## Requires macOS for the latest update
+
+Run `bash scripts/verify-mac.sh`. The included GitHub Actions workflow performs these steps after the source is placed in a GitHub repository. No remote CI run is claimed here.
+
+1. Build both simulator targets. The engine sources are included directly in each target; no local package resolution is needed.
+2. Confirm App Intents appear in Shortcuts and the three-action ChatGPT review creates a proposal, then acceptance updates the plan.
+3. Run `Run Little Lift.command` on the paired simulators. Its fifth step reads only Little Lift's saved state, checking that the whole current plan reached the watch and its receipt timestamp is newer than this launch. It prints no workout contents. A timeout is a failed check, not a successful sync. This launcher has not yet been executed on the user's Mac.
+4. Log sets, finish, and confirm one history entry and a sync receipt. Simulator behavior does not replace physical-device checks.
+
+## Requires the actual paired devices
+
+- Digital Crown focus and increment behavior for both editable values.
+- Set/start/finish/rest haptics, and the haptics toggle.
+- Rest notifications with the watch backgrounded or locked, including permission denial, Focus/system notification settings, +30 sec, skip, and undo cancellation. Without HealthKit background execution, a suspended app relies on the local notification and catches up when reopened.
+- Complete a workout away from the iPhone; relaunch the watch app; reconnect; confirm the queue drains only after iPhone persistence and no history duplicates appear.
+- Receive another plan mid-workout and confirm the active workout retains its original targets.
+- Large text and Reduce Motion, including long exercise names and the 46 mm watch layout. Confirm the primary action remains visible in Start, set logging, rest, and summary screens; test the internal accessibility fallback and the options sheet separately.
+- Free signing versus paid team provisioning, installation and app icon behavior on the current Xcode/OS versions.
+
+These are outstanding device checks, not claims of tested behavior. App Store release work also needs a chosen bundle identity, screenshots, app privacy declarations/policy, support information, release testing, and review submission.
+
+## Interaction and reminder audit
+
+The code review removed the broad phase-change animation that could animate unrelated layout. Number changes and press feedback stay scoped to their controls, with Reduce Motion respected. Main actions are outside scrolling content; a large-text fallback scrolls the content separately. Secondary actions moved into the options sheet. Controls retain minimum touch heights, and disabled controls have visible feedback. The rest clock updates only its own subtree once per second.
+
+Build 3 replaces blue/red styling with white/gray, including the logo. The watch uses compact set/rest panels and a two-point progress line; the early-finish action is in the neutral options sheet. The phone pins its import/send buttons above the tab bar. The new layout has self-contained Xcode previews but has not been rendered or measured on an Apple runtime here. The user's earlier screenshots show a workout on the watch and its running rest timer; they do not validate this new layout or completed-workout return delivery.
+
+Rest reminders are scheduled again after the authorization sheet returns and when the app reopens. A background countdown task leaves the local notification in place instead of clearing it at the moment it should deliver. Skip, undo, and finish cancel the current reminder; unique identifiers protect newer reminders against asynchronous cancellation races. These native UI/notification fixes are reviewed and syntax-checked here; physical delivery and animation smoothness have not been observed or profiled in this workspace.
+
+## First Mac build report and project fix
+
+The user's first simulator build reported `Unable to resolve module dependency: 'WorkoutCore'`, plus an unassigned watch icon entry. The revised project compiles the engine files directly into both native targets and removes the separate module imports/package references. The extra icon entry is removed. Structural checks now enforce source inclusion, absence of the obsolete imports, and a single assigned icon entry. The revised native SDK build still requires macOS verification.
+
+The user subsequently built and opened both native interfaces on their Mac. Pair selection initially used a different iPhone from the one paired to the watch. After correcting that, the previous sync implementation still failed silently. The latest update adds live replies, plan receipts, visible errors/timeouts, simulator live workout delivery, and a launcher that builds and starts both apps on the same existing pair. This latest native code and the launcher's actual Apple-tool execution still require a Mac run; the passing portable tests are not a claim that the connection problem has been observed fixed on the user's simulator.

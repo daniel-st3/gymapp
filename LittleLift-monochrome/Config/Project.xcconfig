@@ -1,0 +1,4 @@
+LITTLELIFT_PHONE_BUNDLE_ID = com.littlelift.app
+LITTLELIFT_WATCH_BUNDLE_ID = com.littlelift.app.watchapp
+// Optional personal signing settings. Never commit a local team configuration.
+#include? "Local.xcconfig"

@@ -1,0 +1,25 @@
+name: Portable core and repository checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    container: swift:6.0
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - name: Engine regression tests
+        working-directory: LittleLift-monochrome
+        run: swift test
+      - name: Source and private-data boundary
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          python3 LittleLift-monochrome/scripts/check_repository.py
+      - name: Launcher unit tests
+        working-directory: LittleLift-monochrome
+        run: python3 -m unittest discover -s scripts -p 'test_*.py'
+# Native SDK 27 builds are verified locally with scripts/verify-mac.sh.
+# This public repository job uses standard GitHub-hosted infrastructure;
+# no app backend, inference service or paid runner is configured.

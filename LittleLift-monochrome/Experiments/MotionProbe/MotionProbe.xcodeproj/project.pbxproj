@@ -1,0 +1,146 @@
+// !$*UTF8*$!
+{
+	"archiveVersion" = 1;
+	"classes" = {
+	};
+	"objectVersion" = 60;
+	"objects" = {
+		"C13A7F5AAF52ABCD48D99762" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Probe.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"CFB079B65896CADAA74F75BD" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "C13A7F5AAF52ABCD48D99762";
+		};
+		"A07E8BD2ABD080925C22F976" = {
+			"isa" = "PBXSourcesBuildPhase";
+			"buildActionMask" = 2147483647;
+			"files" = ("CFB079B65896CADAA74F75BD");
+			"runOnlyForDeploymentPostprocessing" = 0;
+		};
+		"B347D52832D614A2B6130C52" = {
+			"isa" = "PBXFileReference";
+			"explicitFileType" = "wrapper.application";
+			"path" = "MotionProbe.app";
+			"sourceTree" = "BUILT_PRODUCTS_DIR";
+		};
+		"54DD98680B77CE3AFFA11F89" = {
+			"isa" = "PBXGroup";
+			"children" = ("B347D52832D614A2B6130C52");
+			"name" = "Products";
+			"sourceTree" = "<group>";
+		};
+		"69FFC5D1A3164466FA8EF45F" = {
+			"isa" = "PBXGroup";
+			"children" = ("C13A7F5AAF52ABCD48D99762", "54DD98680B77CE3AFFA11F89");
+			"sourceTree" = "<group>";
+		};
+		"54E4025C6E2CAF1246122DB9" = {
+			"isa" = "XCBuildConfiguration";
+			"buildSettings" = {
+				"PRODUCT_NAME" = "MotionProbe";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "$(MOTION_PROBE_BUNDLE_ID)";
+				"SDKROOT" = "watchos";
+				"SUPPORTED_PLATFORMS" = "watchos watchsimulator";
+				"TARGETED_DEVICE_FAMILY" = "4";
+				"WATCHOS_DEPLOYMENT_TARGET" = "11.0";
+				"SWIFT_VERSION" = "5.0";
+				"INFOPLIST_FILE" = "Info.plist";
+				"GENERATE_INFOPLIST_FILE" = "NO";
+				"CODE_SIGN_ENTITLEMENTS" = "Probe.entitlements";
+				"CODE_SIGN_STYLE" = "Automatic";
+				"MARKETING_VERSION" = "0.1";
+				"CURRENT_PROJECT_VERSION" = "1";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "DEBUG";
+				"DEBUG_INFORMATION_FORMAT" = "dwarf";
+			};
+			"name" = "Debug";
+		};
+		"E227A0590D5CDBC4B2EBAA84" = {
+			"isa" = "XCBuildConfiguration";
+			"buildSettings" = {
+				"PRODUCT_NAME" = "MotionProbe";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "$(MOTION_PROBE_BUNDLE_ID)";
+				"SDKROOT" = "watchos";
+				"SUPPORTED_PLATFORMS" = "watchos watchsimulator";
+				"TARGETED_DEVICE_FAMILY" = "4";
+				"WATCHOS_DEPLOYMENT_TARGET" = "11.0";
+				"SWIFT_VERSION" = "5.0";
+				"INFOPLIST_FILE" = "Info.plist";
+				"GENERATE_INFOPLIST_FILE" = "NO";
+				"CODE_SIGN_ENTITLEMENTS" = "Probe.entitlements";
+				"CODE_SIGN_STYLE" = "Automatic";
+				"MARKETING_VERSION" = "0.1";
+				"CURRENT_PROJECT_VERSION" = "1";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-O";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "";
+				"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
+			};
+			"name" = "Release";
+		};
+		"7604F650C8CE192BFBB798EC" = {
+			"isa" = "XCConfigurationList";
+			"buildConfigurations" = ("54E4025C6E2CAF1246122DB9", "E227A0590D5CDBC4B2EBAA84");
+			"defaultConfigurationIsVisible" = 0;
+			"defaultConfigurationName" = "Release";
+		};
+		"D54EE69BD5522DE78D75B76A" = {
+			"isa" = "PBXNativeTarget";
+			"buildConfigurationList" = "7604F650C8CE192BFBB798EC";
+			"buildPhases" = ("A07E8BD2ABD080925C22F976");
+			"buildRules" = ();
+			"dependencies" = ();
+			"name" = "MotionProbe";
+			"productName" = "MotionProbe";
+			"productReference" = "B347D52832D614A2B6130C52";
+			"productType" = "com.apple.product-type.application";
+		};
+		"941865B714DC30BFE0179935" = {
+			"isa" = "XCBuildConfiguration";
+			"buildSettings" = {
+				"CLANG_ENABLE_MODULES" = "YES";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "DEBUG";
+				"DEBUG_INFORMATION_FORMAT" = "dwarf";
+			};
+			"name" = "Debug";
+		};
+		"915B7943BF5CCDDD534B7E98" = {
+			"isa" = "XCBuildConfiguration";
+			"buildSettings" = {
+				"CLANG_ENABLE_MODULES" = "YES";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-O";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "";
+				"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
+			};
+			"name" = "Release";
+		};
+		"60D97B5B93333DD1022AFD36" = {
+			"isa" = "XCConfigurationList";
+			"buildConfigurations" = ("941865B714DC30BFE0179935", "915B7943BF5CCDDD534B7E98");
+			"defaultConfigurationIsVisible" = 0;
+			"defaultConfigurationName" = "Release";
+		};
+		"2B3F8F003FA6FA4A3766BA24" = {
+			"isa" = "PBXProject";
+			"attributes" = {
+				"LastUpgradeCheck" = "2700";
+			};
+			"buildConfigurationList" = "60D97B5B93333DD1022AFD36";
+			"compatibilityVersion" = "Xcode 15.0";
+			"developmentRegion" = "en";
+			"hasScannedForEncodings" = 0;
+			"knownRegions" = ("en", "Base");
+			"mainGroup" = "69FFC5D1A3164466FA8EF45F";
+			"productRefGroup" = "54DD98680B77CE3AFFA11F89";
+			"projectDirPath" = "";
+			"projectRoot" = "";
+			"targets" = ("D54EE69BD5522DE78D75B76A");
+		};
+	};
+	"rootObject" = "2B3F8F003FA6FA4A3766BA24";
+}

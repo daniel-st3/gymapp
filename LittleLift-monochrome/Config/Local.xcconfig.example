@@ -1,0 +1,5 @@
+// Optional: copy this file to Local.xcconfig (which is ignored by Git).
+// You can also select your team directly on BOTH targets in Xcode.
+DEVELOPMENT_TEAM = YOURTEAMID
+LITTLELIFT_PHONE_BUNDLE_ID = com.yourname.littlelift
+LITTLELIFT_WATCH_BUNDLE_ID = com.yourname.littlelift.watchapp

@@ -1,0 +1,27 @@
+{
+  "title": "Upper body",
+  "unit": "kg",
+  "exercises": [
+    {
+      "name": "Bench press",
+      "sets": 3,
+      "reps": 10,
+      "weight": 40,
+      "restSeconds": 90
+    },
+    {
+      "name": "Seated row",
+      "sets": 3,
+      "reps": 12,
+      "weight": 30,
+      "restSeconds": 90
+    },
+    {
+      "name": "Lateral raise",
+      "sets": 3,
+      "reps": 12,
+      "weight": 5,
+      "restSeconds": 60
+    }
+  ]
+}

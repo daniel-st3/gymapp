@@ -1,0 +1,26 @@
+[
+  {
+    "id": "22222222-2222-4222-8222-222222222222",
+    "date": "2026-10-01T12:00:00Z",
+    "title": "Example historical workout",
+    "source": "My confirmed training notes",
+    "unit": "kg",
+    "exercises": [
+      {
+        "name": "Seated row",
+        "comparisonID": "row-machine-a-neutral",
+        "loadConvention": "machineStack",
+        "sets": [
+          {
+            "weight": 30,
+            "reps": 10
+          },
+          {
+            "weight": 30,
+            "reps": 9
+          }
+        ]
+      }
+    ]
+  }
+]

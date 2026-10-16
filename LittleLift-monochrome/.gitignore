@@ -1,0 +1,31 @@
+.build/
+.swiftpm/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+.DS_Store
+*.ipa
+*.xcarchive
+*.zip
+.env*
+!*.example
+Config/Local.xcconfig
+__pycache__/
+*.pyc
+.simulator-build/
+BuildLogs/
+.verification/
+Refresh My Devices.command
+# Signing material and private local records
+*.p12
+*.p8
+*.pem
+*.key
+*.mobileprovision
+*.provisionprofile
+phone-v1.json
+watch-v1.json
+*.xcresult
+*.trace
+# Preserve the original provenance-bearing design master locally.
+Design/Brand/Logo-master.png
