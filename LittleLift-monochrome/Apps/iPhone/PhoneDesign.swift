@@ -28,7 +28,7 @@ struct LiftPageHeading: View {
     @ScaledMetric(relativeTo: .title) private var size: CGFloat = 32
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title).font(.system(size: size, weight: .regular, design: .serif))
+            Text(title).font(.system(size: size, weight: .regular, design: .default))
                 .fixedSize(horizontal: false, vertical: true).accessibilityAddTraits(.isHeader)
             if let detail { Text(detail).font(.subheadline).foregroundStyle(.secondary) }
         }.frame(maxWidth: .infinity, alignment: .leading)
@@ -100,10 +100,10 @@ struct LiftChevron: View {
 
 struct LiftRootChrome: ViewModifier {
     func body(content: Content) -> some View {
-        content.navigationTitle("Little Lift").navigationBarTitleDisplayMode(.inline)
+        content.navigationTitle(L10n.s("Little Lift")).navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .principal) {
-                Text("LITTLE LIFT").font(.caption2.weight(.medium)).tracking(2.5)
-                    .accessibilityLabel("Little Lift")
+                Text(L10n.s("LITTLE LIFT")).font(.caption2.weight(.medium)).tracking(2.5)
+                    .accessibilityLabel(L10n.s("Little Lift"))
             } }
     }
 }
@@ -118,19 +118,16 @@ struct LiftExerciseRow: View {
                 .padding(.top, 3).frame(minWidth: 22)
             VStack(alignment: .leading, spacing: 10) {
                 Text(exercise.name).font(.body).fixedSize(horizontal: false, vertical: true)
-                ViewThatFits(in: .horizontal) {
-                    HStack(spacing: 16) { prescription; rest }
-                    VStack(alignment: .leading, spacing: 6) { prescription; rest }
-                }
+                prescription
             }.frame(maxWidth: .infinity, alignment: .leading)
         }.accessibilityElement(children: .combine)
     }
     private var prescription: some View {
-        Text("\(exercise.sets) × \(exercise.reps)  ·  \(WorkoutSession.number(exercise.weight)) \(unit.rawValue)")
+        Text(exercise.prescription(unit: unit))
             .font(.subheadline.monospacedDigit())
     }
     private var rest: some View {
-        Label("\(exercise.restSeconds)s", systemImage: "timer").font(.caption).foregroundStyle(.secondary)
-            .accessibilityLabel("\(exercise.restSeconds) seconds prescribed rest")
+        Label(L10n.s("\(exercise.restSeconds)s"), systemImage: "timer").font(.caption).foregroundStyle(.secondary)
+            .accessibilityLabel(L10n.s("\(exercise.restSeconds) seconds prescribed rest"))
     }
 }

@@ -10,7 +10,7 @@ import SwiftUI
     private(set) var active = false
     private(set) var starting = false
     private(set) var sampleCount = 0
-    private(set) var message = "Ready for a short test."
+    private(set) var message = L10n.s("Ready for a short test.")
     private(set) var elapsed = 0.0
     private(set) var recordingExercise = ""
     private(set) var queuedRecordID: UUID?
@@ -31,26 +31,29 @@ import SwiftUI
         do {
             for var record in try repository.recordings() where record.status == "recording" {
                 record.status = "interrupted"; try repository.save(record)
-                message = "Interrupted samples preserved. Check the Watch workout indicator before starting another experiment."
+                message = L10n.s("Interrupted samples preserved. Check the Watch workout indicator before starting another experiment.")
             }
             latest = try repository.recordings().first
-        } catch { message = "Motion data preserved but unreadable: \(error.localizedDescription)" }
+        } catch { message = L10n.s("Motion data preserved but unreadable: \(error.localizedDescription)") }
     }
     func start(exercise: String) async {
         guard !active, !starting else { return }
+        guard WatchStore.shared.state.session == nil || WatchStore.shared.state.session?.phase == .completed else {
+            error = L10n.s("Finish your workout before starting a motion test."); return
+        }
         let attempt = UUID(); startAttempt = attempt
-        starting = true; error = nil; message = "Waiting for Apple permission. Check this Watch and your iPhone."
+        starting = true; error = nil; message = L10n.s("Waiting for Apple permission. Check this Watch and your iPhone.")
         defer {
             if startAttempt == attempt { starting = false; startAttempt = nil; permissionTask?.cancel() }
         }
         await Task.yield()
         do {
-            guard manager.isDeviceMotionAvailable, HKHealthStore.isHealthDataAvailable() else { throw WorkoutError.invalidState("Motion capture requires a physical Apple Watch with motion and HealthKit available.") }
-            guard try repository.recordings().count < 20 else { throw WorkoutError.invalidState("20 local experimental recordings saved. Delete/export on Watch before starting another.") }
+            guard manager.isDeviceMotionAvailable, HKHealthStore.isHealthDataAvailable() else { throw WorkoutError.invalidState(L10n.s("Motion capture requires a physical Apple Watch with motion and HealthKit available.")) }
+            guard try repository.recordings().count < 20 else { throw WorkoutError.invalidState(L10n.s("20 local experimental recordings saved. Delete/export on Watch before starting another.")) }
             permissionTask = Task { @MainActor [weak self] in
                 do { try await Task.sleep(for: .seconds(20)) } catch { return }
                 guard let self, self.startAttempt == attempt else { return }
-                self.message = "Still waiting for permission. You can cancel and try again."
+                self.message = L10n.s("Still waiting for permission. You can cancel and try again.")
             }
             try await health.requestAuthorization(toShare: [HKObjectType.workoutType()], read: [])
             guard startAttempt == attempt else { return }
@@ -58,13 +61,13 @@ import SwiftUI
             switch health.authorizationStatus(for: HKObjectType.workoutType()) {
             case .sharingAuthorized: break
             case .sharingDenied:
-                throw WorkoutError.invalidState("Allow Workouts in Watch Settings → Health → Apps → Little Lift, then retry.")
+                throw WorkoutError.invalidState(L10n.s("Allow Workouts in Watch Settings → Health → Apps → Little Lift, then retry."))
             case .notDetermined:
-                throw WorkoutError.invalidState("Apple hasn’t completed permission setup. Check Watch Settings → Health → Apps → Little Lift, then retry.")
+                throw WorkoutError.invalidState(L10n.s("Apple hasn’t completed permission setup. Check Watch Settings → Health → Apps → Little Lift, then retry."))
             @unknown default:
-                throw WorkoutError.invalidState("Workouts permission is unavailable. Check Watch Settings → Health → Apps → Little Lift.")
+                throw WorkoutError.invalidState(L10n.s("Workouts permission is unavailable. Check Watch Settings → Health → Apps → Little Lift."))
             }
-            guard WatchStore.shared.state.motionOptIn == true else { throw WorkoutError.invalidState("Motion opt-in is off on iPhone.") }
+            guard WatchStore.shared.state.motionOptIn == true else { throw WorkoutError.invalidState(L10n.s("Motion opt-in is off on iPhone.")) }
             let config = HKWorkoutConfiguration(); config.activityType = .traditionalStrengthTraining; config.locationType = .indoor
             let session = try HKWorkoutSession(healthStore: health, configuration: config)
             session.delegate = self; workout = session
@@ -84,11 +87,11 @@ import SwiftUI
                     self.add(timestamp: motion.timestamp, x: motion.rotationRate.x, y: motion.rotationRate.y, z: motion.rotationRate.z)
                 }
             }
-            message = "Waiting for sensor data…"
+            message = L10n.s("Waiting for sensor data…")
             sensorTask = Task { @MainActor [weak self] in
                 do { try await Task.sleep(for: .seconds(10)) } catch { return }
                 guard let self, self.active, self.sampleCount == 0 else { return }
-                self.fail("No motion samples arrived. Check Watch Settings → Privacy & Security → Motion & Fitness, then try again.")
+                self.fail(L10n.s("No motion samples arrived. Check Watch Settings → Privacy & Security → Motion & Fitness, then try again."))
             }
             stopTask = Task { @MainActor [weak self] in
                 do { try await Task.sleep(for: .seconds(180)) } catch { return }
@@ -96,21 +99,21 @@ import SwiftUI
             }
         } catch {
             guard startAttempt == attempt else { return }
-            active = false; self.error = error.localizedDescription; message = "Couldn’t start."
+            active = false; self.error = error.localizedDescription; message = L10n.s("Couldn’t start.")
             workout?.end(); workout = nil
         }
     }
     func cancelStart() {
         startAttempt = nil; starting = false; permissionTask?.cancel()
-        message = "Cancelled. No recording started."
+        message = L10n.s("Cancelled. No recording started.")
     }
     private func fail(_ detail: String) {
-        stop(status: "interrupted"); error = detail; message = "Capture stopped."
+        stop(status: "interrupted"); error = detail; message = L10n.s("Capture stopped.")
     }
     func sendLatest() throws {
         guard !active, let latest, !latest.samples.isEmpty else { return }
         try WatchStore.shared.sendMotion(repository.url(latest.id), id: latest.id)
-        queuedRecordID = latest.id; message = "Queued for iPhone."
+        queuedRecordID = latest.id; message = L10n.s("Queued for iPhone.")
     }
     func deleteLatest() throws { if let latest { try repository.delete(latest.id) }; latest = try repository.recordings().first }
     private func add(timestamp: Double, x: Double, y: Double, z: Double) {
@@ -122,7 +125,7 @@ import SwiftUI
         if record.samples.isEmpty, WatchStore.shared.state.haptics { WKInterfaceDevice.current().play(.start) }
         record.samples.append(MotionSample(t: t, x: x, y: y, z: z)); current = record
         if record.samples.count % 50 == 0 {
-            sampleCount = record.samples.count; elapsed = t; message = "Recording · stops at 3 min"
+            sampleCount = record.samples.count; elapsed = t; message = L10n.s("Recording · stops at 3 min")
             do { try repository.save(record) } catch { fail(error.localizedDescription) }
         }
     }
@@ -132,19 +135,19 @@ import SwiftUI
         guard var record = current else { return }
         record.status = status
         let battery = WKInterfaceDevice.current().batteryLevel; record.batteryEnd = battery >= 0 ? Double(battery) : nil
-        do { try repository.save(record); latest = record; sampleCount = record.samples.count; elapsed = record.duration; message = record.samples.isEmpty ? "No movement data was captured." : "Saved on Watch." }
+        do { try repository.save(record); latest = record; sampleCount = record.samples.count; elapsed = record.duration; message = record.samples.isEmpty ? L10n.s("No movement data was captured.") : "Saved on Watch." }
         catch {
             // A prior replay must not be sent or presented as this capture.
             // The last durable checkpoint remains recoverable after relaunch.
-            message = "Could not save the last samples. Reopen Little Lift to recover the saved checkpoint."
-            self.error = "\(message) \(error.localizedDescription)"
+            message = L10n.s("Could not save the last samples. Reopen Little Lift to recover the saved checkpoint.")
+            self.error = L10n.s("\(message) \(error.localizedDescription)")
             current = nil
             return
         }
         current = nil
         if !record.samples.isEmpty {
             if WatchStore.shared.state.haptics { WKInterfaceDevice.current().play(.stop) }
-            do { try sendLatest() } catch { message = "Saved on Watch. Tap Send to retry." }
+            do { try sendLatest() } catch { message = L10n.s("Saved on Watch. Tap Send to retry.") }
         }
         // No HKWorkoutBuilder is collected or finished, and no HKWorkout is saved.
     }
@@ -174,56 +177,56 @@ struct MotionCaptureView: View {
         WatchPage {
             VStack(alignment: .leading, spacing: 10) {
                 if capture.active || capture.starting || saved != nil {
-                    Text(capture.active ? "Recording" : capture.starting ? "Allow access" : "Replay saved")
+                    Text(capture.active ? L10n.s("Recording") : capture.starting ? L10n.s("Allow access") : L10n.s("Replay saved"))
                         .watchText(.title)
                 }
-                Text((capture.active ? capture.recordingExercise : saved?.exercise ?? store.state.motionExercise?.rawValue) ?? "Dumbbell curl")
+                Text((capture.active ? capture.recordingExercise : saved?.exercise ?? store.state.motionExercise?.rawValue) ?? L10n.s("Dumbbell curl"))
                     .watchText(.body).fixedSize(horizontal: false, vertical: true)
                 if capture.active {
-                    Text("\(Int(capture.elapsed)) seconds").font(.title3.weight(.light)).monospacedDigit()
+                    Text(L10n.s("\(Int(capture.elapsed)) seconds")).font(.title3.weight(.light)).monospacedDigit()
                     Text(capture.message).watchText(.secondary).foregroundStyle(.secondary)
                 } else if capture.starting {
                     Text(capture.message).watchText(.secondary).foregroundStyle(.secondary)
                 } else if let record = saved {
-                    Text(sent ? "Queued. Open Motion test on iPhone." : "\(Int(record.duration)) seconds · \(record.samples.count) samples")
+                    Text(sent ? L10n.s("Queued. Open Motion test on iPhone.") : L10n.s("\(Int(record.duration)) seconds · \(record.samples.count) samples"))
                         .watchText(.secondary).foregroundStyle(.secondary)
-                    Button("Delete replay") { deleting = true }.watchText(.secondary)
+                    Button(L10n.s("Delete replay")) { deleting = true }.watchText(.secondary)
                 } else {
-                    Text("3-minute test.\nStop other workout apps first.")
+                    Text(L10n.s("3-minute test.\nStop other workout apps first."))
                         .watchText(.secondary).foregroundStyle(.secondary)
                 }
             }.frame(maxWidth: .infinity, alignment: .leading)
         } actions: {
             if capture.active {
-                Button("Stop") { capture.stop(); readyForNew = false }.buttonStyle(QuietButtonStyle())
+                Button(L10n.s("Stop")) { capture.stop(); readyForNew = false }.buttonStyle(QuietButtonStyle())
             } else if capture.starting {
-                Button("Cancel") { capture.cancelStart() }.buttonStyle(QuietButtonStyle())
+                Button(L10n.s("Cancel")) { capture.cancelStart() }.buttonStyle(QuietButtonStyle())
             } else if let record = saved {
                 VStack(spacing: 6) {
-                    Button(sent ? "Queued for iPhone" : "Send to iPhone") {
+                    Button(sent ? L10n.s("Queued for iPhone") : L10n.s("Send to iPhone")) {
                         do { try capture.sendLatest(); queued = true }
                         catch { capture.error = error.localizedDescription }
                     }.buttonStyle(QuietButtonStyle()).disabled(sent || record.samples.isEmpty)
-                    Button("New test") { readyForNew = true; queued = false }.buttonStyle(QuietTextButtonStyle())
+                    Button(L10n.s("New test")) { readyForNew = true; queued = false }.buttonStyle(QuietTextButtonStyle())
                 }
             } else {
-                Button("Start") {
+                Button(L10n.s("Start")) {
                     readyForNew = false; queued = false
                     Task { await capture.start(exercise: (store.state.motionExercise ?? .dumbbellCurl).rawValue) }
                 }.buttonStyle(QuietButtonStyle()).disabled(store.state.motionOptIn != true)
             }
         }
-        .navigationTitle("Motion")
+        .navigationTitle(L10n.s("Motion"))
         .task {
             if !capture.active, capture.latest != nil, capture.queuedRecordID != capture.latest?.id {
                 try? capture.sendLatest()
             }
         }
-        .alert("Motion test", isPresented: Binding(get: { capture.error != nil }, set: { if !$0 { capture.error = nil } })) {
-            Button("OK") { capture.error = nil }
+        .alert(L10n.s("Motion test"), isPresented: Binding(get: { capture.error != nil }, set: { if !$0 { capture.error = nil } })) {
+            Button(L10n.s("OK")) { capture.error = nil }
         } message: { Text(capture.error ?? "") }
-        .confirmationDialog("Delete this Watch replay?", isPresented: $deleting) {
-            Button("Delete", role: .destructive) {
+        .confirmationDialog(L10n.s("Delete this Watch replay?"), isPresented: $deleting) {
+            Button(L10n.s("Delete"), role: .destructive) {
                 do { try capture.deleteLatest(); readyForNew = true; queued = false }
                 catch { capture.error = error.localizedDescription }
             }

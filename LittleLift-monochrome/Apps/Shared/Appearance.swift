@@ -12,7 +12,7 @@ enum LiftMotion {
 }
 
 enum LiftType {
-    static let title = Font.system(.title2, design: .serif, weight: .regular)
+    static let title = Font.system(.title2, design: .default, weight: .regular)
     static let heading = Font.system(.headline, design: .default, weight: .regular)
     static let number = Font.system(.title3, design: .rounded, weight: .light)
 }
@@ -20,7 +20,9 @@ enum LiftType {
 enum LiftCopy {
     static func workoutSummary(_ plan: WorkoutPlan) -> String {
         let exercises = plan.exercises.count
-        return "\(exercises) \(exercises == 1 ? "exercise" : "exercises") · \(plan.totalSets) \(plan.totalSets == 1 ? "set" : "sets")"
+        if plan.exercises.contains(where: { $0.activity != nil }) { return L10n.s("\(exercises) exercises · \(plan.totalSets) sets / segments") }
+        if exercises == 1 { return L10n.s("1 exercise · \(plan.totalSets) sets") }
+        return L10n.s("\(exercises) exercises · \(plan.totalSets) sets")
     }
 }
 
@@ -76,12 +78,13 @@ struct LiftDisclosureStyle: DisclosureGroupStyle {
 #endif
 
 struct LiftCompletionMark: View {
+    var animate = true
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var appeared = false
     var body: some View {
         Image(systemName: "checkmark.circle")
             .symbolRenderingMode(.monochrome)
-            .symbolEffect(.bounce, options: .speed(1.8), value: reduceMotion ? false : appeared)
+            .symbolEffect(.bounce, options: .speed(1.8), value: reduceMotion || !animate ? false : appeared)
             .accessibilityHidden(true)
             .onAppear { appeared = true }
     }

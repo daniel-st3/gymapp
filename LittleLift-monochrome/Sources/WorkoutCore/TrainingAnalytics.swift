@@ -51,7 +51,7 @@ public struct TrainingAnalytics: Sendable {
         self.start = start; end = now
         var seen = Set<UUID>()
         let records = state.sessions.filter {
-            $0.phase == .completed && !$0.entries.isEmpty && $0.startedAt >= start &&
+            $0.phase == .completed && $0.hasRecordedWork && $0.plan.practice != true && $0.startedAt >= start &&
             $0.startedAt <= now && ($0.endedAt.map { $0 <= now } ?? false) && seen.insert($0.id).inserted
         }.sorted { $0.startedAt > $1.startedAt }
         sessions = records

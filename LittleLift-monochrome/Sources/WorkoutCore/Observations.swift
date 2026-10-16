@@ -5,17 +5,17 @@ public enum LoadConvention: String, Codable, CaseIterable, Sendable {
     public init(from decoder: Decoder) throws {
         let value = try decoder.singleValueContainer().decode(String.self)
         guard let convention = Self(rawValue: value) else {
-            throw WorkoutError.invalidInput("Unsupported loadConvention. Use total, perDumbbell, machineStack, assistance or bodyweight.")
+            throw WorkoutError.invalidInput(L10n.s("Unsupported loadConvention. Use total, perDumbbell, machineStack, assistance or bodyweight."))
         }
         self = convention
     }
     public var label: String {
         switch self {
-        case .total: return "total external load"
-        case .perDumbbell: return "per dumbbell"
-        case .machineStack: return "machine stack setting"
-        case .assistance: return "assistance setting (more means more assistance)"
-        case .bodyweight: return "bodyweight; external load not recorded"
+        case .total: return L10n.s("total external load")
+        case .perDumbbell: return L10n.s("per dumbbell")
+        case .machineStack: return L10n.s("machine stack setting")
+        case .assistance: return L10n.s("assistance setting (more means more assistance)")
+        case .bodyweight: return L10n.s("bodyweight; external load not recorded")
         }
     }
 }
@@ -26,7 +26,7 @@ public enum ObservationKind: String, Codable, Sendable {
     public init(from decoder: Decoder) throws {
         let text = try decoder.singleValueContainer().decode(String.self)
         guard let kind = Self(rawValue: text) else {
-            throw WorkoutError.invalidInput("Unsupported observation. Use performance, loggingInterval, or effort. Actual rest, technique, motion and medical assessments are not collected. Ask your coach to revise the request.")
+            throw WorkoutError.invalidInput(L10n.s("Unsupported observation. Use performance, loggingInterval, or effort. Actual rest, technique, motion and medical assessments are not collected. Ask your coach to revise the request."))
         }
         self = kind
     }
@@ -50,7 +50,7 @@ public struct ObservationRequest: Codable, Equatable, Identifiable, Sendable {
     public init(from decoder: Decoder) throws {
         let all = try decoder.container(keyedBy: AnyKey.self)
         guard all.allKeys.allSatisfy({ CodingKeys(rawValue: $0.stringValue) != nil }) else {
-            throw WorkoutError.invalidInput("Unsupported observation option. Requests only accept id, kind, exerciseID, and afterSet for effort. No custom instructions or capture commands are supported.")
+            throw WorkoutError.invalidInput(L10n.s("Unsupported observation option. Requests only accept id, kind, exerciseID, and afterSet for effort. No custom instructions or capture commands are supported."))
         }
         let fields = try decoder.container(keyedBy: CodingKeys.self)
         id = try fields.decode(String.self, forKey: .id)
@@ -61,9 +61,9 @@ public struct ObservationRequest: Codable, Equatable, Identifiable, Sendable {
     public func collectionDescription(in plan: WorkoutPlan) -> String {
         let name = plan.exercises.first { $0.id == exerciseID }?.name ?? "Exercise"
         switch kind {
-        case .performance: return "\(name): compare each logged load and repetition count with its prescribed target. Values are confirmed by tapping Log set."
-        case .loggingInterval: return "\(name): record Log-tap timestamps and intervals between consecutive sets. Intervals include exercise time; actual rest and set duration are unavailable."
-        case .effort: return "\(name), after set \(afterSet ?? 0): one optional effort rating, 1 (easy) to 10 (maximal). You can skip it. No sensor inference."
+        case .performance: return L10n.s("\(name): compare each logged load and repetition count with its prescribed target. Values are confirmed by tapping Log set.")
+        case .loggingInterval: return L10n.s("\(name): record Log-tap timestamps and intervals between consecutive sets. Intervals include exercise time; actual rest and set duration are unavailable.")
+        case .effort: return L10n.s("\(name), after set \(afterSet ?? 0): one optional effort rating, 1 (easy) to 10 (maximal). You can skip it. No sensor inference.")
         }
     }
 }
@@ -90,27 +90,28 @@ extension WorkoutPlan {
     public var observationRequests: [ObservationRequest] { observations ?? [] }
     public func validateObservations() throws {
         guard observationSchemaVersion == nil || observationSchemaVersion == 1 else {
-            throw WorkoutError.invalidPlan("Unsupported observation schema version. This app supports version 1.")
+            throw WorkoutError.invalidPlan(L10n.s("Unsupported observation schema version. This app supports version 1."))
         }
         let requests = observationRequests
         guard requests.count <= 12, requests.isEmpty || totalSets <= 100 else {
-            throw WorkoutError.invalidPlan("Use at most 12 observation requests and at most 100 sets when collecting observations.")
+            throw WorkoutError.invalidPlan(L10n.s("Use at most 12 observation requests and at most 100 sets when collecting observations."))
         }
         guard Set(requests.map(\.id)).count == requests.count,
               Set(requests.map { "\($0.exerciseID)-\($0.kind.rawValue)" }).count == requests.count,
               requests.filter({ $0.kind == .effort }).count <= 1 else {
-            throw WorkoutError.invalidPlan("Observation IDs must be unique. Use each kind once per exercise, and only one optional effort question per workout.")
+            throw WorkoutError.invalidPlan(L10n.s("Observation IDs must be unique. Use each kind once per exercise, and only one optional effort question per workout."))
         }
         for request in requests {
             guard Self.validIdentifier(request.id), let exercise = exercises.first(where: { $0.id == request.exerciseID }) else {
-                throw WorkoutError.invalidPlan("Each observation needs a unique 1–64 character ID (letters, digits, hyphens or underscores) and an exerciseID matching an exercise’s explicit UUID id.")
+                throw WorkoutError.invalidPlan(L10n.s("Each observation needs a unique 1–64 character ID (letters, digits, hyphens or underscores) and an exerciseID matching an exercise’s explicit UUID id."))
             }
+            guard exercise.kind == .strength else { throw WorkoutError.invalidPlan(L10n.s("Set observations require a strength exercise. Timed activities already report their explicit timing and optional machine values.")) }
             if request.kind == .effort {
-                guard request.afterSet == exercise.sets else {
-                    throw WorkoutError.invalidPlan("An effort question must specify afterSet equal to that exercise’s final prescribed set.")
+                guard exercise.kind == .strength, request.afterSet == exercise.sets else {
+                    throw WorkoutError.invalidPlan(L10n.s("An effort question must specify afterSet equal to that exercise’s final prescribed set."))
                 }
             } else if request.afterSet != nil {
-                throw WorkoutError.invalidPlan("Only effort supports afterSet. Performance and loggingInterval cover all sets of the selected exercise.")
+                throw WorkoutError.invalidPlan(L10n.s("Only effort supports afterSet. Performance and loggingInterval cover all sets of the selected exercise."))
             }
         }
     }
@@ -149,25 +150,25 @@ extension WorkoutSession {
                 let detail: String
                 switch request.kind {
                 case .performance:
-                    let target = "Prescribed: \(Self.number(exercise.weight)) \(plan.unit.rawValue) × \(exercise.reps) reps."
+                    let target = L10n.s("Prescribed: \(Self.number(exercise.weight)) \(plan.unit.rawValue) × \(exercise.reps) reps.")
                     if let entry {
-                        detail = "\(target)\nUser-confirmed: \(Self.number(entry.weight)) \(plan.unit.rawValue) × \(entry.reps) reps. Difference: \(Self.number(entry.weight - exercise.weight)) \(plan.unit.rawValue), \(entry.reps - exercise.reps) reps."
-                    } else { detail = "\(target)\nUnavailable: set not logged; no actual values inferred." }
+                        detail = L10n.s("\(target)\nUser-confirmed: \(Self.number(entry.weight)) \(plan.unit.rawValue) × \(entry.reps) reps. Difference: \(Self.number(entry.weight - exercise.weight)) \(plan.unit.rawValue), \(entry.reps - exercise.reps) reps.")
+                    } else { detail = L10n.s("\(target)\nUnavailable: set not logged; no actual values inferred.") }
                 case .loggingInterval:
                     if let entry {
-                        let event = "Measured event: Log tapped at \(ISO8601DateFormatter().string(from: entry.completedAt))."
-                        let interval = loggingInterval(before: entry).map { "Log-tap interval: \(Self.number($0)) s. Includes exercise time; not actual rest." }
-                            ?? "Log-tap interval unavailable: needs consecutive sets with consistent clocks from this recording version."
-                        detail = "\(event)\n\(interval)\nPrescribed rest: \(exercise.restSeconds) s. Actual rest, set start/end and repetition timing are unavailable."
-                    } else { detail = "Unavailable: set not logged. Prescribed rest: \(exercise.restSeconds) s; no measured rest inferred." }
+                        let event = L10n.s("Measured event: Log tapped at \(ISO8601DateFormatter().string(from: entry.completedAt)).")
+                        let interval = loggingInterval(before: entry).map { L10n.s("Log-tap interval: \(Self.number($0)) s. Includes exercise time; not actual rest.") }
+                            ?? L10n.s("Log-tap interval unavailable: needs consecutive sets with consistent clocks from this recording version.")
+                        detail = L10n.s("\(event)\n\(interval)\nPrescribed rest: \(exercise.restSeconds) s. Actual rest, set start/end and repetition timing are unavailable.")
+                    } else { detail = L10n.s("Unavailable: set not logged. Prescribed rest: \(exercise.restSeconds) s; no measured rest inferred.") }
                 case .effort:
                     if let response = effortResponse, response.requestID == request.id, response.setID == entry?.id {
-                        detail = response.rating.map { "User-confirmed effort: \($0)/10 (1 easy · 10 maximal). Subjective rating for this set." }
-                            ?? "Skipped: no effort rating supplied."
-                    } else { detail = entry == nil ? "Unavailable: the requested final set was not logged." : "Not answered yet. Optional; no effort value inferred." }
+                        detail = response.rating.map { L10n.s("User-confirmed effort: \($0)/10 (1 easy · 10 maximal). Subjective rating for this set.") }
+                            ?? L10n.s("Skipped: no effort rating supplied.")
+                    } else { detail = entry == nil ? L10n.s("Unavailable: the requested final set was not logged.") : L10n.s("Not answered yet. Optional; no effort value inferred.") }
                 }
                 return ObservationEvidence(id: "\(request.id)-\(number)", requestID: request.id, exerciseID: exercise.id,
-                    setNumber: number, setID: entry?.id, title: "\(exercise.name) · Set \(number)", detail: detail)
+                    setNumber: number, setID: entry?.id, title: L10n.s("\(exercise.name) · Set \(number)"), detail: detail)
             }
         }
     }
@@ -192,7 +193,7 @@ extension WorkoutSession {
               entry.exerciseID == request.exerciseID, entry.setNumber == request.afterSet,
               response.rating.map({ (1...10).contains($0) }) ?? true,
               response.recordedAt.timeIntervalSince1970.isFinite, response.recordedAt >= entry.completedAt else {
-            throw WorkoutError.invalidInput("The received effort observation has an invalid rating or set reference.")
+            throw WorkoutError.invalidInput(L10n.s("The received effort observation has an invalid rating or set reference."))
         }
     }
 }

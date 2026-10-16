@@ -11,17 +11,17 @@ final class PhoneStore {
     @ObservationIgnored private let motionRepository = MotionRepository(folder: URL.applicationSupportDirectory.appending(path: "LittleLiftMotion", directoryHint: .isDirectory))
     private(set) var storageBlocked = false
     @ObservationIgnored private let reviewNotifications = ReviewNotifications()
-    private(set) var syncMessage = "Workouts sync when your watch is available."
+    private(set) var syncMessage = L10n.s("Workouts sync when your watch is available.")
     private(set) var isSyncing = false
-    private(set) var connectionDetails = "Connecting…"
+    private(set) var connectionDetails = L10n.s("Connecting…")
     @ObservationIgnored private let repository: FileRepository<PhoneState>
     @ObservationIgnored private let link = DeviceLink()
 
     private init() {
         let folder = URL.applicationSupportDirectory.appending(path: "LittleLift", directoryHint: .isDirectory)
         repository = FileRepository(url: folder.appending(path: "phone-v1.json"))
-        do { state = try repository.load() ?? PhoneState() }
-        catch { storageBlocked = true; self.error = "Stored data could not be read. It has not been overwritten. \(error.localizedDescription)" }
+        do { try repository.checkpointBeforeUpgrade(); let loaded = try repository.load() ?? PhoneState(); try StorageSchema.validate(loaded.storageVersion); state = loaded; UserDefaults.standard.set(state.comfort?.language, forKey: "littlelift.language") }
+        catch { storageBlocked = true; self.error = L10n.s("Stored data could not be read. It has not been overwritten. \(error.localizedDescription)") }
         link.onMessage = { [weak self] in try self?.receive($0) }
         link.onReady = { [weak self] in self?.sendToWatch() }
         link.onStatus = { [weak self] in self?.syncMessage = $0 }
@@ -42,10 +42,12 @@ final class PhoneStore {
         #endif
     }
 
-    private func commit(_ next: PhoneState) throws {
-        guard !storageBlocked else { throw WorkoutError.invalidState("Stored data could not be read. Restart after restoring your backup.") }
+    private func commit(_ candidate: PhoneState) throws {
+        var next = candidate; next.storageVersion = 2
+        guard !storageBlocked else { throw WorkoutError.invalidState(L10n.s("Stored data could not be read. Restart after restoring your backup.")) }
         try repository.save(next)
         state = next
+        UserDefaults.standard.set(next.comfort?.language, forKey: "littlelift.language")
     }
 
     func importPlan(_ text: String) throws {
@@ -56,7 +58,7 @@ final class PhoneStore {
     }
     func proposeImport(_ text: String) throws {
         var next = state
-        try next.propose(TrainingReview(analysis: "Review this imported workout and what it will collect before accepting.", plan: PlanImport.parse(text)))
+        try next.propose(TrainingReview(analysis: L10n.s("Review this imported workout and what it will collect before accepting."), plan: PlanImport.parse(text)))
         try commit(next)
     }
     func saveReview(_ text: String) throws {
@@ -67,8 +69,20 @@ final class PhoneStore {
         try commit(next); sendToWatch()
     }
     func discardReview() throws { var next = state; next.review = nil; try commit(next) }
+    func setComfort(_ value: ComfortPreferences) throws { try value.validate(); var value = value; value.revision = UUID(); var next = state; next.comfort = value; try commit(next); sendToWatch() }
+    func setWeeklyGoal(days: Int, paused: Bool) throws {
+        var next = state; var habit = next.weeklyHabit ?? WeeklyHabit(timeZone: TimeZone.current.identifier, goals: [])
+        try habit.schedule(days: days, paused: paused, now: Date()); next.weeklyHabit = habit; try commit(next)
+    }
+    func completeOnboarding(_ step: String) throws {
+        var next = state; next.onboardingSteps = Array(Set((next.onboardingSteps ?? []) + [step])); try commit(next)
+    }
+    func saveContext(profile: Bool, history: Bool, equipment: String) throws {
+        guard equipment.count <= 2000 else { throw WorkoutError.invalidInput(L10n.s("Keep equipment notes below 2,000 characters.")) }
+        var next = state; next.contextProfileApproved = profile; next.contextHistoryApproved = history; next.equipmentContext = equipment; try commit(next)
+    }
     func setProfile(_ text: String) throws {
-        guard text.count <= 12_000 else { throw WorkoutError.invalidInput("Keep the training profile below 12,000 characters.") }
+        guard text.count <= 12_000 else { throw WorkoutError.invalidInput(L10n.s("Keep the training profile below 12,000 characters.")) }
         var next = state; next.profile = text; try commit(next)
     }
     func setMode(_ mode: ConnectionMode) throws { var next = state; next.mode = mode; try commit(next) }
@@ -137,12 +151,12 @@ final class PhoneStore {
     func sendToWatch(acknowledging id: UUID? = nil) {
         do {
             try link.publish(SyncLogic.snapshot(from: state, acknowledging: id))
-        } catch { syncMessage = "Saved on iPhone. \(error.localizedDescription)" }
+        } catch { syncMessage = L10n.s("Saved on iPhone. \(error.localizedDescription)") }
     }
     private func receive(_ message: SyncMessage) throws -> SyncMessage? {
-        guard !storageBlocked else { throw WorkoutError.invalidState("The iPhone could not read its stored workouts. Your watch data is still saved.") }
+        guard !storageBlocked else { throw WorkoutError.invalidState(L10n.s("The iPhone could not read its stored workouts. Your watch data is still saved.")) }
         if case .planReceived(let id) = message, id == state.plan?.id {
-            syncMessage = "Workout received on watch."
+            syncMessage = L10n.s("Workout received on watch.")
             return nil
         }
         var next = state

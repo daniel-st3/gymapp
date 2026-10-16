@@ -5,7 +5,7 @@ import UserNotifications
     override init() { super.init(); UNUserNotificationCenter.current().delegate = self }
     func requestPermission() async throws {
         let allowed = try await UNUserNotificationCenter.current().requestAuthorization(options: [.alert])
-        guard allowed else { throw WorkoutError.invalidState("Review notifications are off. The one-tap review action remains available in Little Lift.") }
+        guard allowed else { throw WorkoutError.invalidState(L10n.s("Review notifications are off. The one-tap review action remains available in Little Lift.")) }
     }
     private var generation = 0
     func cancelPending() async {
@@ -17,11 +17,11 @@ import UserNotifications
     func schedule(sessionID: UUID) async throws {
         let expectedGeneration = generation
         let center = UNUserNotificationCenter.current()
-        guard await center.notificationSettings().authorizationStatus == .authorized else { throw WorkoutError.invalidState("Allow review notifications in iPhone Settings, or use the review action in Little Lift.") }
+        guard await center.notificationSettings().authorizationStatus == .authorized else { throw WorkoutError.invalidState(L10n.s("Allow review notifications in iPhone Settings, or use the review action in Little Lift.")) }
         guard expectedGeneration == generation else { throw CancellationError() }
         let content = UNMutableNotificationContent()
-        content.title = "Little Lift workout ready"; content.subtitle = "Coach review"
-        content.body = "Your completed workout is saved on this iPhone. Open to review."
+        content.title = L10n.s("Little Lift workout ready"); content.subtitle = L10n.s("Coach review")
+        content.body = L10n.s("Your completed workout is saved on this iPhone. Open to review.")
         content.userInfo = ["reviewSessionID": sessionID.uuidString]
         // Stable identifier replaces a pending duplicate if a crash occurs between
         // notification registration and the persisted notified flag.

@@ -30,21 +30,21 @@ public struct HistoricalWorkout: Codable, Equatable, Identifiable, Sendable {
     public func validate() throws {
         guard let day = parsedDate, day <= Date().addingTimeInterval(86400), title.count <= 120, !title.isEmpty,
               !source.isEmpty, source.count <= 240, (1...50).contains(exercises.count) else {
-            throw WorkoutError.invalidInput("History needs a stable UUID id, past ISO date, title, source and 1–50 exercises.")
+            throw WorkoutError.invalidInput(L10n.s("History needs a stable UUID id, past ISO date, title, source and 1–50 exercises."))
         }
         for exercise in exercises {
             guard !exercise.name.isEmpty, exercise.name.count <= 120, (1...20).contains(exercise.sets.count),
                   exercise.sets.allSatisfy({ (1...200).contains($0.reps) && $0.weight.isFinite && (0...1000).contains($0.weight) }),
                   (exercise.comparisonID == nil) == (exercise.loadConvention == nil), exercise.comparisonID.map(WorkoutPlan.validIdentifier) ?? true else {
-                throw WorkoutError.invalidInput("Imported history must contain actual set values, with valid matching metadata if supplied. Targets alone are not a completed workout.")
+                throw WorkoutError.invalidInput(L10n.s("Imported history must contain actual set values, with valid matching metadata if supplied. Targets alone are not a completed workout."))
             }
         }
     }
     public func report() -> String {
-        var lines = ["IMPORTED HISTORY — user-confirmed external record", "ID: \(id)", "\(date) · \(title) · source: \(source)", "No Little Lift timestamps, effort or sensor observations collected."]
+        var lines = [L10n.s("IMPORTED HISTORY — user-confirmed external record"), L10n.s("ID: \(id)"), L10n.s("\(date) · \(title) · source: \(source)"), L10n.s("No Little Lift timestamps, effort or sensor observations collected.")]
         for e in exercises {
-            lines.append("\(e.name) [\(e.comparisonID ?? "unmatched")] · \(e.loadConvention?.label ?? "convention unspecified")")
-            lines += e.sets.enumerated().map { "Set \($0.offset + 1): \(WorkoutSession.number($0.element.weight)) \(unit.rawValue) × \($0.element.reps) reps (imported actual)" }
+            lines.append("\(e.name) [\(e.comparisonID ?? L10n.s("unmatched"))] · \(e.loadConvention?.label ?? L10n.s("convention unspecified"))")
+            lines += e.sets.enumerated().map { L10n.s("Set \($0.offset + 1): \(WorkoutSession.number($0.element.weight)) \(unit.rawValue) × \($0.element.reps) reps (imported actual)") }
         }
         return lines.joined(separator: "\n")
     }
@@ -59,11 +59,11 @@ public struct HistoricalSet: Codable, Equatable, Sendable { public let weight: D
 
 public enum HistoryImport {
     public static func parse(_ text: String) throws -> [HistoricalWorkout] {
-        guard text.utf8.count <= 256_000 else { throw WorkoutError.invalidInput("Import at most 256 KB of history at once.") }
+        guard text.utf8.count <= 256_000 else { throw WorkoutError.invalidInput(L10n.s("Import at most 256 KB of history at once.")) }
         let rows: [HistoricalWorkout]
         do { rows = try JSONDecoder().decode([HistoricalWorkout].self, from: Data(text.utf8)) }
-        catch { throw WorkoutError.invalidInput("Use the history example schema: an array of records with stable UUID id, ISO date, title, source, unit and actual exercise sets.") }
-        guard (1...100).contains(rows.count), Set(rows.map(\.id)).count == rows.count else { throw WorkoutError.invalidInput("Import 1–100 records with unique IDs.") }
+        catch { throw WorkoutError.invalidInput(L10n.s("Use the history example schema: an array of records with stable UUID id, ISO date, title, source, unit and actual exercise sets.")) }
+        guard (1...100).contains(rows.count), Set(rows.map(\.id)).count == rows.count else { throw WorkoutError.invalidInput(L10n.s("Import 1–100 records with unique IDs.")) }
         try rows.forEach { try $0.validate() }; return rows
     }
     public static let example = """
@@ -81,15 +81,15 @@ extension PhoneState {
         var all = routineLibrary
         let saved: WorkoutPlan
         if let id {
-            guard let i = all.firstIndex(where: { $0.id == id }) else { throw WorkoutError.invalidInput("This routine is no longer available. Reopen the library before saving.") }
+            guard let i = all.firstIndex(where: { $0.id == id }) else { throw WorkoutError.invalidInput(L10n.s("This routine is no longer available. Reopen the library before saving.")) }
             if all[i].plan == plan { return all[i].plan }
-            guard all[i].previousVersions.count < 100 else { throw WorkoutError.invalidInput("This routine has 100 saved revisions. Save a new routine to preserve the archive.") }
+            guard all[i].previousVersions.count < 100 else { throw WorkoutError.invalidInput(L10n.s("This routine has 100 saved revisions. Save a new routine to preserve the archive.")) }
             all[i].previousVersions.append(all[i].plan)
             var revision = plan; revision.id = UUID(); all[i].plan = revision
             saved = revision
         } else {
             if let existing = all.first(where: { $0.plan == plan }) { return existing.plan }
-            guard all.count < 100 else { throw WorkoutError.invalidInput("The library supports up to 100 routines.") }
+            guard all.count < 100 else { throw WorkoutError.invalidInput(L10n.s("The library supports up to 100 routines.")) }
             var unique = plan
             if all.contains(where: { $0.plan.id == plan.id || $0.previousVersions.contains(where: { $0.id == plan.id }) }) { unique.id = UUID() }
             all.append(Routine(plan: unique)); saved = unique
@@ -106,7 +106,7 @@ extension PhoneState {
         self = next
     }
     public mutating func scheduleRoutine(_ id: UUID?, weekday: Int) throws {
-        guard (1...7).contains(weekday), id == nil || routineLibrary.contains(where: { $0.id == id }) else { throw WorkoutError.invalidInput("Choose an existing routine and weekday.") }
+        guard (1...7).contains(weekday), id == nil || routineLibrary.contains(where: { $0.id == id }) else { throw WorkoutError.invalidInput(L10n.s("Choose an existing routine and weekday.")) }
         var slots = weeklySchedule.filter { $0.weekday != weekday }
         if let id { slots.append(WeeklySlot(weekday: weekday, routineID: id)) }
         schedule = slots.sorted { $0.weekday < $1.weekday }
@@ -116,31 +116,34 @@ extension PhoneState {
         var all = externalHistory
         for record in records {
             if let old = all.first(where: { $0.id == record.id }) {
-                guard old == record else { throw WorkoutError.invalidInput("A history ID already exists with different values. Original records are preserved.") }
+                guard old == record else { throw WorkoutError.invalidInput(L10n.s("A history ID already exists with different values. Original records are preserved.")) }
             } else if !all.contains(where: { $0.date == record.date && $0.title == record.title && $0.unit == record.unit && $0.exercises == record.exercises }) { all.append(record) }
         }
         importedHistory = all.sorted { ($0.parsedDate ?? .distantPast) > ($1.parsedDate ?? .distantPast) }
     }
     public func contextExport() -> String {
-        let actual = sessions.sorted { $0.startedAt > $1.startedAt }.prefix(8).map { $0.report() }.joined(separator: "\n---\n")
-        let external = externalHistory.prefix(8).map { $0.report() }.joined(separator: "\n---\n")
-        let routines = routineLibrary.prefix(12).map { "\($0.plan.title): \($0.plan.totalSets) prescribed sets; not completed history" }.joined(separator: "\n")
-        let progression = Progression.summary(sessions)
-        let text = """
-        LITTLE LIFT CONTEXT — explicit export for my chosen chat
-        USER-EDITABLE PROFILE / PREFERENCES
-        \(profile.isEmpty ? "Not supplied" : profile)
-        RECENT CONFIRMED LITTLE LIFT LOGS (up to 8 of \(sessions.count))
-        \(actual.isEmpty ? "None" : actual)
-        EXTERNAL HISTORY (up to 8 of \(externalHistory.count)); user-confirmed, not measured by Little Lift
-        \(external.isEmpty ? "None" : external)
-        MATCHED PROGRESSION (latest workout versus most recent matching results)
-        \(progression)
-        SAVED ROUTINES (prescriptions only)
-        \(routines)
-        No previous conversation is assumed. Missing values are unknown. Keep variation, units and load conventions matched. No causal, injury-risk or medical-readiness conclusions. Any proposed plan requires my acceptance.
-        """
-        if text.count > 40_000 { return String(text.prefix(40_000)) + "\n[Context truncated at 40,000 characters; request selected older reports if needed.]" }
+        let shareHistory = contextHistoryApproved != false
+        let actual = (shareHistory ? sessions : []).sorted { $0.startedAt > $1.startedAt }.prefix(8).map { $0.report() }.joined(separator: "\n---\n")
+        let external = (shareHistory ? externalHistory : []).prefix(8).map { $0.report() }.joined(separator: "\n---\n")
+        let routines = routineLibrary.prefix(12).map { L10n.s("\($0.plan.title): \($0.plan.totalSets) prescribed sets / segments; not completed history") }.joined(separator: "\n")
+        let progression = shareHistory ? Progression.summary(sessions) : L10n.s("Not shared")
+        let lines = [
+            L10n.s("LITTLE LIFT CONTEXT — explicit export for my chosen chat"),
+            L10n.s("USER-EDITABLE PROFILE / PREFERENCES"),
+            contextProfileApproved == true ? profile : L10n.s("Profile not shared; ask before requesting personal details."),
+            L10n.s("KNOWN EQUIPMENT / OPTIONAL GYM CONTEXT (user supplied, not independently verified)"),
+            equipmentContext ?? L10n.s("Not supplied"),
+            L10n.s("If web search is available in the chosen chat, use official sources and ask me to confirm a machine/branch match. A description is not a verified inventory. Do not change a variation or load from a search result."),
+            L10n.s("RECENT CONFIRMED LITTLE LIFT LOGS (up to 8 of \(sessions.count))"),
+            actual.isEmpty ? L10n.s("None shared") : actual,
+            L10n.s("EXTERNAL HISTORY (up to 8 of \(externalHistory.count)); user-confirmed, not measured by Little Lift"),
+            external.isEmpty ? L10n.s("None shared") : external,
+            L10n.s("MATCHED PROGRESSION (latest workout versus most recent matching results)"), progression,
+            L10n.s("SAVED ROUTINES (prescriptions only)"), routines,
+            L10n.s("No previous conversation is assumed. Missing values are unknown. Keep variation, units and load conventions matched. No causal, injury-risk or medical-readiness conclusions. Any proposed plan requires my acceptance.")
+        ]
+        let text = lines.joined(separator: "\n")
+        if text.count > 40_000 { return String(text.prefix(40_000)) + "\n" + L10n.s("Context truncated at 40,000 characters; request selected older reports if needed.") }
         return text
     }
 }
@@ -148,26 +151,26 @@ public enum Progression {
     /// Only actual logged sets of the exact variation qualify. Imported history,
     /// uncompleted prescriptions and similarly named machines are not evidence.
     public static func lastResult(for exercise: ExercisePlan, unit: WeightUnit, sessions: [WorkoutSession]) -> (session: WorkoutSession, entry: CompletedSet)? {
-        for session in sessions.sorted(by: { $0.startedAt > $1.startedAt }) where session.phase == .completed {
+        for session in sessions.sorted(by: { $0.startedAt > $1.startedAt }) where session.phase == .completed && session.plan.practice != true {
             let matchingIDs = Set(session.executionExercises.filter { $0.matches(exercise, unit: session.plan.unit, otherUnit: unit) }.map(\.id))
             if let entry = session.entries.last(where: { matchingIDs.contains($0.exerciseID) }) { return (session, entry) }
         }
         return nil
     }
     public static func summary(_ sessions: [WorkoutSession]) -> String {
-        let sorted = sessions.sorted { $0.startedAt > $1.startedAt }
-        guard let latest = sorted.first else { return "Insufficient confirmed history." }
+        let sorted = sessions.filter { $0.phase == .completed && $0.plan.practice != true }.sorted { $0.startedAt > $1.startedAt }
+        guard let latest = sorted.first else { return L10n.s("Insufficient confirmed history.") }
         var lines: [String] = []
         for exercise in latest.executionExercises {
             guard let current = latest.entries.last(where: { $0.exerciseID == exercise.id }) else { continue }
             var found = false
             for old in sorted.dropFirst() {
                 guard let match = old.executionExercises.first(where: { $0.matches(exercise, unit: old.plan.unit, otherUnit: latest.plan.unit) }), let prior = old.entries.last(where: { $0.exerciseID == match.id }) else { continue }
-                lines.append("\(exercise.name), final logged set: \(WorkoutSession.number(prior.weight)) × \(prior.reps) → \(WorkoutSession.number(current.weight)) × \(current.reps) \(latest.plan.unit.rawValue). \(exercise.loadConvention?.label ?? "") No cause inferred.")
+                lines.append(L10n.s("\(exercise.name), final logged set: \(WorkoutSession.number(prior.weight)) × \(prior.reps) → \(WorkoutSession.number(current.weight)) × \(current.reps) \(latest.plan.unit.rawValue). \(exercise.loadConvention?.label ?? "") No cause inferred."))
                 found = true; break
             }
-            if !found { lines.append("\(exercise.name): insufficient matching variation/unit/convention history.") }
+            if !found { lines.append(L10n.s("\(exercise.name): insufficient matching variation/unit/convention history.")) }
         }
-        return lines.isEmpty ? "Insufficient logged sets." : lines.joined(separator: "\n")
+        return lines.isEmpty ? L10n.s("Insufficient logged sets.") : lines.joined(separator: "\n")
     }
 }

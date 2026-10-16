@@ -22,7 +22,7 @@ final class DeviceLink: NSObject, WCSessionDelegate {
     }
 
     func activate() {
-        guard let session else { onStatus?("Watch connection is unavailable on this device."); return }
+        guard let session else { onStatus?(L10n.s("Watch connection is unavailable on this device.")); return }
         session.delegate = self
         if session.activationState != .activated { session.activate() }
         updateDetails()
@@ -31,28 +31,28 @@ final class DeviceLink: NSObject, WCSessionDelegate {
     func publish(_ snapshot: PhoneSnapshot) throws {
         latestSnapshot = snapshot
         _ = try SyncCodec.encode(.snapshot(snapshot))
-        guard let session else { onStatus?("Watch connection is unavailable."); return }
+        guard let session else { onStatus?(L10n.s("Watch connection is unavailable.")); return }
         guard session.activationState == .activated else {
-            onStatus?("Connecting to watch…"); activate(); return
+            onStatus?(L10n.s("Connecting to watch…")); activate(); return
         }
         #if os(iOS)
-        guard session.isPaired else { onStatus?("This iPhone has no paired watch."); return }
+        guard session.isPaired else { onStatus?(L10n.s("This iPhone has no paired watch.")); return }
         guard session.isWatchAppInstalled else {
-            onStatus?("Install and open Little Lift on the paired watch."); return
+            onStatus?(L10n.s("Install and open Little Lift on the paired watch.")); return
         }
         #endif
         // A fresh ID makes an explicit resend meaningful even for the same plan.
         try session.updateApplicationContext(payload(.snapshot(snapshot)))
         updateDetails()
         if session.isReachable {
-            onStatus?("Sending workout to watch…")
+            onStatus?(L10n.s("Sending workout to watch…"))
             try sendLive(.snapshot(snapshot), key: "plan")
-        } else { onStatus?("Saved on iPhone. Waiting for Little Lift on the paired watch.") }
+        } else { onStatus?(L10n.s("Saved on iPhone. Waiting for Little Lift on the paired watch.")) }
     }
 
     func enqueue(_ workout: WorkoutSession) throws {
         guard let session, session.activationState == .activated else {
-            onStatus?("Workout saved. Connecting to iPhone…"); activate(); return
+            onStatus?(L10n.s("Workout saved. Connecting to iPhone…")); activate(); return
         }
         let message = SyncMessage.completed(workout)
         #if !targetEnvironment(simulator)
@@ -66,24 +66,24 @@ final class DeviceLink: NSObject, WCSessionDelegate {
         // The simulator can exercise foreground delivery without depending on
         // background user-info transfers. The real watch retains both paths.
         if session.isReachable { try sendLive(message, key: "workout:\(workout.id)") }
-        else { onStatus?("Workout saved on watch. Open Little Lift on the paired iPhone to sync.") }
+        else { onStatus?(L10n.s("Workout saved on watch. Open Little Lift on the paired iPhone to sync.")) }
     }
 
     func sendMotionFile(_ url: URL, id: UUID) throws {
-        guard let session, session.activationState == .activated else { throw WorkoutError.invalidState("Open both apps and retry motion transfer.") }
+        guard let session, session.activationState == .activated else { throw WorkoutError.invalidState(L10n.s("Open both apps and retry motion transfer.")) }
         guard !session.outstandingFileTransfers.contains(where: { $0.file.metadata?["motionID"] as? String == id.uuidString }) else { return }
         session.transferFile(url, metadata: ["kind": "littlelift.motion.v1", "motionID": id.uuidString])
-        onStatus?("Motion replay queued. The original stays on Watch.")
+        onStatus?(L10n.s("Motion replay queued. The original stays on Watch."))
     }
     func requestSnapshot() {
         wantsSnapshot = true
-        guard let session else { onStatus?("iPhone connection is unavailable."); return }
+        guard let session else { onStatus?(L10n.s("iPhone connection is unavailable.")); return }
         guard session.activationState == .activated else {
-            onStatus?("Connecting to iPhone…"); activate(); return
+            onStatus?(L10n.s("Connecting to iPhone…")); activate(); return
         }
         wantsSnapshot = false
         updateDetails()
-        onStatus?("Requesting workout from iPhone…")
+        onStatus?(L10n.s("Requesting workout from iPhone…"))
         do {
             // A watch-originated message can wake the phone app. An explicit
             // attempt gets an error callback instead of silently returning.
@@ -97,7 +97,7 @@ final class DeviceLink: NSObject, WCSessionDelegate {
 
     private func sendLive(_ message: SyncMessage, key: String) throws {
         guard let session, session.activationState == .activated else {
-            onStatus?("Connection is still starting. Please retry in a moment.")
+            onStatus?(L10n.s("Connection is still starting. Please retry in a moment."))
             activate(); return
         }
         guard pending[key] == nil else { return }
@@ -106,7 +106,7 @@ final class DeviceLink: NSObject, WCSessionDelegate {
         let timeout = Task { @MainActor [weak self] in
             do { try await Task.sleep(for: .seconds(10)) } catch { return }
             guard let self, self.finish(key: key, id: id) else { return }
-            self.onStatus?("No reply yet. Keep Little Lift open on both paired devices and retry.")
+            self.onStatus?(L10n.s("No reply yet. Keep Little Lift open on both paired devices and retry."))
             self.updateDetails()
         }
         pending[key] = (id, timeout)
@@ -116,17 +116,21 @@ final class DeviceLink: NSObject, WCSessionDelegate {
             let error = reply["error"] as? String
             let accepted = reply["accepted"] as? Bool ?? false
             Task { @MainActor in
-                guard let self, self.finish(key: key, id: id) else { return }
-                if let error { self.onStatus?(error) }
-                else if let data { self.receive(data) }
-                else if !accepted { self.onStatus?("The other app returned an invalid sync reply.") }
+                guard let self else { return }
+                let wasPending = self.finish(key: key, id: id)
+                // A UI timeout is not a revocation of a durable receipt. A late
+                // validated snapshot can acknowledge the outbox; SyncLogic keeps
+                // its older prescription from replacing a newer one.
+                if let data { self.receive(data) }
+                else if wasPending, let error { self.onStatus?(error) }
+                else if wasPending, !accepted { self.onStatus?(L10n.s("The other app returned an invalid sync reply.")) }
                 self.updateDetails()
             }
         }, errorHandler: { [weak self] error in
             let detail = error.localizedDescription
             Task { @MainActor in
                 guard let self, self.finish(key: key, id: id) else { return }
-                self.onStatus?("Couldn’t reach the other app. Open Little Lift on both paired devices. \(detail)")
+                self.onStatus?(L10n.s("Couldn’t reach the other app. Open Little Lift on both paired devices. \(detail)"))
                 self.updateDetails()
             }
         })
@@ -141,7 +145,7 @@ final class DeviceLink: NSObject, WCSessionDelegate {
     private func receive(_ data: Data, replyHandler: (([String: Any]) -> Void)? = nil) {
         do {
             let message = try SyncCodec.decode(data)
-            guard let handler = onMessage else { throw WorkoutError.invalidState("The other app is still starting.") }
+            guard let handler = onMessage else { throw WorkoutError.invalidState(L10n.s("The other app is still starting.")) }
             let response = try handler(message)
             // Stores return only after their candidate state has been saved.
             if let replyHandler {
@@ -169,7 +173,7 @@ final class DeviceLink: NSObject, WCSessionDelegate {
     }
 
     private func updateDetails() {
-        guard let session else { onDetails?("WatchConnectivity is unavailable."); return }
+        guard let session else { onDetails?(L10n.s("WatchConnectivity is unavailable.")); return }
         var lines = ["App: \(Bundle.main.bundleIdentifier ?? "unknown")",
                      "Session: \(session.activationState == .activated ? "active" : "connecting")",
                      "Other app reachable: \(session.isReachable ? "yes" : "no")"]
@@ -219,7 +223,7 @@ final class DeviceLink: NSObject, WCSessionDelegate {
             let data = try InputBoundary.read(file.fileURL, maximumBytes: 2_000_000)
             Task { @MainActor [weak self] in
                 do { try self?.onMotionFile?(data) }
-                catch { self?.onStatus?("Motion replay preserved on Watch: \(error.localizedDescription)") }
+                catch { self?.onStatus?(L10n.s("Motion replay preserved on Watch: \(error.localizedDescription)")) }
             }
         } catch { Task { @MainActor [weak self] in self?.onStatus?(error.localizedDescription) } }
     }
@@ -232,7 +236,7 @@ final class DeviceLink: NSObject, WCSessionDelegate {
     }
     nonisolated func session(_ session: WCSession, didFinish userInfoTransfer: WCSessionUserInfoTransfer, error: Error?) {
         if let message = error?.localizedDescription {
-            Task { @MainActor [weak self] in self?.onStatus?("Saved locally. Sync will retry: \(message)") }
+            Task { @MainActor [weak self] in self?.onStatus?(L10n.s("Saved locally. Sync will retry: \(message)")) }
         }
     }
     #if os(iOS)

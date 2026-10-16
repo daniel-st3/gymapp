@@ -4,7 +4,7 @@ import WatchKit
 import UserNotifications
 
 enum WatchSheet: String, Identifiable {
-    case options, effort, motion
+    case options, effort, motion, adjust
     var id: String { rawValue }
 }
 
@@ -19,7 +19,7 @@ final class WatchStore {
     private(set) var storageBlocked = false
     private(set) var syncNote = ""
     private(set) var isSyncing = false
-    private(set) var connectionDetails = "Connecting…"
+    private(set) var connectionDetails = L10n.s("Connecting…")
     private(set) var notificationStatus: UNAuthorizationStatus = .notDetermined
     private(set) var notificationIssue: String?
     @ObservationIgnored private let repository: FileRepository<WatchState>
@@ -29,8 +29,8 @@ final class WatchStore {
     private init() {
         let folder = URL.applicationSupportDirectory.appending(path: "LittleLift", directoryHint: .isDirectory)
         repository = FileRepository(url: folder.appending(path: "watch-v1.json"))
-        do { state = try repository.load() ?? WatchState() }
-        catch { storageBlocked = true; self.error = "Stored data could not be read and has not been overwritten. \(error.localizedDescription)" }
+        do { try repository.checkpointBeforeUpgrade(); let loaded = try repository.load() ?? WatchState(); try StorageSchema.validate(loaded.storageVersion); state = loaded; UserDefaults.standard.set(state.comfort?.language, forKey: "littlelift.language") }
+        catch { storageBlocked = true; self.error = L10n.s("Stored data could not be read and has not been overwritten. \(error.localizedDescription)") }
         prefill()
         link.onMessage = { [weak self] in try self?.receive($0) }
         link.onReady = { [weak self] in self?.retrySync() }
@@ -40,9 +40,14 @@ final class WatchStore {
         link.activate()
     }
 
-    private func commit(_ next: WatchState) throws {
-        guard !storageBlocked else { throw WorkoutError.invalidState("Stored data could not be read. Restart after restoring your backup.") }
+    private func commit(_ candidate: WatchState) throws {
+        var next = candidate; next.storageVersion = 2
+        guard !storageBlocked else { throw WorkoutError.invalidState(L10n.s("Stored data could not be read. Restart after restoring your backup.")) }
+        if let active = next.session, active.phase != .completed { try active.validateDeliveryReserve() }
+        let changedExercise = state.session?.currentExercise?.id != next.session?.currentExercise?.id
         try repository.save(next); state = next
+        if changedExercise { WorkoutRuntime.shared.changeActivity(next.session?.currentExercise) }
+        UserDefaults.standard.set(next.comfort?.language, forKey: "littlelift.language")
     }
 
     func perform(_ operation: () throws -> Void) {
@@ -50,10 +55,12 @@ final class WatchStore {
     }
 
     func start() throws {
-        guard state.session == nil, let plan = state.plan else { throw WorkoutError.invalidState("Add a workout on your iPhone first.") }
+        guard state.session == nil, let plan = state.plan else { throw WorkoutError.invalidState(L10n.s("Add a workout on your iPhone first.")) }
         var next = state; next.session = try WorkoutSession(plan: plan)
+        if let minutes = next.comfort?.waterMinutes { next.session?.hydrationDue = Date().addingTimeInterval(Double(minutes * 60)) }
         try commit(next); prefill(); play(.start)
         Task { @MainActor in
+            if let session = state.session { await WorkoutRuntime.shared.start(for: session) }
             await requestRestNotifications()
         }
     }
@@ -63,17 +70,59 @@ final class WatchStore {
         var next = state
         guard var session = next.session else { return }
         try session.logSet(weight: draftWeight, reps: Int(draftReps.rounded()))
+        if session.phase == .completed, next.comfort?.quietFeedback != true { session.feedback = FactualFeedback.message(for: session, previous: next.recent) }
         next.session = session; next.enqueueCompleted(); try commit(next)
-        if session.phase == .completed { notifications.cancel(); play(.success); retrySync() }
+        RhythmGuide.shared.stop()
+        if session.phase == .completed { WorkoutRuntime.shared.finish(); notifications.cancel(); play(.success); retrySync() }
         else { play(.click); scheduleRest() }
         prefill()
     }
 
+    enum TimedAction { case start, pause, resume, done, extend }
+    func activityAction(_ action: TimedAction) throws {
+        var next = state
+        switch action {
+        case .start: try next.session?.startActivity()
+        case .pause: try next.session?.pauseActivity()
+        case .resume: try next.session?.resumeActivity()
+        case .done: try next.session?.completeActivity(source: .machine)
+        case .extend: break
+        }
+        next.enqueueCompleted(); try commit(next)
+        if next.session?.phase == .completed { WorkoutRuntime.shared.finish(); notifications.cancel(); retrySync() }
+        prefill()
+    }
+    func activityReadings(distance: Double?, speed: Double?, incline: Double?) throws {
+        var next = state; try next.session?.setActivityReadings(distance: distance, speed: speed, incline: incline); try commit(next)
+    }
+    func transitionAction(_ action: TimedAction) throws {
+        var next = state
+        switch action {
+        case .pause: next.session?.pauseTransition()
+        case .resume: next.session?.resumeTransition()
+        case .extend: try next.session?.extendTransition()
+        case .done: next.session?.skipTransition()
+        case .start: break
+        }
+        try commit(next); prefill()
+    }
+    func chooseNext(_ id: UUID) throws {
+        RhythmGuide.shared.stop()
+        var next = state; try next.session?.chooseNext(id); try commit(next); prefill()
+    }
     func deferExercise() throws {
+        RhythmGuide.shared.stop()
         var next = state; try next.session?.deferCurrent(); try commit(next); prefill()
     }
-    func substitute(_ id: UUID) throws {
-        var next = state; try next.session?.substituteCurrent(with: id); try commit(next); prefill()
+    func substitute(_ id: UUID, future: Bool = false) throws {
+        RhythmGuide.shared.stop()
+        var next = state; try next.session?.substituteCurrent(with: id, proposeForFuture: future); try commit(next); prefill()
+    }
+    func skipExercise() throws {
+        RhythmGuide.shared.stop()
+        var next = state; try next.session?.skipExercise(reason: L10n.s("User chose to omit; no replacement prescribed."))
+        next.enqueueCompleted(); try commit(next); prefill()
+        if next.session?.phase == .completed { WorkoutRuntime.shared.finish(); notifications.cancel(); retrySync() }
     }
     func omitOptional(_ ids: [UUID]) throws {
         var next = state; try next.session?.omitOptional(ids); try commit(next); prefill()
@@ -92,9 +141,10 @@ final class WatchStore {
         var next = state
         guard next.session?.endRestIfDue() == true else { return }
         try commit(next); notifications.cancel(); prefill()
-        if haptic { play(.notification) }
+        if haptic, state.comfort?.restHaptics != false { play(.notification) }
     }
     func undo() throws {
+        RhythmGuide.shared.stop()
         let undone = state.session?.entries.last
         var next = state; try next.session?.undoLastSet(); try commit(next)
         notifications.cancel(); prefill()
@@ -104,8 +154,9 @@ final class WatchStore {
         play(.click)
     }
     func finishEarly() throws {
+        RhythmGuide.shared.stop()
         var next = state; next.session?.finish(); next.enqueueCompleted(); try commit(next)
-        notifications.cancel(); play(.stop); retrySync()
+        WorkoutRuntime.shared.finish(); notifications.cancel(); play(.stop); retrySync()
     }
     func dismissSummary() throws {
         guard state.session?.phase == .completed else { return }
@@ -118,12 +169,19 @@ final class WatchStore {
         next.enqueueCompleted(); try commit(next)
         if next.session?.phase == .completed { retrySync() }
     }
+    func waterReminder(snooze: Bool) throws {
+        var next = state
+        next.session?.hydrationDue = snooze ? Date().addingTimeInterval(Double((state.comfort?.waterMinutes ?? 15) * 60)) : nil
+        try commit(next)
+    }
     func sendMotion(_ url: URL, id: UUID) throws { try link.sendMotionFile(url, id: id) }
     func setHaptics(_ enabled: Bool) throws {
         var next = state; next.haptics = enabled; try commit(next)
+        if !enabled { RhythmGuide.shared.stop() }
         scheduleRest()
     }
     func foreground() {
+        Task { await WorkoutRuntime.shared.recover() }
         perform { try restFinished(haptic: false) }
         // Recover a future reminder after relaunch, including a first permission grant.
         scheduleRest()
@@ -146,12 +204,12 @@ final class WatchStore {
     }
 
     var restReminderMessage: String {
-        if let notificationIssue { return "Reminders unavailable: \(notificationIssue)" }
+        if let notificationIssue { return L10n.s("Reminders unavailable: \(notificationIssue)") }
         switch notificationStatus {
-        case .authorized, .provisional, .ephemeral: return "Rest reminders are allowed."
-        case .denied: return "Rest reminders are off. You can allow them in the watch’s notification settings. The timer still works while Little Lift is open."
-        case .notDetermined: return "Allow notifications for background rest reminders."
-        @unknown default: return "Check rest reminders in the watch’s notification settings."
+        case .authorized, .provisional, .ephemeral: return L10n.s("Rest reminders are allowed.")
+        case .denied: return L10n.s("Rest reminders are off. You can allow them in the watch’s notification settings. The timer still works while Little Lift is open.")
+        case .notDetermined: return L10n.s("Allow notifications for background rest reminders.")
+        @unknown default: return L10n.s("Check rest reminders in the watch’s notification settings.")
         }
     }
 
@@ -167,9 +225,10 @@ final class WatchStore {
         var next = state
         let receipt = try SyncLogic.watchReply(to: snapshot, state: &next)
         try commit(next)
+        if !next.haptics || next.comfort?.rhythmEnabled != true { RhythmGuide.shared.stop() }
         if next.motionOptIn != true { MotionCapture.shared.stop(status: "interrupted") }
-        syncNote = next.plan == nil ? "Connected. Add a workout in Little Lift on iPhone." :
-            (next.outbox.isEmpty ? "Workout ready" : "Workout ready. Logs waiting for iPhone confirmation.")
+        syncNote = next.plan == nil ? L10n.s("Connected. Add a workout in Little Lift on iPhone.") :
+            (next.outbox.isEmpty ? L10n.s("Workout ready") : L10n.s("Workout ready. Logs waiting for iPhone confirmation."))
         return receipt
     }
 
@@ -186,7 +245,7 @@ final class WatchStore {
     }
     private func scheduleRest() {
         guard let deadline = state.session?.restUntil else { notifications.cancel(); return }
-        notifications.schedule(deadline: deadline, sound: state.haptics)
+        notifications.schedule(deadline: deadline, sound: state.haptics && state.comfort?.restHaptics != false)
     }
     private func play(_ type: WKHapticType) { if state.haptics { WKInterfaceDevice.current().play(type) } }
     var summarySynced: Bool {
@@ -225,7 +284,7 @@ private final class RestNotifications {
             guard currentIdentifier == identifier, settings.authorizationStatus == .authorized,
                   deadline.timeIntervalSinceNow > 0 else { return }
             let content = UNMutableNotificationContent()
-            content.title = "Rest finished"; content.body = "Your next set is ready."
+            content.title = L10n.s("Rest finished"); content.body = L10n.s("Your next set is ready.")
             if sound { content.sound = .default }
             let trigger = UNTimeIntervalNotificationTrigger(timeInterval: max(1, deadline.timeIntervalSinceNow), repeats: false)
             try? await center.add(UNNotificationRequest(identifier: identifier, content: content, trigger: trigger))

@@ -1,8 +1,10 @@
 # Run Little Lift on your Mac
 
-**Latest local update: Build 10.** Progress now shows local training activity and matched exercise records. Shortcut actions require authentication, incoming data has stronger validation and conflicting duplicate workouts are rejected. See [README](README.md) and [security](SECURITY.md).
+**Latest local update: Build 11.** Mixed strength/cardio logging, optional machine-change time, better deferral, Spanish/English, native typography, editable coach context, exercise help and flexible weekly goals. Watch uses an official workout session with manual fallback. See the [27-point delivery matrix](docs/feedback-27.md) and [current verification](docs/verification.md).
 
-**Build 9 design retained.** The front end now has a consistent monochrome design: serif titles, compact system controls, clearer workout cards, dated History, grouped Settings and a redesigned import/edit flow. Watch logging keeps its primary actions fixed and its number controls compact. Native animation respects Reduce Motion. Existing routines, observations, time planning, coach sharing and optional experiments remain available. See [the design](docs/design-9.md), [delivery checklist](docs/design-9-checklist.md) and [verification](docs/verification.md) for actual testing and device status.
+The latest apps run on the existing paired simulators. The free-signed device build passes, including the Watch HealthKit entitlement, but the current phone lock/Watch connection prevented physical installation. Physical wrist return, haptic feel, sensor accuracy and live ChatGPT remain unverified. Original signing, icon and data are preserved; **do not uninstall**.
+
+For a nontechnical walkthrough, use **Settings → Start here** inside the phone app, or open the [local Spanish guide](docs/onboarding/index.html). The existing explicit-chat workflow and optional independent Shortcut remain separate. The historical Build 4 notes below are not new verification.
 
 ## Easiest way to run it
 

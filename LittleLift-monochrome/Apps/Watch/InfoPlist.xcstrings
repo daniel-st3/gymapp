@@ -1,0 +1,54 @@
+{
+  "sourceLanguage": "en",
+  "version": "1.0",
+  "strings": {
+    "NSHealthShareUsageDescription": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Little Lift uses a workout session during training to support wrist-down execution. It does not read your Health history."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Little Lift usa una sesión de entrenamiento para continuar con la muñeca baja. No lee tu historial de Salud."
+          }
+        }
+      }
+    },
+    "NSHealthUpdateUsageDescription": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow workout sessions during training and optional motion tests. Your log stays in Little Lift; no Health workout or calorie estimate is saved."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permite sesiones durante el entrenamiento y las pruebas opcionales de movimiento. El registro queda en Little Lift; no se guarda un entrenamiento ni una estimación de calorías en Salud."
+          }
+        }
+      }
+    },
+    "NSMotionUsageDescription": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Optional experimental wrist timing replay, processed only on your devices."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repetición experimental opcional del movimiento de muñeca, procesada solo en tus dispositivos."
+          }
+        }
+      }
+    }
+  }
+}

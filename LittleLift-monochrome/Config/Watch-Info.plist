@@ -26,9 +26,9 @@
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>The optional motion experiment uses a workout session for wrist-down execution; it does not read your Health history.</string>
+	<string>Little Lift uses a workout session during training to support wrist-down execution. It does not read your Health history.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>Allow a temporary workout session for the optional motion experiment. Little Lift does not save a Health workout.</string>
+	<string>Allow workout sessions during training and optional motion tests. Your log stays in Little Lift; no Health workout or calorie estimate is saved.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>Optional experimental wrist timing replay, processed only on your devices.</string>
 	<key>WKApplication</key>

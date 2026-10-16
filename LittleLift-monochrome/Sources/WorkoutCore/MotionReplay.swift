@@ -3,6 +3,7 @@ import Foundation
 public enum MotionExercise: String, Codable, CaseIterable, Sendable {
     case dumbbellCurl = "Dumbbell curl"
     case lateralRaise = "Lateral raise"
+    public var label: String { L10n.key(rawValue) }
 }
 
 public struct MotionSample: Codable, Equatable, Sendable {
@@ -27,10 +28,10 @@ public struct MotionRecording: Codable, Equatable, Identifiable, Sendable {
     }
     public func validate() throws {
         guard ["Dumbbell curl", "Lateral raise"].contains(exercise), ["recording", "stopped", "interrupted", "time limit"].contains(status),
-              samples.count <= 4500, InputBoundary.validDate(startedAt), confirmedAt.map({ InputBoundary.validDate($0) && $0 >= startedAt && status != "recording" }) ?? true, confirmedReps.map({ (0...200).contains($0) }) ?? true, (confirmedReps == nil) == (confirmedAt == nil), [batteryStart, batteryEnd].compactMap({ $0 }).allSatisfy({ $0.isFinite && (0...1).contains($0) }) else { throw WorkoutError.invalidInput("Invalid experimental motion recording.") }
+              samples.count <= 4500, InputBoundary.validDate(startedAt), confirmedAt.map({ InputBoundary.validDate($0) && $0 >= startedAt && status != "recording" }) ?? true, confirmedReps.map({ (0...200).contains($0) }) ?? true, (confirmedReps == nil) == (confirmedAt == nil), [batteryStart, batteryEnd].compactMap({ $0 }).allSatisfy({ $0.isFinite && (0...1).contains($0) }) else { throw WorkoutError.invalidInput(L10n.s("Invalid experimental motion recording.")) }
         var previous = -1.0
         for s in samples {
-            guard [s.t,s.x,s.y,s.z].allSatisfy(\.isFinite), s.t > previous, (0...185).contains(s.t), [s.x,s.y,s.z].allSatisfy({ abs($0) <= 100 }) else { throw WorkoutError.invalidInput("Motion timestamps or sample values are invalid.") }
+            guard [s.t,s.x,s.y,s.z].allSatisfy(\.isFinite), s.t > previous, (0...185).contains(s.t), [s.x,s.y,s.z].allSatisfy({ abs($0) <= 100 }) else { throw WorkoutError.invalidInput(L10n.s("Motion timestamps or sample values are invalid.")) }
             previous = s.t
         }
     }
@@ -67,7 +68,7 @@ public struct MotionRecording: Codable, Equatable, Identifiable, Sendable {
         return sets
     }
     public mutating func confirm(reps: Int, now: Date = Date()) throws {
-        guard status != "recording", (0...200).contains(reps) else { throw WorkoutError.invalidInput("Confirm a count from 0–200 after capture stops.") }
+        guard status != "recording", (0...200).contains(reps) else { throw WorkoutError.invalidInput(L10n.s("Confirm a count from 0–200 after capture stops.")) }
         confirmedReps = reps; confirmedAt = now
     }
 }
@@ -92,15 +93,15 @@ public struct MotionRepository {
         try records.forEach { try $0.validate() }; return records.sorted { $0.startedAt > $1.startedAt }
     }
     public func receive(_ data: Data) throws {
-        guard data.count <= 2_000_000 else { throw WorkoutError.invalidInput("Motion recording exceeds the local transfer limit.") }
+        guard data.count <= 2_000_000 else { throw WorkoutError.invalidInput(L10n.s("Motion recording exceeds the local transfer limit.")) }
         let received = try FileRepository<MotionRecording>.decoder().decode(MotionRecording.self, from: data)
         try received.validate()
-        guard received.status != "recording" else { throw WorkoutError.invalidInput("Only stopped motion recordings can be imported.") }
+        guard received.status != "recording" else { throw WorkoutError.invalidInput(L10n.s("Only stopped motion recordings can be imported.")) }
         if let existing = try FileRepository<MotionRecording>(url: url(received.id)).load() {
-            guard existing.samples == received.samples, existing.exercise == received.exercise, existing.startedAt == received.startedAt else { throw WorkoutError.invalidInput("A different original motion record already has this ID.") }
+            guard existing.samples == received.samples, existing.exercise == received.exercise, existing.startedAt == received.startedAt else { throw WorkoutError.invalidInput(L10n.s("A different original motion record already has this ID.")) }
             return // preserve user confirmation when an original is delivered twice
         }
-        guard try recordings().count < 20 else { throw WorkoutError.invalidInput("The experimental library is limited to 20 recordings. Export/delete a recording before adding more.") }
+        guard try recordings().count < 20 else { throw WorkoutError.invalidInput(L10n.s("The experimental library is limited to 20 recordings. Export/delete a recording before adding more.")) }
         try save(received)
     }
     public func delete(_ id: UUID) throws { try FileManager.default.removeItem(at: url(id)) }

@@ -13,6 +13,7 @@ public struct ExercisePlan: Codable, Equatable, Identifiable, Sendable {
     public var loadConvention: LoadConvention?
     public var workPolicy: WorkPolicy?
     public var alternatives: [ExerciseAlternative]?
+    public var activity: ActivityPrescription?
 
     public init(id: UUID = UUID(), name: String, sets: Int, reps: Int, weight: Double, restSeconds: Int = 90, comparisonID: String? = nil, loadConvention: LoadConvention? = nil) {
         self.id = id; self.name = name; self.sets = sets; self.reps = reps
@@ -29,6 +30,9 @@ public struct WorkoutPlan: Codable, Equatable, Identifiable, Sendable {
     public var observations: [ObservationRequest]?
     public var observationSchemaVersion: Int?
     public var timeBudget: TimeBudget?
+    public var schemaVersion: Int?
+    public var transitionSeconds: Int?
+    public var practice: Bool?
     public var totalSets: Int { exercises.reduce(0) { $0 + $1.sets } }
 
     public init(id: UUID = UUID(), title: String, unit: WeightUnit = .kg, exercises: [ExercisePlan], observations: [ObservationRequest]? = nil, observationSchemaVersion: Int? = nil) {
@@ -38,39 +42,47 @@ public struct WorkoutPlan: Codable, Equatable, Identifiable, Sendable {
 
     public func validate() throws {
         guard Self.validName(title) else {
-            throw WorkoutError.invalidPlan("Give the workout a short title on a single line.")
+            throw WorkoutError.invalidPlan(L10n.s("Give the workout a short title on a single line."))
         }
         guard (1...50).contains(exercises.count) else {
-            throw WorkoutError.invalidPlan("A workout must contain 1–50 exercises and at most 200 sets.")
+            throw WorkoutError.invalidPlan(L10n.s("A workout must contain 1–50 exercises and at most 200 sets."))
         }
         guard Set(exercises.map(\.id)).count == exercises.count else {
-            throw WorkoutError.invalidPlan("Exercise identifiers must be unique.")
+            throw WorkoutError.invalidPlan(L10n.s("Exercise identifiers must be unique."))
         }
+        guard schemaVersion == nil || schemaVersion == 1 || schemaVersion == 2,
+              transitionSeconds.map({ (0...300).contains($0) }) ?? true else { throw WorkoutError.invalidPlan(L10n.s("Unsupported workout schema or transition time.")) }
         for exercise in exercises {
+            try exercise.activity?.validate()
+            if exercise.activity != nil {
+                guard exercise.sets == 1, exercise.reps == 1, exercise.weight == 0, exercise.comparisonID == nil, exercise.loadConvention == nil, exercise.alternatives?.isEmpty ?? true else {
+                    throw WorkoutError.invalidPlan(L10n.s("Timed activities use one segment, without strength repetitions, load conventions or automatic substitutions."))
+                }
+            }
             try exercise.validateFlexibility()
             guard exercise.comparisonID.map(Self.validIdentifier) ?? true,
                   (exercise.comparisonID == nil) == (exercise.loadConvention == nil),
                   exercise.loadConvention != .bodyweight || exercise.weight == 0 else {
-                throw WorkoutError.invalidPlan("Provide comparisonID and loadConvention together. Use a 1–64 character identifier for the exact variation. Bodyweight targets must have weight 0.")
+                throw WorkoutError.invalidPlan(L10n.s("Provide comparisonID and loadConvention together. Use a 1–64 character identifier for the exact variation. Bodyweight targets must have weight 0."))
             }
             guard Self.validName(exercise.name), (1...20).contains(exercise.sets),
                   (1...200).contains(exercise.reps), exercise.weight.isFinite,
                   (0...1000).contains(exercise.weight), (0...1800).contains(exercise.restSeconds) else {
-                throw WorkoutError.invalidPlan("Use a short exercise name on one line, 1–20 sets, 1–200 reps, weight 0–1000, and rest 0–1800 seconds.")
+                throw WorkoutError.invalidPlan(L10n.s("Use a short exercise name on one line, 1–20 sets, 1–200 reps, weight 0–1000, and rest 0–1800 seconds."))
             }
         }
         let allIDs = exercises.map(\.id) + exercises.flatMap { ($0.alternatives ?? []).map(\.id) }
-        guard Set(allIDs).count == allIDs.count else { throw WorkoutError.invalidPlan("Exercise and alternative IDs must be distinct throughout the workout.") }
-        if exercises.contains(where: { !($0.alternatives ?? []).isEmpty || $0.workPolicy != nil }) {
+        guard Set(allIDs).count == allIDs.count else { throw WorkoutError.invalidPlan(L10n.s("Exercise and alternative IDs must be distinct throughout the workout.")) }
+        if exercises.contains(where: { !($0.alternatives ?? []).isEmpty || $0.workPolicy != nil || $0.activity != nil }) {
             let bytes = try FileRepository<WorkoutPlan>.encoder().encode(self).count
-            guard bytes + totalSets * 255 + 1024 < 60_000 else {
-                throw WorkoutError.invalidPlan("This flexible workout is too large to deliver safely when completed. Split it into smaller routines or remove alternatives.")
+            guard bytes + exercises.reduce(0, { $0 + $1.sets * ($1.kind == .strength ? 255 : 1000) }) + 1024 < 60_000 else {
+                throw WorkoutError.invalidPlan(L10n.s("This flexible workout is too large to deliver safely when completed. Split it into smaller routines or remove alternatives."))
             }
         }
         try timeBudget?.validate()
         try validateObservations()
         guard totalSets <= 200 else {
-            throw WorkoutError.invalidPlan("Keep a workout below 201 sets.")
+            throw WorkoutError.invalidPlan(L10n.s("Keep a workout below 201 sets."))
         }
     }
 
@@ -89,7 +101,7 @@ public enum WorkoutError: LocalizedError, Equatable, Sendable {
     }
 }
 
-public enum SessionPhase: String, Codable, Sendable { case active, resting, completed }
+public enum SessionPhase: String, Codable, Sendable { case active, resting, transitioning, completed }
 
 public struct CompletedSet: Codable, Equatable, Identifiable, Sendable {
     public let id: UUID
@@ -115,6 +127,13 @@ public struct WorkoutSession: Codable, Equatable, Identifiable, Sendable {
     public private(set) var previousConfiguration: ExecutionConfiguration?
     public private(set) var adjustmentEntryCount: Int?
     public private(set) var adjustments: [SessionAdjustment]?
+    public private(set) var activities: [ActivityResult]?
+    public private(set) var activityTimer: ActivityTimer?
+    public private(set) var transitionUntil: Date?
+    public private(set) var transitionRemaining: Double?
+    public private(set) var pendingTransition: Bool?
+    public var feedback: String?
+    public var hydrationDue: Date?
 
 
     public init(id: UUID = UUID(), plan: WorkoutPlan, now: Date = Date()) throws {
@@ -123,7 +142,7 @@ public struct WorkoutSession: Codable, Equatable, Identifiable, Sendable {
     }
 
     public var currentExercise: ExercisePlan? {
-        executionExercises.first { exercise in !execution.omitted.contains(originalID(for: exercise.id)) && entries.filter { $0.exerciseID == exercise.id }.count < exercise.sets }
+        executionExercises.first { exercise in !execution.omitted.contains(originalID(for: exercise.id)) && !(execution.skipped ?? []).contains(originalID(for: exercise.id)) && completedCount(for: exercise) < exercise.sets }
     }
     public var currentSetNumber: Int {
         guard let exercise = currentExercise else { return 0 }
@@ -133,45 +152,53 @@ public struct WorkoutSession: Codable, Equatable, Identifiable, Sendable {
     public var duration: TimeInterval { max(0, (endedAt ?? Date()).timeIntervalSince(startedAt)) }
 
     public mutating func logSet(weight: Double, reps: Int, now: Date = Date(), uptime: TimeInterval = ProcessInfo.processInfo.systemUptime) throws {
-        guard phase == .active, let exercise = currentExercise else {
-            throw WorkoutError.invalidState("Finish or skip your rest before logging another set.")
+        guard phase == .active, let exercise = currentExercise, exercise.kind == .strength else {
+            throw WorkoutError.invalidState(L10n.s("Finish or skip your rest before logging another set."))
         }
-        guard weight.isFinite, (0...1000).contains(weight), (1...200).contains(reps), now >= (entries.last?.completedAt ?? startedAt),
+        guard weight.isFinite, (0...1000).contains(weight), (1...200).contains(reps), now >= latestWorkDate,
               now.timeIntervalSince1970.isFinite, uptime.isFinite, uptime >= 0 else {
-            throw WorkoutError.invalidInput("Use weight 0–1000 and 1–200 repetitions.")
+            throw WorkoutError.invalidInput(L10n.s("Use weight 0–1000 and 1–200 repetitions."))
         }
         if pendingEffort != nil { try answerEffort(nil, now: now) }
-        let recordsTiming = true // New records support pace estimates; legacy timestamps remain untouched.
+        // New records support pace estimates; legacy timestamps remain untouched.
         entries.append(CompletedSet(id: UUID(), exerciseID: exercise.id, setNumber: currentSetNumber,
-                                    weight: weight, reps: reps, completedAt: now, loggedUptime: recordsTiming ? uptime : nil))
+                                    weight: weight, reps: reps, completedAt: now, loggedUptime: uptime))
+        pendingTransition = currentExercise?.id != exercise.id && currentExercise != nil
         if currentExercise == nil { finish(now: now, resolveEffort: false) }
         else if exercise.restSeconds > 0 {
             phase = .resting
             restDuration = Double(exercise.restSeconds)
             restUntil = now.addingTimeInterval(restDuration)
-        }
+        } else { beginTransition(now: now) }
     }
 
     @discardableResult
     public mutating func endRestIfDue(now: Date = Date()) -> Bool {
         guard phase == .resting, let deadline = restUntil, now >= deadline else { return false }
-        skipRest(); return true
+        skipRest(now: now); return true
     }
 
-    public mutating func skipRest() {
+    public mutating func skipRest(now: Date = Date()) {
         guard phase == .resting else { return }
-        phase = .active; restUntil = nil; restDuration = 0
+        phase = .active; restUntil = nil; restDuration = 0; beginTransition(now: now)
     }
 
     public mutating func extendRest(by seconds: TimeInterval = 30) throws {
         guard phase == .resting, let deadline = restUntil, seconds.isFinite, (1...300).contains(seconds),
-              restDuration + seconds <= 3600 else { throw WorkoutError.invalidState("Rest cannot be extended further.") }
+              restDuration + seconds <= 3600 else { throw WorkoutError.invalidState(L10n.s("Rest cannot be extended further.")) }
         restUntil = deadline.addingTimeInterval(seconds); restDuration += seconds
     }
 
     public mutating func undoLastSet() throws {
-        guard phase != .completed, !entries.isEmpty else {
-            throw WorkoutError.invalidState("There is no set to undo in this active workout.")
+        guard phase != .completed, activityTimer == nil else { throw WorkoutError.invalidState(L10n.s("Finish the running activity before undoing.")) }
+        if let last = activities?.last, last.endedAt > (entries.last?.completedAt ?? .distantPast) {
+            activities?.removeLast(); phase = .active; restUntil = nil; restDuration = 0
+            transitionUntil = nil; transitionRemaining = nil; pendingTransition = nil
+            var config = execution; config.order.removeAll { $0 == last.exerciseID }; config.order.insert(last.exerciseID, at: 0); configuration = config
+            return
+        }
+        guard !entries.isEmpty else {
+            throw WorkoutError.invalidState(L10n.s("There is no set to undo in this active workout."))
         }
         let removed = entries.removeLast()
         if configuration != nil {
@@ -179,69 +206,128 @@ public struct WorkoutSession: Codable, Equatable, Identifiable, Sendable {
             config.order.removeAll { $0 == original }; config.order.insert(original, at: 0); configuration = config
         }
         if effortResponse?.setID == removed.id { effortResponse = nil }
+        transitionUntil = nil; transitionRemaining = nil; pendingTransition = nil
         phase = .active; restUntil = nil; restDuration = 0
+    }
+
+    public mutating func startActivity(now: Date = Date()) throws {
+        guard phase == .active, activityTimer == nil, let exercise = currentExercise, exercise.kind != .strength, InputBoundary.validDate(now), now >= latestWorkDate else { throw WorkoutError.invalidState(L10n.s("This activity cannot start now.")) }
+        activityTimer = ActivityTimer(exerciseID: exercise.id, spans: [ActivitySpan(start: now)])
+    }
+    public mutating func setActivityReadings(distance: Double?, speed: Double?, incline: Double?) throws {
+        guard ActivityPrescription.valid(distance, 0...200_000), ActivityPrescription.valid(speed, 0...80), ActivityPrescription.valid(incline, -20...50), activityTimer != nil else { throw WorkoutError.invalidInput(L10n.s("Check the machine readings.")) }
+        activityTimer?.distanceMeters = distance; activityTimer?.speedKph = speed; activityTimer?.inclinePercent = incline
+    }
+    public mutating func pauseActivity(now: Date = Date()) throws { guard activityTimer != nil else { return }; try activityTimer?.pause(at: now) }
+    public mutating func resumeActivity(now: Date = Date()) throws { guard activityTimer != nil else { return }; try activityTimer?.resume(at: now) }
+    public mutating func completeActivity(distanceMeters: Double? = nil, speedKph: Double? = nil, inclinePercent: Double? = nil, source: ValueSource = .user, now: Date = Date()) throws {
+        guard var timer = activityTimer, let exercise = currentExercise, timer.exerciseID == exercise.id else { throw WorkoutError.invalidState(L10n.s("Start the activity before recording it.")) }
+        if !timer.paused { try timer.pause(at: now) }
+        let result = ActivityResult(id: UUID(), exerciseID: exercise.id, spans: timer.spans, endedAt: now, distanceMeters: distanceMeters ?? timer.distanceMeters, speedKph: speedKph ?? timer.speedKph, inclinePercent: inclinePercent ?? timer.inclinePercent, valuesSource: source, completed: true)
+        try result.validate(start: startedAt, end: now)
+        var records = activities ?? []; records.append(result); activities = records; activityTimer = nil
+        if currentExercise == nil { finish(now: now) } else { pendingTransition = true; beginTransition(now: now) }
+    }
+    private mutating func beginTransition(now: Date) {
+        guard pendingTransition == true else { return }; pendingTransition = nil
+        guard let seconds = plan.transitionSeconds, seconds > 0, currentExercise != nil else { return }
+        phase = .transitioning; transitionUntil = now.addingTimeInterval(Double(seconds)); transitionRemaining = nil
+    }
+    public mutating func skipTransition() {
+        guard phase == .transitioning else { return }; phase = .active; transitionUntil = nil; transitionRemaining = nil
+    }
+    public mutating func pauseTransition(now: Date = Date()) {
+        guard phase == .transitioning, let until = transitionUntil else { return }
+        transitionRemaining = max(0, until.timeIntervalSince(now)); transitionUntil = nil
+    }
+    public mutating func resumeTransition(now: Date = Date()) {
+        guard phase == .transitioning, let remaining = transitionRemaining else { return }
+        transitionUntil = now.addingTimeInterval(remaining); transitionRemaining = nil
+    }
+    public mutating func extendTransition(now: Date = Date()) throws {
+        guard phase == .transitioning else { return }
+        if let until = transitionUntil { guard until.timeIntervalSince(now) < 600 else { return }; transitionUntil = max(until, now).addingTimeInterval(30) }
+        if let remaining = transitionRemaining { transitionRemaining = min(600, remaining + 30) }
+    }
+    public mutating func skipExercise(reason: String, now: Date = Date()) throws {
+        guard phase != .completed, activityTimer == nil, let exercise = currentExercise, !reason.isEmpty, reason.count <= 120 else { throw WorkoutError.invalidState(L10n.s("Stop the activity and give a short reason before skipping it.")) }
+        var config = execution; config.skipped = Array(Set((config.skipped ?? []) + [originalID(for: exercise.id)]))
+        try changeExecution(config, detail: L10n.s("Skipped remaining work: \(exercise.name). Reason: \(reason). Completed work preserved; skipped work is not completed."), now: now)
+        if currentExercise == nil { finish(now: now) }
+    }
+    public mutating func chooseNext(_ id: UUID, now: Date = Date()) throws {
+        guard activityTimer == nil, remainingExercises.contains(where: { originalID(for: $0.id) == id }) else { throw WorkoutError.invalidState(L10n.s("Choose a remaining exercise after stopping the activity.")) }
+        var config = execution; config.order.removeAll { $0 == id }; config.order.insert(id, at: 0)
+        try changeExecution(config, detail: L10n.s("Selected next exercise; original order and completed work preserved."), now: now)
     }
 
     public mutating func answerEffort(_ rating: Int?, now: Date = Date()) throws {
         guard let request = pendingEffort, let entry = entries.first(where: { $0.exerciseID == request.exerciseID && $0.setNumber == request.afterSet }),
               rating.map({ (1...10).contains($0) }) ?? true, now >= entry.completedAt, now.timeIntervalSince1970.isFinite else {
-            throw WorkoutError.invalidInput("Choose an effort from 1–10, or skip the pending question.")
+            throw WorkoutError.invalidInput(L10n.s("Choose an effort from 1–10, or skip the pending question."))
         }
         effortResponse = EffortResponse(requestID: request.id, setID: entry.id, rating: rating, recordedAt: now)
     }
 
     private mutating func changeExecution(_ next: ExecutionConfiguration, detail: String, now: Date) throws {
-        guard phase != .completed, (adjustments?.count ?? 0) < 99 else { throw WorkoutError.invalidState("No more changes can be made in this session.") }
+        guard phase != .completed, (adjustments?.count ?? 0) < 99 else { throw WorkoutError.invalidState(L10n.s("No more changes can be made in this session.")) }
         let old = execution
         var candidate = self; candidate.configuration = next
         try candidate.validateExecution()
-        candidate.previousConfiguration = old; candidate.adjustmentEntryCount = entries.count
+        candidate.previousConfiguration = old; candidate.adjustmentEntryCount = loggedWorkCount
         var log = adjustments ?? []; log.append(SessionAdjustment(id: UUID(), date: now, detail: detail)); candidate.adjustments = log
         try candidate.validateDeliveryReserve()
         self = candidate
     }
     public mutating func deferCurrent(now: Date = Date()) throws {
-        guard let current = currentExercise, remainingExercises.count > 1 else { throw WorkoutError.invalidState("No other exercise remains. Return when the machine is available.") }
+        guard activityTimer == nil, let current = currentExercise, remainingExercises.count > 1 else { throw WorkoutError.invalidState(L10n.s("No other exercise remains. Return when the machine is available.")) }
         let id = originalID(for: current.id); var next = execution
         next.order.removeAll { $0 == id }; next.order.append(id)
-        try changeExecution(next, detail: "Deferred \(current.name); completed sets and rest unchanged.", now: now)
+        try changeExecution(next, detail: L10n.s("Deferred \(current.name); completed sets and rest unchanged."), now: now)
     }
-    public mutating func substituteCurrent(with alternativeID: UUID, now: Date = Date()) throws {
-        guard phase != .completed, let current = currentExercise, let original = plan.exercises.first(where: { $0.id == originalID(for: current.id) }),
+    public mutating func substituteCurrent(with alternativeID: UUID, reason: String = "Preference", proposeForFuture: Bool = false, now: Date = Date()) throws {
+        guard activityTimer == nil, phase != .completed, let current = currentExercise, let original = plan.exercises.first(where: { $0.id == originalID(for: current.id) }),
               !entries.contains(where: { originalID(for: $0.exerciseID) == original.id }),
               let alternative = original.alternatives?.first(where: { $0.id == alternativeID }), alternative.unit == plan.unit else {
-            throw WorkoutError.invalidInput("Choose a previously approved alternative with the same units before logging any sets of this exercise.")
+            throw WorkoutError.invalidInput(L10n.s("Choose a previously approved alternative with the same units before logging any sets of this exercise."))
         }
         var next = execution; next.substitutions.removeAll { $0.originalID == original.id }
-        next.substitutions.append(Substitution(originalID: original.id, alternativeID: alternative.id))
-        try changeExecution(next, detail: "Approved substitution: \(original.name) → \(alternative.name); \(alternative.reps) reps at \(Self.number(alternative.weight)) \(alternative.unit.rawValue), \(alternative.restSeconds)s prescribed rest. Original observation requests are not transferred to this variation.", now: now)
+        next.substitutions.append(Substitution(originalID: original.id, alternativeID: alternative.id, proposeForFuture: proposeForFuture, reason: String(reason.prefix(120))))
+        try changeExecution(next, detail: L10n.s("\(proposeForFuture ? L10n.s("Proposed also for future review") : L10n.s("Today only")). Reason: \((reason == "Preference" ? L10n.s("Preference") : String(reason.prefix(120)))). Approved substitution: \(original.name) → \(alternative.name); \(alternative.reps) reps at \(Self.number(alternative.weight)) \(alternative.unit.rawValue), \(alternative.restSeconds)s prescribed rest. Original observation requests are not transferred to this variation."), now: now)
     }
     public mutating func omitOptional(_ ids: [UUID], now: Date = Date()) throws {
         let approved = Set(WorkoutPace.optionalCandidates(self).map { originalID(for: $0.id) })
         guard !ids.isEmpty, Set(ids).isSubset(of: approved), currentExercise.map({ !ids.contains(originalID(for: $0.id)) }) ?? false else {
-            throw WorkoutError.invalidInput("Only untouched, approved optional work after the current exercise can be removed.")
+            throw WorkoutError.invalidInput(L10n.s("Only untouched, approved optional work after the current exercise can be removed."))
         }
         var next = execution; next.omitted = Array(Set(next.omitted + ids))
         let names = plan.exercises.filter { ids.contains($0.id) }.map(\.name).joined(separator: ", ")
-        try changeExecution(next, detail: "Omitted approved optional work: \(names). Loads, repetitions, completed sets and required rest unchanged.", now: now)
+        try changeExecution(next, detail: L10n.s("Omitted approved optional work: \(names). Loads, repetitions, completed sets and required rest unchanged."), now: now)
     }
     public mutating func undoAdjustment(now: Date = Date()) throws {
-        guard let previousConfiguration, adjustmentEntryCount == entries.count, phase != .completed else {
-            throw WorkoutError.invalidState("This change can be reversed before another set is logged. Completed sets are never removed by reversing a plan change.")
+        guard let previousConfiguration, adjustmentEntryCount == loggedWorkCount, phase != .completed else {
+            throw WorkoutError.invalidState(L10n.s("This change can be reversed before another set is logged. Completed sets are never removed by reversing a plan change."))
         }
         var candidate = self; candidate.configuration = previousConfiguration; try candidate.validateExecution()
         candidate.previousConfiguration = nil; candidate.adjustmentEntryCount = nil
-        var log = adjustments ?? []; log.append(SessionAdjustment(id: UUID(), date: now, detail: "Reversed the last workout change before logging another set.")); candidate.adjustments = log
+        var log = adjustments ?? []; log.append(SessionAdjustment(id: UUID(), date: now, detail: L10n.s("Reversed the last workout change before logging another set."))); candidate.adjustments = log
         try candidate.validateDeliveryReserve(); self = candidate
     }
 
     public mutating func finish(now: Date = Date(), resolveEffort: Bool = true) {
         guard phase != .completed else { return }
+        if var timer = activityTimer {
+            let stop = max(now, timer.spans.last?.start ?? startedAt)
+            if !timer.paused { try? timer.pause(at: stop) }
+            var records = activities ?? []
+            records.append(ActivityResult(id: UUID(), exerciseID: timer.exerciseID, spans: timer.spans, endedAt: stop, distanceMeters: timer.distanceMeters, speedKph: timer.speedKph, inclinePercent: timer.inclinePercent, valuesSource: .machine, completed: false))
+            activities = records; activityTimer = nil
+        }
         if resolveEffort, let request = pendingEffort, let entry = entries.last(where: { $0.exerciseID == request.exerciseID }) {
             effortResponse = EffortResponse(requestID: request.id, setID: entry.id, rating: nil, recordedAt: max(now, entry.completedAt))
         }
-        phase = .completed; endedAt = max(now, entries.last?.completedAt ?? startedAt, startedAt)
-        restUntil = nil; restDuration = 0
+        phase = .completed; endedAt = max(now, latestWorkDate, startedAt); hydrationDue = nil
+        restUntil = nil; restDuration = 0; transitionUntil = nil; transitionRemaining = nil; pendingTransition = nil
     }
 
     public func validateCompleted() throws {
@@ -251,20 +337,25 @@ public struct WorkoutSession: Codable, Equatable, Identifiable, Sendable {
         guard isReadyForDelivery, let end = endedAt, end >= startedAt,
               InputBoundary.validDate(startedAt), InputBoundary.validDate(end),
               entries.count <= plan.totalSets, Set(entries.map(\.id)).count == entries.count else {
-            throw WorkoutError.invalidInput("The received workout is incomplete or invalid.")
+            throw WorkoutError.invalidInput(L10n.s("The received workout is incomplete or invalid."))
+        }
+        guard activityTimer == nil, (activities?.count ?? 0) <= plan.exercises.count, Set((activities ?? []).map(\.id)).count == (activities?.count ?? 0), Set((activities ?? []).map(\.exerciseID)).count == (activities?.count ?? 0) else { throw WorkoutError.invalidInput(L10n.s("Duplicate or unfinished activity.")) }
+        for activity in activities ?? [] {
+            guard executionExercises.contains(where: { $0.id == activity.exerciseID && $0.kind != .strength }) else { throw WorkoutError.invalidInput(L10n.s("Activity does not match its prescription.")) }
+            try activity.validate(start: startedAt, end: end)
         }
         var seen = Set<String>()
         var previousDate = startedAt
         var counts: [UUID: Int] = [:]
         for entry in entries {
             guard let exercise = executionExercises.first(where: { $0.id == entry.exerciseID }),
-                  (1...exercise.sets).contains(entry.setNumber), (1...200).contains(entry.reps),
+                  exercise.kind == .strength, (1...exercise.sets).contains(entry.setNumber), (1...200).contains(entry.reps),
                   entry.weight.isFinite, (0...1000).contains(entry.weight),
                   entry.completedAt >= previousDate, entry.completedAt <= end,
                   entry.setNumber == (counts[entry.exerciseID] ?? 0) + 1,
                   entry.loggedUptime.map({ $0.isFinite && $0 >= 0 }) ?? true,
                   seen.insert("\(entry.exerciseID)-\(entry.setNumber)").inserted else {
-                throw WorkoutError.invalidInput("A received set has invalid or duplicate values.")
+                throw WorkoutError.invalidInput(L10n.s("A received set has invalid or duplicate values."))
             }
             previousDate = entry.completedAt
             counts[entry.exerciseID] = entry.setNumber
@@ -273,36 +364,45 @@ public struct WorkoutSession: Codable, Equatable, Identifiable, Sendable {
 
     public func report() -> String {
         let date = ISO8601DateFormatter().string(from: startedAt)
-        var lines = ["WORKOUT LOG", "Session ID: \(id.uuidString)", "Date: \(date)",
-                     "Workout: \(plan.title)", "Duration: \(Int(duration / 60)) min",
-                     "Completed: \(entries.count) / \(plan.totalSets) sets", "Units: \(plan.unit.rawValue)", ""]
+        var lines = [L10n.s("WORKOUT LOG"), L10n.s("Session ID: \(id.uuidString)"), L10n.s("Date: \(date)"),
+                     L10n.s("Workout: \(plan.title)"), L10n.s("Duration: \(Int(duration / 60)) min"),
+                     L10n.s("Completed: \(loggedWorkCount) / \(plan.totalSets) sets / segments"), L10n.s("Units: \(plan.unit.rawValue)"), ""]
+        if plan.practice == true { lines.append(L10n.s("PRACTICE SESSION — excluded from weekly goals; not evidence of training progression.")) }
         for exercise in executionExercises {
             lines.append(exercise.name)
-            lines.append("  Load convention: \(exercise.loadConvention?.label ?? "unspecified; cross-workout comparison unavailable")")
-            lines.append("  Variation ID: \(exercise.comparisonID ?? "unspecified")")
+            if let activity = exercise.activity {
+                lines.append(L10n.s("  Prescribed: \(activity.summary)"))
+                if let result = activities?.first(where: { $0.exerciseID == exercise.id }) { lines.append(L10n.s("  Recorded: \(result.summary(unit: activity.distanceUnit))")) }
+                else { lines.append(L10n.s("  Not completed; results unavailable")) }
+                continue
+            }
+            if (execution.skipped ?? []).contains(originalID(for: exercise.id)) { lines.append(L10n.s("  Remaining work skipped; not completed")) }
+            lines.append(L10n.s("  Prescribed: \(exercise.prescription(unit: plan.unit))"))
+            lines.append(L10n.s("  Load convention: \(exercise.loadConvention?.label ?? L10n.s("unspecified; cross-workout comparison unavailable"))"))
+            lines.append(L10n.s("  Variation ID: \(exercise.comparisonID ?? L10n.s("unspecified"))"))
             let logged = entries.filter { $0.exerciseID == exercise.id }
-            if logged.isEmpty { lines.append("  Not completed") }
+            if logged.isEmpty { lines.append(L10n.s("  Not completed")) }
             for entry in logged {
-                lines.append("  Set \(entry.setNumber) (user-confirmed): \(Self.number(entry.weight)) \(plan.unit.rawValue) × \(entry.reps) reps")
+                lines.append(L10n.s("  Set \(entry.setNumber) (user-confirmed): \(Self.number(entry.weight)) \(plan.unit.rawValue) × \(entry.reps) reps"))
             }
         }
         if let adjustments, !adjustments.isEmpty {
-            lines.append("\nEXPLICIT WORKOUT CHANGES (original prescription preserved)")
+            lines.append(L10n.s("\nEXPLICIT WORKOUT CHANGES (original prescription preserved)"))
             for change in adjustments { lines.append(change.detail) }
-            for original in plan.exercises { lines.append("Original: \(original.name), \(original.sets) × \(original.reps), \(Self.number(original.weight)) \(plan.unit.rawValue), rest \(original.restSeconds)s") }
+            for original in plan.exercises { lines.append(L10n.s("Original: \(original.name) · \(original.prescription(unit: plan.unit))")) }
         }
         if !observationEvidence.isEmpty {
-            lines.append("\nCOACH OBSERVATIONS")
+            lines.append(L10n.s("\nCOACH OBSERVATIONS"))
             for evidence in observationEvidence {
-                lines.append("[\(evidence.requestID)] \(evidence.title) · Set ID: \(evidence.setID?.uuidString ?? "not logged")\n\(evidence.detail)")
+                lines.append(L10n.s("[\(evidence.requestID)] \(evidence.title) · Set ID: \(evidence.setID?.uuidString ?? L10n.s("not logged"))\n\(evidence.detail)"))
             }
         }
-        lines.append("\nPlease log these actual results and give descriptive feedback. Do not treat uncompleted sets as completed. Compare across workouts only when variation IDs, units and load conventions match; otherwise explain insufficient data. Log-tap intervals include exercise time and do not measure actual rest. No set-start/end or motion measurements were collected. Do not infer causation, injury risk or medical readiness. Propose any next plan for my review; never assume it has been accepted.")
+        lines.append(L10n.s("\nPlease log these actual results and give descriptive feedback. Do not treat uncompleted sets as completed. Compare across workouts only when variation IDs, units and load conventions match; otherwise explain insufficient data. Log-tap intervals include exercise time and do not measure actual rest. Strength sets have no physical start/end or motion measurements. Timed activities report explicit Start/Pause/Resume/Done events, not sensor measurements. Do not infer causation, injury risk or medical readiness. Propose any next plan for my review; never assume it has been accepted."))
         return lines.joined(separator: "\n")
     }
 
     public static func number(_ value: Double) -> String {
-        value.formatted(.number.precision(.fractionLength(0...2)))
+        value.formatted(.number.precision(.fractionLength(0...2)).locale(Locale(identifier: L10n.language)))
     }
 }
 
@@ -314,12 +414,19 @@ public struct TrainingReview: Codable, Equatable, Sendable {
 
 public enum ConnectionMode: String, Codable, CaseIterable, Sendable {
     case existingChat, shortcut
-    public var title: String { self == .existingChat ? "My existing chat" : "Review Shortcut" }
+    public var title: String { self == .existingChat ? L10n.s("My existing chat") : L10n.s("Review Shortcut") }
 }
 
 public struct PhoneState: Codable, Equatable, Sendable {
+    public var storageVersion: Int? = 2
     public var plan: WorkoutPlan?
     public var sessions: [WorkoutSession] = []
+    public var comfort: ComfortPreferences?
+    public var weeklyHabit: WeeklyHabit?
+    public var onboardingSteps: [String]?
+    public var equipmentContext: String?
+    public var contextProfileApproved: Bool?
+    public var contextHistoryApproved: Bool?
     public var profile = ""
     public var mode: ConnectionMode = .existingChat
     public var review: TrainingReview?
@@ -346,7 +453,7 @@ public struct PhoneState: Codable, Equatable, Sendable {
         try session.validateCompleted()
         if let original = sessions.first(where: { $0.id == session.id }) {
             guard original == session else {
-                throw WorkoutError.invalidInput("A different workout already has this ID. The saved original was preserved; the conflicting delivery was not acknowledged.")
+                throw WorkoutError.invalidInput(L10n.s("A different workout already has this ID. The saved original was preserved; the conflicting delivery was not acknowledged."))
             }
             return
         }
@@ -356,10 +463,12 @@ public struct PhoneState: Codable, Equatable, Sendable {
 }
 
 public struct WatchState: Codable, Equatable, Sendable {
+    public var storageVersion: Int? = 2
     public var plan: WorkoutPlan?
     public var session: WorkoutSession?
     public var outbox: [WorkoutSession] = []
     public var recent: [WorkoutSession] = []
+    public var comfort: ComfortPreferences?
     public var haptics = true
     public var doubleTapEnabled: Bool?
     public var motionOptIn: Bool?
@@ -382,18 +491,21 @@ public struct PhoneSnapshot: Codable, Equatable, Sendable {
     public let plan: WorkoutPlan?
     public let acknowledged: [UUID]
     public let issuedAt: Date
+    public let comfort: ComfortPreferences?
     public let doubleTapEnabled: Bool?
     public let motionOptIn: Bool?
     public let motionExercise: MotionExercise?
-    public init(plan: WorkoutPlan?, acknowledged: [UUID], issuedAt: Date = Date(), doubleTapEnabled: Bool? = nil, motionOptIn: Bool? = nil, motionExercise: MotionExercise? = nil) {
+    public init(plan: WorkoutPlan?, acknowledged: [UUID], issuedAt: Date = Date(), doubleTapEnabled: Bool? = nil, motionOptIn: Bool? = nil, motionExercise: MotionExercise? = nil, comfort: ComfortPreferences? = nil) {
+        self.comfort = comfort
         self.motionExercise = motionExercise
         self.motionOptIn = motionOptIn
         self.doubleTapEnabled = doubleTapEnabled
         self.plan = plan; self.acknowledged = acknowledged; self.issuedAt = issuedAt
     }
-    private enum CodingKeys: String, CodingKey { case plan, acknowledged, issuedAt, doubleTapEnabled, motionOptIn, motionExercise }
+    private enum CodingKeys: String, CodingKey { case plan, acknowledged, issuedAt, doubleTapEnabled, motionOptIn, motionExercise, comfort }
     public init(from decoder: Decoder) throws {
         let fields = try decoder.container(keyedBy: CodingKeys.self)
+        comfort = try fields.decodeIfPresent(ComfortPreferences.self, forKey: .comfort)
         motionOptIn = try fields.decodeIfPresent(Bool.self, forKey: .motionOptIn)
         motionExercise = try fields.decodeIfPresent(MotionExercise.self, forKey: .motionExercise)
         doubleTapEnabled = try fields.decodeIfPresent(Bool.self, forKey: .doubleTapEnabled)

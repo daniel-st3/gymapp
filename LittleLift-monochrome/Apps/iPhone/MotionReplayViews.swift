@@ -5,33 +5,33 @@ struct MotionLibraryView: View {
     var body: some View {
         LiftList {
             Section {
-                Toggle("Enable on Watch", isOn: Binding(get: { store.state.motionOptIn == true }, set: { value in do { try store.setMotionOptIn(value) } catch { store.error = error.localizedDescription } }))
-                Picker("Exercise", selection: Binding(get: { store.state.motionExercise ?? .dumbbellCurl }, set: { value in do { try store.setMotionExercise(value) } catch { store.error = error.localizedDescription } })) {
-                    ForEach(MotionExercise.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+                Toggle(L10n.s("Enable on Watch"), isOn: Binding(get: { store.state.motionOptIn == true }, set: { value in do { try store.setMotionOptIn(value) } catch { store.error = error.localizedDescription } }))
+                Picker(L10n.s("Exercise"), selection: Binding(get: { store.state.motionExercise ?? .dumbbellCurl }, set: { value in do { try store.setMotionExercise(value) } catch { store.error = error.localizedDescription } })) {
+                    ForEach(MotionExercise.allCases, id: \.self) { Text($0.label).tag($0) }
                 }
-            } header: { Text("Experimental") } footer: {
-                Text("On Watch: … → Motion test → Start. Allow Apple’s permission request, then tap Stop. The saved replay transfers to iPhone automatically; Send on Watch retries if needed. A test lasts up to 3 minutes.")
+            } header: { Text(L10n.s("Experimental")) } footer: {
+                Text(L10n.s("On Watch: … → Motion test → Start. Allow Apple’s permission request, then tap Stop. The saved replay transfers to iPhone automatically; Send on Watch retries if needed. A test lasts up to 3 minutes."))
                     .font(.footnote)
             }
             Section {
-                DisclosureGroup("Before your first test") {
-                    Text("If Start reports missing permission: on Watch, open Settings → Health → Apps → Little Lift and allow Workouts. Only you can grant this Apple permission.")
-                    Text("Use only when no other workout app is recording. A temporary HealthKit workout provides background runtime and may affect system activity measurements. Little Lift does not save a Health workout or read Health history.")
-                    Text("Wrist rotation cannot measure weight or certify technique. Repetition counts are estimates you can edit and confirm. Wrist-down continuity, battery use and counting accuracy are not yet validated.")
-                    Text("Processing stays on your devices. Raw recordings are excluded from cloud backup. Ordinary workout logging does not use this experiment.")
+                DisclosureGroup(L10n.s("Before your first test")) {
+                    Text(L10n.s("If Start reports missing permission: on Watch, open Settings → Health → Apps → Little Lift and allow Workouts. Only you can grant this Apple permission."))
+                    Text(L10n.s("Use only when no other workout app is recording. A temporary HealthKit workout provides background runtime and may affect system activity measurements. Little Lift does not save a Health workout or read Health history."))
+                    Text(L10n.s("Wrist rotation cannot measure weight or certify technique. Repetition counts are estimates you can edit and confirm. Wrist-down continuity, battery use and counting accuracy are not yet validated."))
+                    Text(L10n.s("Processing stays on your devices. Raw recordings are excluded from cloud backup. Ordinary workout logging does not use this experiment."))
                 }
-                Button("Refresh replays") { store.loadMotion() }
+                Button(L10n.s("Refresh replays")) { store.loadMotion() }
             }
             ForEach(store.motionRecordings) { recording in
                 NavigationLink { MotionReplayDetailView(store: store, initial: recording) } label: {
                     VStack(alignment: .leading) {
                         Text(recording.exercise)
-                        Text("\(Int(recording.duration))s · \(recording.status) · \(recording.confirmedReps.map { "\($0) confirmed reps" } ?? "unconfirmed")").font(.caption).foregroundStyle(.secondary)
+                        Text(L10n.s("\(Int(recording.duration))s · \(recording.status) · \(recording.confirmedReps.map { "\($0) confirmed reps" } ?? "unconfirmed")")).font(.caption).foregroundStyle(.secondary)
                     }
                 }
             }
-            if store.motionRecordings.isEmpty { Text("Stopped recordings sent from Watch appear here. The original stays on Watch until you delete it.").foregroundStyle(.secondary) }
-        }.scrollContentBackground(.hidden).background(.black).navigationTitle("Motion test").navigationBarTitleDisplayMode(.inline).onAppear { store.loadMotion() }
+            if store.motionRecordings.isEmpty { Text(L10n.s("Stopped recordings sent from Watch appear here. The original stays on Watch until you delete it.")).foregroundStyle(.secondary) }
+        }.scrollContentBackground(.hidden).background(.black).navigationTitle(L10n.s("Motion test")).navigationBarTitleDisplayMode(.inline).onAppear { store.loadMotion() }
     }
 }
 struct MotionReplayDetailView: View {
@@ -48,36 +48,36 @@ struct MotionReplayDetailView: View {
     }
     var body: some View {
         LiftList {
-            Section("Experimental timing replay") {
+            Section(L10n.s("Experimental timing replay")) {
                 Text(recording.exercise)
                 MotionTimeline(recording: recording, selectedTime: selectedTime).frame(height: 170)
-                    .accessibilityLabel("Wrist rotation timeline, \(recording.suggestedMarkers.count) suggested markers, \(recording.gaps.count) sample gaps")
-                Slider(value: $selectedTime, in: 0...max(1, recording.duration)).accessibilityLabel("Replay time")
-                Text("\(selectedTime.formatted(.number.precision(.fractionLength(1)))) / \(recording.duration.formatted(.number.precision(.fractionLength(1)))) seconds").monospacedDigit()
-                Text("Solid trace: measured wrist rotation magnitude. Thin markers: proposed repetitions. Gaps: missing sensor samples. No body-pose or technique reconstruction.").font(.caption).foregroundStyle(.secondary)
+                    .accessibilityLabel(L10n.s("Wrist rotation timeline, \(recording.suggestedMarkers.count) suggested markers, \(recording.gaps.count) sample gaps"))
+                Slider(value: $selectedTime, in: 0...max(1, recording.duration)).accessibilityLabel(L10n.s("Replay time"))
+                Text(L10n.s("\(selectedTime.formatted(.number.precision(.fractionLength(1)))) / \(recording.duration.formatted(.number.precision(.fractionLength(1)))) seconds")).monospacedDigit()
+                Text(L10n.s("Solid trace: measured wrist rotation magnitude. Thin markers: proposed repetitions. Gaps: missing sensor samples. No body-pose or technique reconstruction.")).font(.caption).foregroundStyle(.secondary)
             }
-            Section("Estimates — confirm separately") {
-                Text("\(recording.suggestedMarkers.count) suggested repetitions · \(recording.suggestedSets.count) possible sets")
-                Text("\(recording.samples.count) samples · \(recording.gaps.count) gaps over 160 ms · status: \(recording.status)").font(.caption)
-                Stepper("Confirmed repetitions: \(count)", value: $count, in: 0...200)
-                Button(confirmed ? "Confirmation saved" : "Save my confirmed count") {
+            Section(L10n.s("Estimates — confirm separately")) {
+                Text(L10n.s("\(recording.suggestedMarkers.count) suggested repetitions · \(recording.suggestedSets.count) possible sets"))
+                Text(L10n.s("\(recording.samples.count) samples · \(recording.gaps.count) gaps over 160 ms · status: \(recording.status)")).font(.caption)
+                Stepper(L10n.s("Confirmed repetitions: \(count)"), value: $count, in: 0...200)
+                Button(confirmed ? L10n.s("Confirmation saved") : L10n.s("Save my confirmed count")) {
                     do { try recording.confirm(reps: count); try store.saveMotion(recording); confirmed = true }
                     catch { store.error = error.localizedDescription }
                 }
-                Text("This does not alter a logged set or its load. Raw samples and suggested markers stay separate from your confirmation.").font(.caption).foregroundStyle(.secondary)
+                Text(L10n.s("This does not alter a logged set or its load. Raw samples and suggested markers stay separate from your confirmation.")).font(.caption).foregroundStyle(.secondary)
             }
             if let start = recording.batteryStart, let end = recording.batteryEnd {
-                Section("Device-reported battery") {
-                    Text("\(Int(start * 100))% → \(Int(end * 100))%")
-                    Text("A short run and coarse battery readings do not establish battery cost.").font(.caption).foregroundStyle(.secondary)
+                Section(L10n.s("Device-reported battery")) {
+                    Text(L10n.s("\(Int(start * 100))% → \(Int(end * 100))%"))
+                    Text(L10n.s("A short run and coarse battery readings do not establish battery cost.")).font(.caption).foregroundStyle(.secondary)
                 }
             }
-            Section { Button("Delete this local recording", role: .destructive) { deleting = true } }
-        }.scrollContentBackground(.hidden).background(.black).navigationTitle("Timing replay").navigationBarTitleDisplayMode(.inline)
+            Section { Button(L10n.s("Delete this local recording"), role: .destructive) { deleting = true } }
+        }.scrollContentBackground(.hidden).background(.black).navigationTitle(L10n.s("Timing replay")).navigationBarTitleDisplayMode(.inline)
             .onChange(of: count) { confirmed = false }
-            .confirmationDialog("Delete this iPhone copy?", isPresented: $deleting) {
-                Button("Delete recording", role: .destructive) { do { try store.deleteMotion(recording.id); dismiss() } catch { store.error = error.localizedDescription } }
-            } message: { Text("This deletes the local raw samples and confirmation. A Watch copy is retained separately.") }
+            .confirmationDialog(L10n.s("Delete this iPhone copy?"), isPresented: $deleting) {
+                Button(L10n.s("Delete recording"), role: .destructive) { do { try store.deleteMotion(recording.id); dismiss() } catch { store.error = error.localizedDescription } }
+            } message: { Text(L10n.s("This deletes the local raw samples and confirmation. A Watch copy is retained separately.")) }
     }
 }
 private struct MotionTimeline: View {

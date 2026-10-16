@@ -1,5 +1,7 @@
 # Current delivery checklist
 
+**Build 11:** [F01–F27](feedback-27.md) is the current per-requirement status, including mixed cardio, official workout runtime, language, context and weekly goals. The current verification is **112 Swift tests / 15 suites + 10 launcher tests**, both simulator builds and signed device products. Device installation remains blocked by the locked phone/unavailable Watch tunnel. The sections below preserve the earlier delivery history; they are not fresh Build 11 evidence.
+
 Build 10 adds local Progress and security hardening; see [its checklist](progress-10-checklist.md) and [security boundaries](../SECURITY.md). Existing feature limitations below still apply.
 
 Latest interface: **Build 9** — see [redesign checklist](design-9-checklist.md) and [verification](verification.md). Platform/experimental limits below remain explicit.

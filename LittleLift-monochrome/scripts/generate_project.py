@@ -62,11 +62,11 @@ def main():
     widget_source = add('launcher:sources', 'PBXSourcesBuildPhase', buildActionMask=2147483647, files=[widget_build], runOnlyForDeploymentPostprocessing=0)
     widget_frameworks = add('launcher:frameworks', 'PBXFrameworksBuildPhase', buildActionMask=2147483647, files=[], runOnlyForDeploymentPostprocessing=0)
     widget_privacy = add('launcher:privacy', 'PBXBuildFile', fileRef=file_ref('Apps/Shared/PrivacyInfo.xcprivacy', 'text.xml'))
-    widget_resources = add('launcher:resources', 'PBXResourcesBuildPhase', buildActionMask=2147483647, files=[widget_privacy], runOnlyForDeploymentPostprocessing=0)
+    widget_resources = add('launcher:resources', 'PBXResourcesBuildPhase', buildActionMask=2147483647, files=[widget_privacy, add('launcher:strings', 'PBXBuildFile', fileRef=file_ref('Apps/Shared/Localizable.xcstrings', 'text.json.xcstrings'))], runOnlyForDeploymentPostprocessing=0)
     widget_product = add('launcher:product', 'PBXFileReference', explicitFileType='wrapper.app-extension', includeInIndex=0, path='LittleLiftLauncher.appex', sourceTree='BUILT_PRODUCTS_DIR')
     products.append(widget_product)
     groups.append(add('launcher:group', 'PBXGroup', name='Watch launcher', children=[widget_ref, file_ref('Config/WatchLauncher-Info.plist', 'text.plist.xml')], sourceTree='<group>'))
-    widget_settings = dict(PRODUCT_NAME='LittleLiftLauncher', PRODUCT_BUNDLE_IDENTIFIER='$(LITTLELIFT_WATCH_BUNDLE_ID).launcher', SDKROOT='watchos', SUPPORTED_PLATFORMS='watchos watchsimulator', TARGETED_DEVICE_FAMILY='4', INFOPLIST_FILE='Config/WatchLauncher-Info.plist', GENERATE_INFOPLIST_FILE='NO', CODE_SIGN_STYLE='Automatic', SWIFT_VERSION='5.0', SWIFT_STRICT_CONCURRENCY='targeted', MARKETING_VERSION='0.1.0', CURRENT_PROJECT_VERSION='10', WATCHOS_DEPLOYMENT_TARGET='11.0', SKIP_INSTALL='YES', APPLICATION_EXTENSION_API_ONLY='YES')
+    widget_settings = dict(PRODUCT_NAME='LittleLiftLauncher', PRODUCT_BUNDLE_IDENTIFIER='$(LITTLELIFT_WATCH_BUNDLE_ID).launcher', SDKROOT='watchos', SUPPORTED_PLATFORMS='watchos watchsimulator', TARGETED_DEVICE_FAMILY='4', INFOPLIST_FILE='Config/WatchLauncher-Info.plist', GENERATE_INFOPLIST_FILE='NO', CODE_SIGN_STYLE='Automatic', SWIFT_VERSION='5.0', SWIFT_STRICT_CONCURRENCY='targeted', MARKETING_VERSION='0.1.0', CURRENT_PROJECT_VERSION='11', WATCHOS_DEPLOYMENT_TARGET='11.0', SKIP_INSTALL='YES', APPLICATION_EXTENSION_API_ONLY='YES')
     OBJECTS[widget] = dict(isa='PBXNativeTarget', buildConfigurationList=config_list('launcher', widget_settings), buildPhases=[widget_source, widget_frameworks, widget_resources], buildRules=[], dependencies=[], name='LittleLiftLauncher', productName='LittleLiftLauncher', productReference=widget_product, productType='com.apple.product-type.app-extension')
     target_ids.append(widget)
     for label, target, folder, name, bundle, sdk, family in [
@@ -89,17 +89,19 @@ def main():
         asset_build = add(label + ':assets', 'PBXBuildFile', fileRef=asset_ref)
         privacy_ref = file_ref('Apps/Shared/PrivacyInfo.xcprivacy', 'text.xml')
         privacy_build = add(label + ':privacy', 'PBXBuildFile', fileRef=privacy_ref)
-        resources = add(label + ':resources', 'PBXResourcesBuildPhase', buildActionMask=2147483647, files=[asset_build, privacy_build], runOnlyForDeploymentPostprocessing=0)
+        resources = add(label + ':resources', 'PBXResourcesBuildPhase', buildActionMask=2147483647, files=[asset_build, privacy_build, add(label + ':strings', 'PBXBuildFile', fileRef=file_ref('Apps/Shared/Localizable.xcstrings', 'text.json.xcstrings'))], runOnlyForDeploymentPostprocessing=0)
         product = add(label + ':product', 'PBXFileReference', explicitFileType='wrapper.application', includeInIndex=0, path=name + '.app', sourceTree='BUILT_PRODUCTS_DIR')
         products.append(product)
         settings = dict(PRODUCT_NAME=name, PRODUCT_BUNDLE_IDENTIFIER=bundle, SDKROOT=sdk,
                         SUPPORTED_PLATFORMS='iphoneos iphonesimulator' if label == 'phone' else 'watchos watchsimulator',
                         TARGETED_DEVICE_FAMILY=family, INFOPLIST_FILE=f'Config/{folder}-Info.plist',
                         GENERATE_INFOPLIST_FILE='NO', CODE_SIGN_STYLE='Automatic', SWIFT_VERSION='5.0',
-                        SWIFT_STRICT_CONCURRENCY='targeted', MARKETING_VERSION='0.1.0', CURRENT_PROJECT_VERSION='10',
+                        SWIFT_STRICT_CONCURRENCY='targeted', MARKETING_VERSION='0.1.0', CURRENT_PROJECT_VERSION='11',
                         ASSETCATALOG_COMPILER_APPICON_NAME='AppIcon', ENABLE_PREVIEWS='YES',
                         SUPPORTS_MACCATALYST='NO', SKIP_INSTALL='NO' if label == 'phone' else 'YES')
         settings['IPHONEOS_DEPLOYMENT_TARGET' if label == 'phone' else 'WATCHOS_DEPLOYMENT_TARGET'] = '18.0' if label == 'phone' else '11.0'
+        if label == 'watch':
+            OBJECTS[resources]['files'].append(add('watch:permission-strings', 'PBXBuildFile', fileRef=file_ref('Apps/Watch/InfoPlist.xcstrings', 'text.json.xcstrings')))
         phases = [source_phase, frameworks, resources]
         dependencies = []
         if label == 'phone':
@@ -135,7 +137,7 @@ def main():
                             CLANG_ANALYZER_NONNULL='YES', ENABLE_USER_SCRIPT_SANDBOXING='YES')
     OBJECTS[project] = dict(isa='PBXProject', attributes={'BuildIndependentTargetsInParallel': 'YES', 'LastUpgradeCheck': '1600'},
         buildConfigurationList=config_list('project', project_settings), compatibilityVersion='Xcode 15.0', developmentRegion='en',
-        hasScannedForEncodings=0, knownRegions=['en', 'Base'], mainGroup=main_group, productRefGroup=oid('products'),
+        hasScannedForEncodings=0, knownRegions=['en', 'es', 'Base'], mainGroup=main_group, productRefGroup=oid('products'),
         projectDirPath='', projectRoot='', targets=target_ids)
     directory = ROOT / 'LittleLift.xcodeproj'
     directory.mkdir(exist_ok=True)

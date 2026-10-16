@@ -40,7 +40,10 @@ struct WatchRootView: View {
             Group {
                 if let session = store.state.session {
                     switch session.phase {
-                    case .active: SetView(store: store, session: session)
+                    case .active:
+                        if let exercise = session.currentExercise, exercise.kind != .strength { TimedActivityView(store: store, session: session, exercise: exercise) }
+                        else { SetView(store: store, session: session) }
+                    case .transitioning: TransitionView(store: store, session: session)
                     case .resting: RestView(store: store, session: session)
                     case .completed: SummaryView(store: store, session: session)
                     }
@@ -53,16 +56,22 @@ struct WatchRootView: View {
                         Image(systemName: "ellipsis").foregroundStyle(.primary)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("Workout options")
+                    .accessibilityLabel(L10n.s("Workout options"))
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    if let session = store.state.session, session.phase != .completed {
+                        Button { store.presentedSheet = .adjust } label: { Image(systemName: "arrow.triangle.branch") }.buttonStyle(.plain).accessibilityLabel(L10n.s("Change exercise"))
+                    }
                 }
             }
             .sheet(item: $store.presentedSheet) { sheet in
                 switch sheet {
                 case .options: WatchOptionsView(store: store)
+                case .adjust: NavigationStack { AdaptiveWorkoutView(store: store).toolbar { ToolbarItem(placement: .cancellationAction) { Button(L10n.s("Done")) { store.presentedSheet = nil } } } }
                 case .motion:
                     NavigationStack {
                         MotionCaptureView(store: store)
-                            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Done") { store.presentedSheet = nil } } }
+                            .toolbar { ToolbarItem(placement: .cancellationAction) { Button(L10n.s("Done")) { store.presentedSheet = nil } } }
                     }
                 case .effort:
                     if let session = store.state.session, let request = session.pendingEffort {
@@ -70,11 +79,11 @@ struct WatchRootView: View {
                     }
                 }
             }
-            .alert("Couldn’t save", isPresented: Binding(get: { store.error != nil }, set: { if !$0 { store.error = nil } })) {
-                Button("OK") { store.error = nil }
+            .alert(L10n.s("Couldn’t save"), isPresented: Binding(get: { store.error != nil }, set: { if !$0 { store.error = nil } })) {
+                Button(L10n.s("OK")) { store.error = nil }
             } message: { Text(store.error ?? "") }
         }
-        .onChange(of: scenePhase) { _, phase in if phase == .active { store.foreground() } }
+        .onChange(of: scenePhase) { _, phase in if phase != .active { RhythmGuide.shared.stop() }; WorkoutRuntime.shared.scene(String(describing: phase)); if phase == .active { store.foreground() } }
         .onAppear { store.foreground() }
         .onOpenURL { url in
             if url.scheme == "littlelift", url.host == "motion", store.state.motionOptIn == true { store.presentedSheet = .motion }
@@ -126,18 +135,18 @@ struct WatchTodayView: View {
                 if let plan = store.state.plan {
                     HStack(spacing: 6) {
                         Image(systemName: "dumbbell").accessibilityHidden(true)
-                        Text("TODAY").tracking(1.5)
+                        Text(L10n.s("TODAY")).tracking(1.5)
                     }.watchText(.caption).foregroundStyle(.secondary)
-                    Text(plan.title).font(.system(size: titleSize, weight: .regular, design: .serif)).lineLimit(2)
+                    Text(plan.title).font(.system(size: titleSize, weight: .regular, design: .default)).lineLimit(2)
                     Text(LiftCopy.workoutSummary(plan))
                         .watchText(.secondary).foregroundStyle(.secondary)
                     if let first = plan.exercises.first {
                         Divider().padding(.vertical, 2)
-                        Text("First · \(first.name)").watchText(.caption).foregroundStyle(.secondary).lineLimit(2)
+                        Text(L10n.s("First · \(first.name)")).watchText(.caption).foregroundStyle(.secondary).lineLimit(2)
                     }
                 } else {
-                    Text("No workout yet").watchText(.title)
-                    Text("Open Little Lift on your paired iPhone and import a plan.")
+                    Text(L10n.s("No workout yet")).watchText(.title)
+                    Text(L10n.s("Open Little Lift on your paired iPhone and import a plan."))
                         .watchText(.secondary).foregroundStyle(.secondary)
                     if !store.syncNote.isEmpty {
                         Text(store.syncNote).watchText(.caption).foregroundStyle(.secondary).lineLimit(3)
@@ -147,10 +156,10 @@ struct WatchTodayView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         } actions: {
             if store.state.plan != nil {
-                Button { store.perform { try store.start() } } label: { Label("Start workout", systemImage: "play.fill") }
+                Button { store.perform { try store.start() } } label: { Label(L10n.s("Start workout"), systemImage: "play.fill") }
                     .buttonStyle(QuietButtonStyle(prominent: true))
             } else {
-                Button(store.isSyncing ? "Syncing…" : "Sync with iPhone") { store.retrySync() }
+                Button(store.isSyncing ? L10n.s("Syncing…") : L10n.s("Sync with iPhone")) { store.retrySync() }
                     .buttonStyle(QuietButtonStyle()).disabled(store.isSyncing)
             }
         }
@@ -167,18 +176,19 @@ struct SetView: View {
                 EffortInvitation(store: store, session: session)
                 if let exercise = session.currentExercise {
                     WorkoutSetPanel(exercise: exercise, unit: session.plan.unit, setNumber: session.currentSetNumber,
-                                weight: $store.draftWeight, reps: $store.draftReps, haptics: store.state.haptics)
+                                weight: $store.draftWeight, reps: $store.draftReps, haptics: store.state.haptics, completedExercises: session.executionExercises.filter { session.completedCount(for: $0) == $0.sets }.count, totalExercises: session.plan.exercises.count)
                 }
             }
         } actions: {
             TimelineView(.periodic(from: .now, by: 0.5)) { context in
                 let allowed = LogActionGuard.allows(session: session, presentedSheet: store.presentedSheet != nil, now: context.date)
-                Button { store.perform { try store.logSet() } } label: { Label("Log set", systemImage: "checkmark") }.buttonStyle(QuietButtonStyle(prominent: true))
+                Button { store.perform { try store.logSet() } } label: { Label(RhythmGuide.shared.active ? L10n.s("Done · log set") : L10n.s("Log set"), systemImage: "checkmark") }.buttonStyle(QuietButtonStyle(prominent: true))
                     .disabled(!allowed)
                     .handGestureShortcut(.primaryAction, isEnabled: allowed && store.state.doubleTapEnabled == true)
             }
         }
         .id(session.currentExercise?.id)
+        .onDisappear { RhythmGuide.shared.stop() }
     }
 }
 
@@ -189,6 +199,8 @@ struct WorkoutSetPanel: View {
     @Binding var weight: Double
     @Binding var reps: Double
     let haptics: Bool
+    var completedExercises = 0
+    var totalExercises = 0
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -196,20 +208,19 @@ struct WorkoutSetPanel: View {
                 Text(exercise.name).watchText(.body).lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
                 HStack {
-                    Text("Set \(setNumber) of \(exercise.sets)").watchText(.caption).foregroundStyle(.secondary)
+                    Text(L10n.s("Set \(setNumber) of \(exercise.sets)")).watchText(.caption).foregroundStyle(.secondary)
                     Spacer(minLength: 8)
-                    GeometryReader { proxy in
-                        Capsule().fill(.white.opacity(0.16))
-                            .overlay(alignment: .leading) {
-                                Capsule().fill(.white.opacity(0.65)).frame(width: proxy.size.width * Double(setNumber - 1) / Double(max(1, exercise.sets)))
-                            }
-                    }.frame(width: 32, height: 2).accessibilityHidden(true)
+                    if totalExercises > 0 {
+                        Text(L10n.s("\(completedExercises)/\(totalExercises) ex."))
+                            .watchText(.caption).foregroundStyle(.secondary).monospacedDigit()
+                            .accessibilityLabel(L10n.s("\(completedExercises) of \(totalExercises) exercises completed"))
+                    }
                 }
             }
             HStack(spacing: 6) {
                 WatchNumberField(title: unit.rawValue.uppercased(), value: $weight,
                                  step: unit == .kg ? 0.5 : 1, range: 0...1000, haptics: haptics)
-                WatchNumberField(title: "REPS", value: $reps, step: 1, range: 1...200, haptics: haptics)
+                WatchNumberField(title: L10n.s("REPS"), value: $reps, step: 1, range: 1...200, haptics: haptics)
             }
         }
     }
@@ -240,7 +251,7 @@ struct WatchNumberField: View {
                                       sensitivity: .low, isContinuous: false, isHapticFeedbackEnabled: haptics)
                 .accessibilityLabel(title)
                 .accessibilityValue(WorkoutSession.number(value))
-                .accessibilityHint("Use the Digital Crown or the increase and decrease buttons.")
+                .accessibilityHint(L10n.s("Use the Digital Crown or the increase and decrease buttons."))
                 .accessibilityAdjustableAction { direction in
                     switch direction {
                     case .increment: value = min(range.upperBound, value + step)
@@ -251,10 +262,10 @@ struct WatchNumberField: View {
             HStack(spacing: 0) {
                 Button { value = max(range.lowerBound, value - step) } label: {
                     Image(systemName: "minus").watchText(.body, weight: .light)
-                }.accessibilityLabel("Decrease \(title)").disabled(value <= range.lowerBound)
+                }.accessibilityLabel(L10n.s("Decrease \(title)")).disabled(value <= range.lowerBound)
                 Button { value = min(range.upperBound, value + step) } label: {
                     Image(systemName: "plus").watchText(.body, weight: .light)
-                }.accessibilityLabel("Increase \(title)").disabled(value >= range.upperBound)
+                }.accessibilityLabel(L10n.s("Increase \(title)")).disabled(value >= range.upperBound)
             }
             .buttonStyle(QuietTextButtonStyle())
             .foregroundStyle(.primary)
@@ -272,8 +283,10 @@ struct RestView: View {
     var body: some View {
         WatchPage {
             VStack(spacing: 0) {
+                WorkoutProgressLine(session: session)
+                WaterReminderView(store: store)
                 if session.pendingEffort != nil {
-                    Label("Rest", systemImage: "timer").watchText(.caption).foregroundStyle(.secondary)
+                    Label(L10n.s("Rest"), systemImage: "timer").watchText(.caption).foregroundStyle(.secondary)
                     RestClock(deadline: session.restUntil ?? Date(), duration: session.restDuration, compact: true)
                     EffortInvitation(store: store, session: session)
                 } else {
@@ -283,8 +296,8 @@ struct RestView: View {
             }
         } actions: {
             HStack(spacing: 8) {
-                Button("+30 sec") { store.perform { try store.extendRest() } }
-                Button("Skip") { store.perform { try store.skipRest() } }
+                Button(L10n.s("+30 sec")) { store.perform { try store.extendRest() } }
+                Button(L10n.s("Skip")) { store.perform { try store.skipRest() } }
             }.buttonStyle(QuietButtonStyle())
         }
         .task(id: session.restUntil) {
@@ -308,10 +321,10 @@ struct RestPanel: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Label("Rest", systemImage: "timer").watchText(.caption).foregroundStyle(.secondary)
+            Label(L10n.s("Rest"), systemImage: "timer").watchText(.caption).foregroundStyle(.secondary)
             RestClock(deadline: deadline, duration: duration)
             if let exerciseName {
-                Text("Next: \(exerciseName) · Set \(setNumber)")
+                Text(L10n.s("Next: \(exerciseName) · Set \(setNumber)"))
                     .watchText(.caption).foregroundStyle(.secondary).lineLimit(2)
             }
         }.frame(maxWidth: .infinity, alignment: .leading)
@@ -336,7 +349,7 @@ struct RestClock: View {
                     .font(.system(size: compact ? numberSize * 0.65 : numberSize, weight: .light, design: .rounded)).minimumScaleFactor(0.6).lineLimit(1).monospacedDigit()
                     .contentTransition(.numericText(countsDown: true))
                     .animation(reduceMotion ? nil : LiftMotion.feedback, value: remaining)
-                    .accessibilityLabel("Rest remaining").accessibilityValue("\(remaining) seconds")
+                    .accessibilityLabel(L10n.s("Rest remaining")).accessibilityValue(L10n.s("\(remaining) seconds"))
                 GeometryReader { geometry in
                     ZStack(alignment: .leading) {
                         Rectangle().fill(Color(white: 0.18))
@@ -357,26 +370,27 @@ struct SummaryView: View {
     var body: some View {
         WatchPage {
             VStack(alignment: .leading, spacing: session.pendingEffort == nil ? 12 : 4) {
-                HStack(spacing: 8) { LiftCompletionMark(); Text("Workout saved") }.watchText(.title)
+                HStack(spacing: 8) { LiftCompletionMark(animate: store.state.comfort?.quietFeedback != true); Text(L10n.s("Workout saved")) }.watchText(.title)
                 if session.pendingEffort != nil {
-                    Text("\(session.entries.count) sets · \(Int(session.duration / 60)) min")
+                    Text(L10n.s("\(session.loggedWorkCount) sets / segments · \(Int(session.duration / 60)) min"))
                         .watchText(.secondary).foregroundStyle(.secondary)
                     EffortInvitation(store: store, session: session)
-                    Text("Done skips and sends.").watchText(.caption).foregroundStyle(.secondary)
+                    Text(L10n.s("Done skips and sends.")).watchText(.caption).foregroundStyle(.secondary)
                 } else {
                     HStack {
-                        summaryMetric("Sets", value: session.entries.count)
+                        summaryMetric(L10n.s("Logged"), value: session.loggedWorkCount)
                         Spacer(minLength: 4)
-                        summaryMetric("Min", value: Int(session.duration / 60))
+                        summaryMetric(L10n.s("Min"), value: Int(session.duration / 60))
                         Spacer(minLength: 4)
-                        summaryMetric("Exercises", value: Set(session.entries.map(\.exerciseID)).count)
+                        summaryMetric(L10n.s("Exercises"), value: Set(session.entries.map(\.exerciseID) + (session.activities ?? []).map(\.exerciseID)).count)
                     }
-                    Text(store.summarySynced ? "Synced to iPhone" : "Saved on watch. Waiting for iPhone.")
+                    if let feedback = session.feedback, store.state.comfort?.quietFeedback != true { Text(feedback).watchText(.caption).foregroundStyle(.secondary).lineLimit(3) }
+                    Text(store.summarySynced ? L10n.s("Synced to iPhone") : L10n.s("Saved on watch. Waiting for iPhone."))
                         .watchText(.caption).foregroundStyle(.secondary).lineLimit(2)
                 }
             }.frame(maxWidth: .infinity, alignment: .leading)
         } actions: {
-            Button("Done") { store.perform { try store.dismissSummary() } }.buttonStyle(QuietButtonStyle(prominent: true))
+            Button(L10n.s("Done")) { store.perform { try store.dismissSummary() } }.buttonStyle(QuietButtonStyle(prominent: true))
         }
     }
 
@@ -395,7 +409,7 @@ struct EffortInvitation: View {
     let session: WorkoutSession
     var body: some View {
         if session.pendingEffort != nil {
-            Button("Rate last set · optional") { store.presentedSheet = .effort }
+            Button(L10n.s("Rate last set · optional")) { store.presentedSheet = .effort }
                 .watchText(.caption)
                 .buttonStyle(QuietTextButtonStyle())
         }
@@ -413,35 +427,35 @@ struct EffortRatingView: View {
         NavigationStack {
             WatchPage {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Effort · Set \(request.afterSet ?? 0)").watchText(.body)
-                    Text(plan.exercises.first { $0.id == request.exerciseID }?.name ?? "Exercise")
+                    Text(L10n.s("Effort · Set \(request.afterSet ?? 0)")).watchText(.body)
+                    Text(plan.exercises.first { $0.id == request.exerciseID }?.name ?? L10n.s("Exercise"))
                         .watchText(.caption).foregroundStyle(.secondary).lineLimit(1)
                     HStack(spacing: 4) {
                         Button { rating = max(1, rating - 1) } label: { Image(systemName: "minus") }
-                            .accessibilityLabel("Decrease effort").disabled(rating <= 1)
-                        Text("\(Int(rating))/10").font(.title2.weight(.light)).monospacedDigit()
+                            .accessibilityLabel(L10n.s("Decrease effort")).disabled(rating <= 1)
+                        Text(L10n.s("\(Int(rating))/10")).font(.title2.weight(.light)).monospacedDigit()
                             .frame(maxWidth: .infinity, minHeight: 44)
                             .focusable()
                             .digitalCrownRotation($rating, from: 1, through: 10, by: 1, sensitivity: .low, isContinuous: false, isHapticFeedbackEnabled: store.state.haptics)
-                            .accessibilityLabel("Effort").accessibilityValue("\(Int(rating)) out of 10")
+                            .accessibilityLabel(L10n.s("Effort")).accessibilityValue(L10n.s("\(Int(rating)) out of 10"))
                             .accessibilityAdjustableAction { direction in
                                 if direction == .increment { rating = min(10, rating + 1) }
                                 if direction == .decrement { rating = max(1, rating - 1) }
                             }
                         Button { rating = min(10, rating + 1) } label: { Image(systemName: "plus") }
-                            .accessibilityLabel("Increase effort").disabled(rating >= 10)
+                            .accessibilityLabel(L10n.s("Increase effort")).disabled(rating >= 10)
                     }.buttonStyle(QuietTextButtonStyle())
-                    Text("1 easy · 10 maximal").watchText(.caption).foregroundStyle(.secondary)
+                    Text(L10n.s("1 easy · 10 maximal")).watchText(.caption).foregroundStyle(.secondary)
                 }
             } actions: {
                 HStack(spacing: 8) {
-                    Button("Skip") { save(nil) }
-                    Button("Save") { save(Int(rating)) }
+                    Button(L10n.s("Skip")) { save(nil) }
+                    Button(L10n.s("Save")) { save(Int(rating)) }
                 }.buttonStyle(QuietButtonStyle())
             }
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Close") { dismiss() }.buttonStyle(.plain) } }
-            .alert("Couldn’t save", isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
-                Button("OK") { error = nil }
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button(L10n.s("Close")) { dismiss() }.buttonStyle(.plain) } }
+            .alert(L10n.s("Couldn’t save"), isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
+                Button(L10n.s("OK")) { error = nil }
             } message: { Text(error ?? "") }
         }
     }
@@ -460,17 +474,27 @@ struct WatchOptionsView: View {
     var body: some View {
         NavigationStack {
             List {
+                if let session = store.state.session, session.phase == .active, session.currentExercise?.kind == .strength,
+                   store.state.comfort?.rhythmEnabled == true, store.state.haptics {
+                    Section(L10n.s("Rhythm guide")) {
+                        Button(RhythmGuide.shared.active ? L10n.s("Stop rhythm guide") : L10n.s("Start rhythm guide")) {
+                            let stop = RhythmGuide.shared.active
+                            dismiss()
+                            if stop { RhythmGuide.shared.stop() } else { RhythmGuide.shared.start(store: store) }
+                        }
+                    }
+                }
                 if let session = store.state.session, session.pendingEffort != nil {
-                    Section("Coach observation") {
+                    Section(L10n.s("Coach observation")) {
                         EffortInvitation(store: store, session: session)
-                        Button("Skip effort rating") { perform { try store.answerEffort(nil) } }
+                        Button(L10n.s("Skip effort rating")) { perform { try store.answerEffort(nil) } }
                     }
                 }
                 if let session = store.state.session, session.phase != .completed {
-                    Section("This workout") {
-                        NavigationLink { AdaptiveWorkoutView(store: store) } label: { LiftLabel("Adjust workout", "arrow.triangle.branch") }
-                        if !session.entries.isEmpty {
-                            Button { perform(close: true) { try store.undo() } } label: { LiftLabel("Undo last set", "arrow.uturn.backward") }
+                    Section(L10n.s("This workout")) {
+                        NavigationLink { AdaptiveWorkoutView(store: store) } label: { LiftLabel(L10n.s("Adjust workout"), "arrow.triangle.branch") }
+                        if session.hasRecordedWork {
+                            Button { perform(close: true) { try store.undo() } } label: { LiftLabel(L10n.s("Undo last set"), "arrow.uturn.backward") }
                         }
                     }
                 }
@@ -480,49 +504,49 @@ struct WatchOptionsView: View {
                             ForEach(plan.exercises) { exercise in
                                 VStack(alignment: .leading, spacing: 6) {
                                     Text(exercise.name)
-                                    Text("\(exercise.sets) × \(exercise.reps) · \(WorkoutSession.number(exercise.weight)) \(plan.unit.rawValue)")
+                                    Text(exercise.prescription(unit: plan.unit))
                                         .watchText(.secondary).foregroundStyle(.secondary)
                                     if let previous = store.previousResult(for: exercise, unit: plan.unit) {
-                                        Text("Previous: \(previous)").watchText(.secondary).foregroundStyle(.secondary)
+                                        Text(L10n.s("Previous: \(previous)")).watchText(.secondary).foregroundStyle(.secondary)
                                     }
                                 }.accessibilityElement(children: .combine)
                             }
-                        }.watchText(.body).navigationTitle("Details")
-                    } label: { LiftLabel("Workout details", "list.bullet.rectangle") }
+                        }.watchText(.body).navigationTitle(L10n.s("Details"))
+                    } label: { LiftLabel(L10n.s("Workout details"), "list.bullet.rectangle") }
                 }
                 if let session = store.state.session, session.phase != .completed {
-                    Section { Button { confirmingEnd = true } label: { LiftLabel("Finish early…", "stop.circle") } }
+                    Section { Button { confirmingEnd = true } label: { LiftLabel(L10n.s("Finish early…"), "stop.circle") } }
                 }
-                Section("Sync") {
+                Section(L10n.s("Sync")) {
                     if !store.syncNote.isEmpty { Text(store.syncNote).watchText(.caption).foregroundStyle(.secondary) }
-                    Button(store.isSyncing ? "Syncing…" : "Sync with iPhone") { store.retrySync() }.disabled(store.isSyncing)
+                    Button(store.isSyncing ? L10n.s("Syncing…") : L10n.s("Sync with iPhone")) { store.retrySync() }.disabled(store.isSyncing)
                     if !store.state.outbox.isEmpty {
-                        Text("\(store.state.outbox.count) saved workout(s) waiting to sync").watchText(.caption).foregroundStyle(.secondary)
+                        Text(L10n.s("\(store.state.outbox.count) saved workout(s) waiting to sync")).watchText(.caption).foregroundStyle(.secondary)
                     }
                 }
                 Section {
-                    NavigationLink { WatchSettingsView(store: store) } label: { LiftLabel("Preferences", "slider.horizontal.3") }
+                    NavigationLink { WatchSettingsView(store: store) } label: { LiftLabel(L10n.s("Preferences"), "slider.horizontal.3") }
                     if store.state.motionOptIn == true {
-                        NavigationLink { MotionCaptureView(store: store) } label: { LiftLabel("Motion test", "waveform.path") }
+                        NavigationLink { MotionCaptureView(store: store) } label: { LiftLabel(L10n.s("Motion test"), "waveform.path") }
                     }
                 }
             }
             .watchText(.body)
-            .navigationTitle("Options")
+            .navigationTitle(L10n.s("Options"))
             .task { await store.refreshNotificationStatus() }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") { dismiss() }.buttonStyle(.plain).foregroundStyle(.primary)
+                    Button(L10n.s("Done")) { dismiss() }.buttonStyle(.plain).foregroundStyle(.primary)
                 }
             }
-            .confirmationDialog("End this workout? Completed sets will be saved.", isPresented: $confirmingEnd, titleVisibility: .visible) {
-                Button("End and save") {
+            .confirmationDialog(L10n.s("End this workout? Completed sets will be saved."), isPresented: $confirmingEnd, titleVisibility: .visible) {
+                Button(L10n.s("End and save")) {
                     perform(close: true) { try store.finishEarly() }
                 }
-                Button("Keep training", role: .cancel) {}
+                Button(L10n.s("Keep training"), role: .cancel) {}
             }
-            .alert("Couldn’t save", isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
-                Button("OK") { error = nil }
+            .alert(L10n.s("Couldn’t save"), isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
+                Button(L10n.s("OK")) { error = nil }
             } message: { Text(error ?? "") }
         }
     }
@@ -539,22 +563,28 @@ struct WatchSettingsView: View {
     let store: WatchStore
     var body: some View {
         List {
-            Section("Feedback") {
-                Toggle("Wrist haptics", isOn: Binding(get: { store.state.haptics }, set: { value in store.perform { try store.setHaptics(value) } }))
+            Section(L10n.s("Feedback")) {
+                Toggle(L10n.s("Wrist haptics"), isOn: Binding(get: { store.state.haptics }, set: { value in store.perform { try store.setHaptics(value) } }))
             }
-            Section("Rest reminders") {
+            Section(L10n.s("Workout runtime")) {
+                Text(WorkoutRuntime.shared.status).watchText(.caption)
+                if let session = store.state.session, session.phase != .completed, !WorkoutRuntime.shared.running {
+                    Button(L10n.s("Enable workout runtime")) { Task { await WorkoutRuntime.shared.start(for: session) } }.disabled(WorkoutRuntime.shared.starting)
+                }
+            }
+            Section(L10n.s("Rest reminders")) {
                 Text(store.restReminderMessage).watchText(.caption).foregroundStyle(.secondary)
                 if store.notificationStatus == .notDetermined {
-                    Button("Allow reminders") { Task { await store.requestRestNotifications() } }
+                    Button(L10n.s("Allow reminders")) { Task { await store.requestRestNotifications() } }
                 }
             }
             Section {
                 NavigationLink { ScrollView {
                     Text(store.connectionDetails).font(.caption2.monospaced())
                         .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal)
-                }.navigationTitle("Connection") } label: { LiftLabel("Connection", "antenna.radiowaves.left.and.right") }
+                }.navigationTitle(L10n.s("Connection")) } label: { LiftLabel(L10n.s("Connection"), "antenna.radiowaves.left.and.right") }
             }
-        }.watchText(.body).navigationTitle("Preferences")
+        }.watchText(.body).navigationTitle(L10n.s("Preferences"))
             .task { await store.refreshNotificationStatus() }
     }
 }
@@ -565,7 +595,7 @@ struct WatchSettingsView: View {
         WatchPage {
             WorkoutSetPanel(exercise: ExercisePlan(name: "Bench press", sets: 3, reps: 10, weight: 40),
                             unit: .kg, setNumber: 1, weight: .constant(40), reps: .constant(10), haptics: false)
-        } actions: { Button("Log set") {}.buttonStyle(QuietButtonStyle()) }
+        } actions: { Button(L10n.s("Log set")) {}.buttonStyle(QuietButtonStyle()) }
     }.tint(LiftStyle.accent).preferredColorScheme(.dark)
 }
 
@@ -574,7 +604,7 @@ struct WatchSettingsView: View {
         WatchPage {
             RestPanel(deadline: .now.addingTimeInterval(76), duration: 90, exerciseName: "Bench press", setNumber: 2)
         } actions: {
-            HStack(spacing: 8) { Button("+30 sec") {}; Button("Skip") {} }.buttonStyle(QuietButtonStyle())
+            HStack(spacing: 8) { Button(L10n.s("+30 sec")) {}; Button(L10n.s("Skip")) {} }.buttonStyle(QuietButtonStyle())
         }
     }.tint(LiftStyle.accent).preferredColorScheme(.dark)
 }

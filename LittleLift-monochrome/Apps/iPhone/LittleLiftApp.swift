@@ -11,6 +11,8 @@ struct LittleLiftApp: App {
                 .tint(LiftStyle.accent)
                 .preferredColorScheme(.dark)
                 .modifier(LiftAccessibilityDiagnostics())
+                .environment(\.locale, Locale(identifier: store.state.comfort?.language ?? Locale.current.identifier))
+                .id(store.state.comfort?.language)
         }
     }
 }

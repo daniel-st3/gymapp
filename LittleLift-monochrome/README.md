@@ -11,7 +11,7 @@ No backend. No ads. No API keys. No paid inference or runtime dependencies.
   <img src="docs/images/watch-logging.png" width="210" alt="Watch logging with fixed weight, repetitions and Log set controls">
 </p>
 
-*Actual simulator captures using generic demonstration data.*
+*Actual simulator captures from Build 10 using generic demonstration data. Build 11 verification is documented below.*
 
 ## At a glance
 
@@ -23,18 +23,22 @@ No backend. No ads. No API keys. No paid inference or runtime dependencies.
 | Explore History, Progress and factual reports | Undo, finish early and recover after relaunch |
 | Share context with your existing coach chat | Keep logging offline; deliver completed workouts later |
 
-## What’s new in Build 10
+## What’s new in Build 11
 
-**Progress** turns confirmed logs into a simple local dashboard: four- or twelve-week activity, logged sets, training days and typical elapsed session time. Exercise records compare the same variation, unit, load convention and repetition count. Tap a point’s record to inspect its original workout. Imported history stays clearly separate.
+Workouts can mix strength, walking, running and mobility. Cardio has its own Start/Pause/Resume/Done flow, optional machine readings and explicit timing; it never asks for invented repetitions or load. The editable importer accepts schema 2 and continues to read existing JSON. Try the [generic mixed workout](Examples/mixed-workout.json), marked as practice.
 
-**Stronger boundaries** require authentication for Shortcut actions, limit actual bytes read from imported files and photos, validate incoming sync records and reject altered duplicates without replacing the saved original. See [security and privacy](SECURITY.md) for the threat model and practical limits. No software can promise to be unhackable.
+On Watch, defer partly completed exercises, choose the next one, confirm an approved substitute, or use a separate machine-change timer. The original prescription and actual results remain distinct. A real HealthKit workout session supports the official workout runtime; manual logging still works when permission or runtime fails. Wrist-raise return still needs physical verification.
 
-The Build 9 visual design remains: Apple serif titles, readable system controls, rounded figures, SF Symbols, calm native transitions and fixed Watch actions. Dynamic Type and Reduce Motion are supported.
+Spanish and English, sober native system typography, compact progress and fixed primary actions keep the interface readable. iPhone adds editable coach context, a small exercise-help catalog, a local [getting-started guide](docs/onboarding/index.html), optional weekly goals and planned pauses. Optional rhythm pulses are a metronome, **not** repetition detection. Water reminders and factual feedback can be disabled.
+
+Build 10’s local Progress dashboard, authenticated Shortcut actions and bounded input validation remain. Versioned storage refuses unknown future formats and preserves a protected pre-upgrade checkpoint. See [security and privacy](SECURITY.md); no software can promise to be unhackable.
+
+Every requirement has its own status and evidence in [F01–F27](docs/feedback-27.md). Live ChatGPT, exact-thread delivery, physical haptics and repetition accuracy are not claimed verified. No app, site or personal data was published.
 
 ## A normal workout
 
 1. On iPhone, import a workout or choose a saved routine. Check its editable preview, then save and send it to Watch.
-2. On Watch, tap **Start workout**. Adjust the actual weight and reps, then **Log set**. Rest controls stay visible; other actions live in **…**.
+2. On Watch, tap **Start workout**. For strength, adjust actual weight/reps and **Log set**. For cardio, **Start activity**, pause when stopped, then **Done**. Rest controls stay visible; the branch button changes exercise and **…** holds details, undo and early finish.
 3. Tap **Done** after finishing. The phone saves the completed workout before acknowledging it. History, Progress and coach reports then use the actual logged values.
 
 No workout is silently shortened or replaced. Optional-work changes and approved substitutions preserve the original prescription. Coach proposals require acceptance.
@@ -56,7 +60,7 @@ For real devices, use Xcode’s free Personal Team signing. Keep private bundle/
 ## Coach workflows
 
 - **Existing conversation:** share a workout report or compact context export into your chosen chat, then import its proposed workout for review. This preserves continuity through explicit sharing.
-- **Optional Shortcut:** Prepare Workout Review → Apple’s Use Model with ChatGPT → Save Workout Review. App Intents are implemented, authenticated and bounded; reviews are tied to attempts so cancelled or stale results cannot replace a proposal. Live model execution still depends on device/account setup and has not been verified. A Shortcut does **not** inherit or target an old ChatGPT conversation.
+- **Optional Shortcut:** Prepare Workout Review → Apple’s Use Model with ChatGPT → Save Workout Review. App Intents are implemented, authenticated and bounded; reviews are tied to attempts so cancelled or stale results cannot replace a proposal. The native simulator ran Prepare, then Use Model reported “This action is not currently available.” Live model execution and unattended automation remain unverified on the physical account. A Shortcut does **not** inherit or target an old ChatGPT conversation.
 - **Observations:** coaches may request actual-versus-target sets, trustworthy logging intervals and one optional final-set effort rating. A Log interval includes exercise time; a countdown is prescribed rest. Neither proves actual rest duration.
 
 [Generic import examples](Examples) · [Observation schema](docs/observations.md) · [Upgrade guide](docs/upgrade-guide.md)
@@ -71,7 +75,7 @@ bash scripts/verify-mac.sh
 python3 scripts/check_repository.py
 ```
 
-Build 10 has **92 engine tests** across ten suites, plus **10 launcher tests**. The Mac check also validates project generation, resources and icons, and builds both native simulator apps. See [observed verification](docs/verification.md) for simulator/device evidence and remaining limits.
+Build 11 passes **112 engine tests** across fifteen suites, plus **10 launcher tests**. The Mac check also validates project generation, resources and icons, and builds both native simulator apps. See [observed verification](docs/verification.md) for simulator/device evidence and remaining limits.
 
 After adding or removing native Swift files:
 

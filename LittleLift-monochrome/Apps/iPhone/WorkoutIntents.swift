@@ -44,7 +44,7 @@ struct CancelWorkoutReviewIntent: AppIntent {
     static let description = IntentDescription("Cancel the running review so a delayed model result cannot be saved.")
     @MainActor func perform() async throws -> some IntentResult {
         if let job = PhoneStore.shared.state.reviewQueue.first(where: { $0.status == .running }) {
-            try PhoneStore.shared.endReview(job.id, cancelled: true, detail: "Cancelled from Shortcuts.")
+            try PhoneStore.shared.endReview(job.id, cancelled: true, detail: L10n.s("Cancelled from Shortcuts."))
         }
         return .result()
     }
