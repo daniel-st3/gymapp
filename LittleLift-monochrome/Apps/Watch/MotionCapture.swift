@@ -76,12 +76,14 @@ import SwiftUI
             WKInterfaceDevice.current().isBatteryMonitoringEnabled = true
             let battery = WKInterfaceDevice.current().batteryLevel
             record.batteryStart = battery >= 0 ? Double(battery) : nil
-            try repository.save(record); current = record; origin = nil; sampleCount = 0; elapsed = 0; active = true
+            try repository.save(record); current = record; latest = nil; queuedRecordID = nil
+            origin = nil; sampleCount = 0; elapsed = 0; active = true
+            let captureID = record.id
             session.startActivity(with: Date())
             manager.deviceMotionUpdateInterval = 1.0 / 25.0
             manager.startDeviceMotionUpdates(to: .main) { [weak self] motion, error in
                 Task { @MainActor in
-                    guard let self, self.active else { return }
+                    guard let self, self.active, self.current?.id == captureID else { return }
                     if let error { self.fail(error.localizedDescription); return }
                     guard let motion else { return }
                     self.add(timestamp: motion.timestamp, x: motion.rotationRate.x, y: motion.rotationRate.y, z: motion.rotationRate.z)
@@ -90,12 +92,13 @@ import SwiftUI
             message = L10n.s("Waiting for sensor data…")
             sensorTask = Task { @MainActor [weak self] in
                 do { try await Task.sleep(for: .seconds(10)) } catch { return }
-                guard let self, self.active, self.sampleCount == 0 else { return }
+                guard let self, self.active, self.current?.id == captureID, self.current?.samples.isEmpty == true else { return }
                 self.fail(L10n.s("No motion samples arrived. Check Watch Settings → Privacy & Security → Motion & Fitness, then try again."))
             }
             stopTask = Task { @MainActor [weak self] in
                 do { try await Task.sleep(for: .seconds(180)) } catch { return }
-                self?.stop(status: "time limit")
+                guard let self, self.current?.id == captureID else { return }
+                self.stop(status: "time limit")
             }
         } catch {
             guard startAttempt == attempt else { return }
@@ -135,7 +138,7 @@ import SwiftUI
         guard var record = current else { return }
         record.status = status
         let battery = WKInterfaceDevice.current().batteryLevel; record.batteryEnd = battery >= 0 ? Double(battery) : nil
-        do { try repository.save(record); latest = record; sampleCount = record.samples.count; elapsed = record.duration; message = record.samples.isEmpty ? L10n.s("No movement data was captured.") : "Saved on Watch." }
+        do { try repository.save(record); latest = record; sampleCount = record.samples.count; elapsed = record.duration; message = record.samples.isEmpty ? L10n.s("No movement data was captured.") : L10n.s("Saved on Watch.") }
         catch {
             // A prior replay must not be sent or presented as this capture.
             // The last durable checkpoint remains recoverable after relaunch.
@@ -152,7 +155,7 @@ import SwiftUI
         // No HKWorkoutBuilder is collected or finished, and no HKWorkout is saved.
     }
     nonisolated func workoutSession(_ workoutSession: HKWorkoutSession, didChangeTo toState: HKWorkoutSessionState, from fromState: HKWorkoutSessionState, date: Date) {
-        if toState == .ended { Task { @MainActor [weak self] in
+        if toState == .ended || toState == .stopped || toState == .paused { Task { @MainActor [weak self] in
             guard let self, self.workout === workoutSession else { return }
             self.stop(status: "interrupted")
         } }

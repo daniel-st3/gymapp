@@ -7,6 +7,8 @@ final class PhoneStore {
     private(set) var state = PhoneState()
     var error: String?
     var showingReviewQueue = false
+    var openedReviewSessionID: UUID?
+    @ObservationIgnored private var schedulingReviewIDs: Set<UUID> = []
     private(set) var motionRecordings: [MotionRecording] = []
     @ObservationIgnored private let motionRepository = MotionRepository(folder: URL.applicationSupportDirectory.appending(path: "LittleLiftMotion", directoryHint: .isDirectory))
     private(set) var storageBlocked = false
@@ -31,7 +33,11 @@ final class PhoneStore {
             guard let self else { return }; try self.motionRepository.receive(data); self.loadMotion()
         }
         link.activate()
-        reviewNotifications.onOpen = { [weak self] in self?.showingReviewQueue = true }
+        reviewNotifications.onOpen = { [weak self] id in
+            guard let self else { return }
+            openedReviewSessionID = id
+            showingReviewQueue = true
+        }
         refreshReviewNotifications()
         #if DEBUG
         // The explicit simulator launcher uses a generic demo only for an empty
@@ -68,7 +74,14 @@ final class PhoneStore {
         var next = state; try next.acceptReview()
         try commit(next); sendToWatch()
     }
-    func discardReview() throws { var next = state; next.review = nil; try commit(next) }
+    func discardReview() throws { var next = state; next.discardReview(); try commit(next) }
+    func stageUnlinkedReview(_ id: UUID) throws {
+        guard let saved = state.unlinkedCoachReviews?.first(where: { $0.id == id }) else { return }
+        var next = state; try next.propose(saved.response); try commit(next)
+    }
+    func stageSavedReview(_ id: UUID) throws {
+        var next = state; try next.stageSavedReview(for: id); try commit(next)
+    }
     func setComfort(_ value: ComfortPreferences) throws { try value.validate(); var value = value; value.revision = UUID(); var next = state; next.comfort = value; try commit(next); sendToWatch() }
     func setWeeklyGoal(days: Int, paused: Bool) throws {
         var next = state; var habit = next.weeklyHabit ?? WeeklyHabit(timeZone: TimeZone.current.identifier, goals: [])
@@ -114,7 +127,9 @@ final class PhoneStore {
     private func refreshReviewNotifications() {
         guard state.reviewNotificationsEnabled == true else { return }
         for job in state.reviewQueue where job.status == .queued && job.notified != true {
+            guard schedulingReviewIDs.insert(job.id).inserted else { continue }
             Task { @MainActor in
+                defer { schedulingReviewIDs.remove(job.id) }
                 do {
                     guard state.reviewNotificationsEnabled == true else { return }
                     try await reviewNotifications.schedule(sessionID: job.id)

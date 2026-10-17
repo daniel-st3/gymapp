@@ -16,8 +16,34 @@ struct ReviewQueueView: View {
                 }
             }
             if store.state.sessions.isEmpty { Text(L10n.s("Completed workouts appear here after syncing from Watch.")) }
+            if let saved = store.state.unlinkedCoachReviews, !saved.isEmpty {
+                Section(L10n.s("Imported coach responses")) {
+                    ForEach(saved.reversed()) { item in
+                        NavigationLink(item.response.plan.title) { UnlinkedCoachReviewView(saved: item, store: store) }
+                    }
+                }
+            }
             NavigationLink(L10n.s("Optional ChatGPT setup")) { OptionalCoachReviewsView(store: store) }
         }.navigationTitle(L10n.s("Workout reviews")).navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+private struct UnlinkedCoachReviewView: View {
+    let saved: UnlinkedCoachReview
+    let store: PhoneStore
+    @State private var showingProposal = false
+    var body: some View {
+        LiftList {
+            Section {
+                Text(saved.response.analysis).textSelection(.enabled)
+                Text(L10n.s("Imported response · not linked to a specific workout.")).font(.caption).foregroundStyle(.secondary)
+                Button(L10n.s("Review proposed workout")) {
+                    do { try store.stageUnlinkedReview(saved.id); showingProposal = true }
+                    catch { store.error = error.localizedDescription }
+                }
+            }
+        }.navigationTitle(L10n.s("Saved coach response")).navigationBarTitleDisplayMode(.inline)
+            .sheet(isPresented: $showingProposal) { ReviewView(store: store) }
     }
 }
 
@@ -41,12 +67,13 @@ struct OptionalCoachReviewsView: View {
                     Text(L10n.key("review." + job.status.rawValue))
                     if let detail = job.detail { Text(detail).font(.caption).foregroundStyle(.secondary) }
                     if let session = store.state.sessions.first(where: { $0.id == job.id }) {
+                        if job.result != nil { NavigationLink(L10n.s("Saved coach response")) { WorkoutEvidenceReviewView(session: session, store: store) } }
                         ShareLink(item: session.report()) { Text(L10n.s("Share report to my existing chat")) }
                     }
                     if job.status != .received {
                         Button(L10n.s("Run review Shortcut")) {
                             do { try store.selectReview(job.id); runShortcut() } catch { store.error = error.localizedDescription }
-                        }.disabled(job.status == .running || store.state.review != nil || (openedAt.map { Date().timeIntervalSince($0) < 3 } ?? false))
+                        }.disabled(store.state.reviewQueue.contains(where: { $0.status == .running }) || (openedAt.map { Date().timeIntervalSince($0) < 3 } ?? false))
                         if job.status == .running {
                             Button(L10n.s("Cancel this review")) { do { try store.endReview(job.id, cancelled: true, detail: L10n.s("Cancelled by user. Delayed results will be rejected.")) } catch { store.error = error.localizedDescription } }
                             Button(L10n.s("Allow retry")) { do { try store.endReview(job.id, cancelled: false, detail: L10n.s("Model or Shortcut did not return a result. Retry explicitly.")) } catch { store.error = error.localizedDescription } }

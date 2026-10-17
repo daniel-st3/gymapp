@@ -66,6 +66,9 @@ public struct WorkoutEvidenceReview: Sendable {
         var lines = [L10n.s("Automatic workout review · calculated on this iPhone"), summary, timingNote]
         for item in comparisons {
             lines.append(L10n.s("\(item.exercise.name) · Set \(item.entry.setNumber): \(comparisonText(item))"))
+            if let interval = session.loggingInterval(before: item.entry) {
+                lines.append(L10n.s("Log-tap interval: \(WorkoutSession.number(interval)) s. Includes exercise time; not actual rest."))
+            }
         }
         lines.append(session.report())
         return lines.joined(separator: "\n\n")

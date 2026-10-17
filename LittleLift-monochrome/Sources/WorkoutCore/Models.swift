@@ -411,6 +411,11 @@ public struct TrainingReview: Codable, Equatable, Sendable {
     public let plan: WorkoutPlan
     public init(analysis: String, plan: WorkoutPlan) { self.analysis = analysis; self.plan = plan }
 }
+public struct UnlinkedCoachReview: Codable, Equatable, Identifiable, Sendable {
+    public let id: UUID
+    public let response: TrainingReview
+    public let savedAt: Date
+}
 
 public enum ConnectionMode: String, Codable, CaseIterable, Sendable {
     case existingChat, shortcut
@@ -430,6 +435,7 @@ public struct PhoneState: Codable, Equatable, Sendable {
     public var profile = ""
     public var mode: ConnectionMode = .existingChat
     public var review: TrainingReview?
+    public var unlinkedCoachReviews: [UnlinkedCoachReview]?
     public var routines: [Routine]?
     public var schedule: [WeeklySlot]?
     public var importedHistory: [HistoricalWorkout]?
@@ -442,11 +448,25 @@ public struct PhoneState: Codable, Equatable, Sendable {
     public init() {}
 
     public mutating func propose(_ review: TrainingReview) throws {
-        try review.plan.validate(); self.review = review
+        try review.plan.validate()
+        guard self.review == nil || self.review == review else {
+            throw WorkoutError.invalidState(L10n.s("Review or discard the current proposal first. Your saved coach responses remain in History."))
+        }
+        self.review = review
     }
     public mutating func acceptReview() throws {
         guard let review else { return }
-        try review.plan.validate(); plan = review.plan; self.review = nil
+        try review.plan.validate(); archiveUnlinkedReview(); plan = review.plan; self.review = nil
+    }
+    public mutating func discardReview() {
+        archiveUnlinkedReview(); review = nil
+    }
+    private mutating func archiveUnlinkedReview() {
+        guard let review, !reviewQueue.contains(where: { $0.result == review }),
+              !(unlinkedCoachReviews ?? []).contains(where: { $0.response == review }) else { return }
+        var saved = unlinkedCoachReviews ?? []
+        saved.append(UnlinkedCoachReview(id: UUID(), response: review, savedAt: Date()))
+        unlinkedCoachReviews = saved
     }
 
     public mutating func receive(_ session: WorkoutSession) throws {

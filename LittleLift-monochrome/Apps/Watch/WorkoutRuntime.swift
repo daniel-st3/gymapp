@@ -23,8 +23,15 @@ import os
             do { try await Task.sleep(for: .milliseconds(50)) } catch { return }
         }
         guard !recoveryInProgress else { status = L10n.s("Workout runtime recovery is still pending. Manual logging is ready."); return }
-        guard workout == nil, !starting, session.phase != .completed,
+        guard !starting, session.phase != .completed,
               WatchStore.shared.state.session?.id == session.id, WatchStore.shared.state.session?.phase != .completed else { return }
+        if let workout {
+            if workout.state == .paused {
+                workout.resume()
+                status = L10n.s("Resuming workout runtime…"); record("explicit resume requested")
+            }
+            return
+        }
         guard !MotionCapture.shared.active, !MotionCapture.shared.starting else {
             status = L10n.s("Stop the motion test first. Manual logging still works."); return
         }
@@ -60,7 +67,12 @@ import os
         recoveryInProgress = true
         defer { recoveryInProgress = false }
         do {
-            guard let recovered = try await health.recoverActiveWorkoutSession() else { return }
+            guard let recovered = try await health.recoverActiveWorkoutSession() else {
+                if WatchStore.shared.state.session?.phase != nil, WatchStore.shared.state.session?.phase != .completed {
+                    status = L10n.s("Your log is restored. Enable workout runtime in Preferences for wrist-down support.")
+                }
+                return
+            }
             guard let local = WatchStore.shared.state.session, local.phase != .completed,
                   UserDefaults.standard.string(forKey: ownerKey) == local.id.uuidString else {
                 recovered.end(); record("orphaned app runtime ended; local log preserved"); return

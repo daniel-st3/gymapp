@@ -40,3 +40,9 @@ Se identificó **App Bodytech, desarrollador Bodytech, tienda Colombia**, median
 ## Caminadora
 
 [Apple: precisión del Watch](https://support.apple.com/en-ie/105002) diferencia actividades y condiciones de estimación. Little Lift conserva walking/running indoor; su distancia es una lectura manual opcional de la máquina. No usa GPS para medir una cinta estática, ni presenta velocidad/inclinación como sensor medido. Los intervalos entre Start/Pause/Resume/Done son eventos explícitos; los objetivos permanecen separados y los datos ausentes siguen ausentes.
+
+## Build 13: current platform check and observed model execution
+
+Rechecked [Apple’s native model workflow](https://support.apple.com/en-mt/guide/shortcuts/tpg3vrvwmclv/10.0/ios/27), [WWDC26 notification automations](https://developer.apple.com/videos/play/wwdc2026/310/) and [workout runtime recovery](https://developer.apple.com/documentation/healthkit/running-workout-sessions) on 17 October. Notification-trigger support is documented, but creating a trigger is not proof of unattended completion with permissions/model availability. Workout runtime still requires an active workout and bounded background work; foreground return and sensor/battery behavior need physical measurement.
+
+The Mac ChatGPT extension was enabled using its free no-account option and selected explicitly in native Shortcuts. A generic engine-generated review returned actual model JSON and passed the same receipt/validation/persistence code used by the app. This removes the earlier “no live model response anywhere” limitation. It does not establish iPhone extension setup, full physical App Intent execution, live search access, an existing-conversation destination or notification automation. No private APIs, scraping, paid account or fallback model was used. See the Build 13 verification record for the exact boundary.

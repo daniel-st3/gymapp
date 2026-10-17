@@ -1,7 +1,7 @@
 import UserNotifications
 
 @MainActor final class ReviewNotifications: NSObject, UNUserNotificationCenterDelegate {
-    var onOpen: (() -> Void)?
+    var onOpen: ((UUID?) -> Void)?
     override init() { super.init(); UNUserNotificationCenter.current().delegate = self }
     func requestPermission() async throws {
         let allowed = try await UNUserNotificationCenter.current().requestAuthorization(options: [.alert])
@@ -32,7 +32,8 @@ import UserNotifications
         }
     }
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
-        await MainActor.run { self.onOpen?() }
+        let id = (response.notification.request.content.userInfo["reviewSessionID"] as? String).flatMap(UUID.init(uuidString:))
+        await MainActor.run { self.onOpen?(id) }
     }
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions { [.banner, .list] }
 }

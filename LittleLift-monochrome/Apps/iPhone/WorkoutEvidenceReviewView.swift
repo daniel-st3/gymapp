@@ -4,12 +4,23 @@ struct WorkoutEvidenceReviewView: View {
     let session: WorkoutSession
     let store: PhoneStore
     @Environment(\.dynamicTypeSize) private var textSize
+    @State private var showingProposal = false
     private var review: WorkoutEvidenceReview { WorkoutEvidenceReview(session: session, history: store.state.sessions) }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 LiftPageHeading(title: session.plan.title, detail: L10n.s("Automatic review · saved on this iPhone"))
+                if let feedback = store.state.reviewQueue.first(where: { $0.id == session.id })?.result {
+                    LiftSection(title: L10n.s("Saved coach response")) {
+                        Text(feedback.analysis).font(.body).textSelection(.enabled)
+                        Button(L10n.s("Review proposed workout")) {
+                            do { try store.stageSavedReview(session.id); showingProposal = true }
+                            catch { store.error = error.localizedDescription }
+                        }.frame(minHeight: 44)
+                        Text(L10n.s("Feedback stays with this workout. Your plan changes only after acceptance.")).font(.caption).foregroundStyle(.secondary)
+                    }
+                }
                 if textSize.isAccessibilitySize {
                     VStack(alignment: .leading, spacing: 16) { reviewMetrics }
                 } else { HStack(alignment: .top, spacing: 16) { reviewMetrics } }
@@ -67,6 +78,7 @@ struct WorkoutEvidenceReviewView: View {
                 ShareLink(item: review.report()) { Label(L10n.s("Share review with my coach"), systemImage: "square.and.arrow.up").frame(minHeight: 44) }
             }.padding(24)
         }.buttonStyle(.plain).background(.black).navigationTitle(L10n.s("Workout review")).navigationBarTitleDisplayMode(.inline)
+            .sheet(isPresented: $showingProposal) { ReviewView(store: store) }
     }
     @ViewBuilder private var reviewMetrics: some View {
         LiftStat(value: String(review.strengthSets), label: L10n.s("Strength sets recorded"))

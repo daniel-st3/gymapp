@@ -71,35 +71,48 @@ public struct PaceEstimate: Equatable, Sendable {
 }
 public enum WorkoutPace {
     public static func remaining(_ session: WorkoutSession, history: [WorkoutSession], now: Date = Date()) -> PaceEstimate {
-        let live = [session] + history.filter { $0.id != session.id }
+        guard session.phase != .completed else { return PaceEstimate(lower: 0, upper: 0, sampleCount: 0) }
+        let live = [session] + history.filter {
+            $0.id != session.id && $0.plan.practice != true && $0.phase == .completed &&
+            $0.endedAt.map { $0 <= session.startedAt } == true
+        }.sorted { $0.startedAt < $1.startedAt }
         let transition = max(0, session.transitionUntil?.timeIntervalSince(now) ?? session.transitionRemaining ?? 0)
-        let futureChanges = max(0, session.remainingExercises.count - 1) * (session.plan.transitionSeconds ?? 0)
+        let remainingExercises = session.remainingExercises
+        let changes = max(0, remainingExercises.count - 1) + (session.pendingTransition == true ? 1 : 0)
+        let futureChanges = changes * (session.plan.transitionSeconds ?? 0)
         var low = max(0, session.restUntil?.timeIntervalSince(now) ?? 0) + transition + Double(futureChanges), high = low, samples = 0
-        for exercise in session.remainingExercises {
+        for (index, exercise) in remainingExercises.enumerated() {
             let remaining = max(0, exercise.sets - session.completedCount(for: exercise))
             guard remaining > 0 else { continue }
             if let activity = exercise.activity {
                 let elapsed = session.activityTimer?.exerciseID == exercise.id ? session.activityTimer?.elapsed(at: now) ?? 0 : 0
                 low += max(0, (activity.durationSeconds ?? 60) - elapsed)
-                high += max(60, (activity.durationSeconds ?? 1200) - elapsed)
+                high += max(0, (activity.durationSeconds ?? 1200) - elapsed)
                 continue
             }
             var intervals: [Double] = []
             for previous in live {
                 let matched = previous.executionExercises.filter { $0.matches(exercise, unit: previous.plan.unit, otherUnit: session.plan.unit) }
-                for match in matched {
+                // Repeated variations in one workout have ambiguous fatigue/order.
+                if matched.count == 1, let match = matched.first {
                     for e in previous.entries where e.exerciseID == match.id {
-                        if let interval = previous.loggingInterval(before: e), interval >= 5, interval <= 1800 { intervals.append(interval) }
+                        if let interval = previous.loggingInterval(before: e), interval >= 5, interval <= 1800 {
+                            // This is a planning assumption, not measured work or
+                            // rest: observed tap interval minus prescribed rest.
+                            intervals.append(max(15, interval - Double(match.restSeconds)))
+                        }
                     }
                 }
             }
             intervals = Array(intervals.suffix(30)).sorted(); samples += intervals.count
-            // A logging interval includes work/setup/rest. Never add prescribed rest
-            // on top of a full interval, or label it as measured exercise/rest duration.
-            let prescribed = Double(exercise.restSeconds)
-            let minimum = max(prescribed + 15, intervals.first ?? (prescribed + 25))
-            let maximum = max(minimum + 30, intervals.last ?? (prescribed + 120))
-            low += minimum * Double(remaining); high += maximum * Double(remaining)
+            let minimum = intervals.first ?? 25
+            let maximum = max(minimum + 30, intervals.last ?? 120)
+            // No rest follows the final set of the entire workout. The current
+            // rest (including extensions) was counted above; never count it twice.
+            let restCount = remaining - (index == remainingExercises.count - 1 ? 1 : 0)
+            let rests = Double(max(0, restCount) * exercise.restSeconds)
+            low += minimum * Double(remaining) + rests
+            high += maximum * Double(remaining) + rests
         }
         // Transition allowance is separate from the full set logging interval.
         return PaceEstimate(lower: low, upper: high, sampleCount: samples)

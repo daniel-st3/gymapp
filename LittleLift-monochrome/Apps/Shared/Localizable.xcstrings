@@ -16469,6 +16469,182 @@
           }
         }
       }
+    },
+    "The saved coach response is unavailable.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The saved coach response is unavailable."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La respuesta guardada del coach no está disponible."
+          }
+        }
+      }
+    },
+    "Review or discard the current proposal first. Your saved coach responses remain in History.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Review or discard the current proposal first. Your saved coach responses remain in History."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revisa o descarta primero la propuesta actual. Las respuestas guardadas del coach permanecen en Historial."
+          }
+        }
+      }
+    },
+    "Saved coach response": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved coach response"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Respuesta guardada del coach"
+          }
+        }
+      }
+    },
+    "Feedback stays with this workout. Your plan changes only after acceptance.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feedback stays with this workout. Your plan changes only after acceptance."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La respuesta se conserva con este entrenamiento. El plan solo cambia cuando lo aceptas."
+          }
+        }
+      }
+    },
+    "Resuming workout runtime…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resuming workout runtime…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reanudando el entrenamiento en segundo plano…"
+          }
+        }
+      }
+    },
+    "Your log is restored. Enable workout runtime in Preferences for wrist-down support.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your log is restored. Enable workout runtime in Preferences for wrist-down support."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu registro está recuperado. Activa el entrenamiento en segundo plano en Preferencias para continuar con la muñeca baja."
+          }
+        }
+      }
+    },
+    "Finish or close the current import before opening another file.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finish or close the current import before opening another file."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Termina o cierra la importación actual antes de abrir otro archivo."
+          }
+        }
+      }
+    },
+    "This is a coach response. Use Save Workout Review so its workout and attempt can be checked.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This is a coach response. Use Save Workout Review so its workout and attempt can be checked."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta es una respuesta del coach. Usa Guardar revisión del entrenamiento para comprobar a qué entrenamiento e intento pertenece."
+          }
+        }
+      }
+    },
+    "Imported coach responses": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imported coach responses"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Respuestas importadas del coach"
+          }
+        }
+      }
+    },
+    "Imported response · not linked to a specific workout.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imported response · not linked to a specific workout."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Respuesta importada · sin vínculo con un entrenamiento específico."
+          }
+        }
+      }
+    },
+    "Open the file in Shortcuts and add it. The three actions are connected and ChatGPT is selected explicitly. Enable Apple’s ChatGPT extension if needed. There is no automatic switch to another provider.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open the file in Shortcuts and add it. The three actions are connected and ChatGPT is selected explicitly. Enable Apple’s ChatGPT extension if needed. There is no automatic switch to another provider."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre el archivo en Atajos y añádelo. Las tres acciones están conectadas y ChatGPT está seleccionado explícitamente. Activa la extensión de ChatGPT de Apple si hace falta. No se cambia automáticamente a otro proveedor."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

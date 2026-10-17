@@ -23,6 +23,16 @@ No backend. No ads. No API keys. No paid inference or runtime dependencies.
 | Explore History, Progress and factual reports | Undo, finish early and recover after relaunch |
 | Share context with your existing coach chat | Keep logging offline; deliver completed workouts later |
 
+## What’s new in Build 13
+
+Coach responses now stay with their workout after a proposed plan is accepted or discarded. Imported responses without a workout receipt remain clearly separate. Another result cannot silently replace a proposal you are reviewing. Opening a workout text/JSON file takes you directly to an editable preview; saving remains explicit.
+
+Time estimates no longer count the current rest twice or add rest after the final set. Watch runtime resume/recovery and experimental motion interruption handling are more robust. Review input now includes original exercise identifiers, matched comparisons and recorded logging intervals, keeping them distinct from actual rest.
+
+**Verified:** 130 engine tests, 12 script tests, both simulator builds, native paired 46 mm Watch workflows and a real ChatGPT extension response on this Mac using generic data. The response passed Little Lift’s receipt, duplicate, acceptance and persistence checks. The prepared Shortcut now explicitly selects ChatGPT; its signed file is available in the real phone’s setup screen.
+
+Build 13 was installed and launched on both real devices, with backed-up workout/checkpoint/motion data checked afterward. See the [Build 13 audit](docs/audit-13-checklist.md), [delivery evidence](docs/verification.md) and [all 27 requirements](docs/feedback-27.md) for the final artifact status and remaining limits. Mac model execution does not establish unattended iPhone execution, search access or delivery to an existing chat. Physical wrist-down/haptic/sensor claims remain unverified.
+
 ## What’s new in Build 12
 
 Every completed workout now has an automatic review inside Little Lift: prescribed targets, actual logged values, coach observations and exact matching earlier sets. It is calculated from your saved records, works offline and needs no account or Shortcut setup. Missing evidence stays explicit; logging intervals are never called actual rest. Open it from Today, History or Workout reviews.

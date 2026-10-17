@@ -4,10 +4,15 @@ import UniformTypeIdentifiers
 private struct SavedWorkoutReviewRoute: Hashable {
     let sessionID: UUID
 }
+private struct IncomingWorkoutFile: Identifiable {
+    let id = UUID()
+    let text: String
+}
 
 struct PhoneRootView: View {
     @Bindable var store: PhoneStore
     @Environment(\.scenePhase) private var scenePhase
+    @State private var incomingFile: IncomingWorkoutFile?
     var body: some View {
         TabView {
             Tab(L10n.s("Today"), systemImage: "dumbbell") { NavigationStack { TodayView(store: store) } }
@@ -16,8 +21,25 @@ struct PhoneRootView: View {
             Tab(L10n.s("Routines"), systemImage: "square.stack") { NavigationStack { RoutineLibraryView(store: store) } }
             Tab(L10n.s("Settings"), systemImage: "slider.horizontal.3") { NavigationStack { SettingsView(store: store) } }
         }
-        .sheet(isPresented: $store.showingReviewQueue) { NavigationStack { ReviewQueueView(store: store).toolbar { ToolbarItem(placement: .cancellationAction) { Button(L10n.s("Close")) { store.showingReviewQueue = false } } } } }
+        .sheet(isPresented: $store.showingReviewQueue, onDismiss: { store.openedReviewSessionID = nil }) {
+            NavigationStack {
+                Group {
+                    if let session = store.state.sessions.first(where: { $0.id == store.openedReviewSessionID }) {
+                        WorkoutEvidenceReviewView(session: session, store: store)
+                    } else { ReviewQueueView(store: store) }
+                }.toolbar { ToolbarItem(placement: .cancellationAction) { Button(L10n.s("Close")) { store.showingReviewQueue = false } } }
+            }
+        }
         .onChange(of: scenePhase) { _, phase in if phase == .active { store.sendToWatch() } }
+        .sheet(item: $incomingFile) { file in SmartImportView(store: store, initialText: file.text) }
+        .onOpenURL { url in
+            do {
+                guard incomingFile == nil else { throw WorkoutError.invalidState(L10n.s("Finish or close the current import before opening another file.")) }
+                let scoped = url.startAccessingSecurityScopedResource()
+                defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+                incomingFile = IncomingWorkoutFile(text: try WorkoutFileImport.readText(url))
+            } catch { store.error = error.localizedDescription }
+        }
         .alert(L10n.s("Couldn’t save"), isPresented: Binding(get: { store.error != nil }, set: { if !$0 { store.error = nil } })) {
             Button(L10n.s("OK")) { store.error = nil }
         } message: { Text(store.error ?? "") }
@@ -444,7 +466,7 @@ struct ReviewView: View {
                         Button(L10n.s("Accept and send to watch")) {
                             do { try store.acceptReview(); dismiss() } catch { store.error = error.localizedDescription }
                         }
-                        Button(L10n.s("Discard proposal"), role: .destructive) {
+                        Button(L10n.s("Discard proposal")) {
                             do { try store.discardReview(); dismiss() } catch { store.error = error.localizedDescription }
                         }
                     }
@@ -594,7 +616,7 @@ struct ShortcutHelpView: View {
             if let preparedShortcut {
                 Section(L10n.s("Prepared on this Mac")) {
                     ShareLink(item: preparedShortcut) { Text(L10n.s("Open prepared review Shortcut")) }
-                    Text(L10n.s("Open the file in Shortcuts and add it. The three actions are already connected. Choose the ChatGPT extension when Apple asks for a model, or cancel if it is unavailable. No model is selected silently.")).font(.caption)
+                    Text(L10n.s("Open the file in Shortcuts and add it. The three actions are connected and ChatGPT is selected explicitly. Enable Apple’s ChatGPT extension if needed. There is no automatic switch to another provider.")).font(.caption)
                 }
             }
             Section(L10n.s("One-time setup on iPhone")) {

@@ -4,6 +4,10 @@ import UniformTypeIdentifiers
 
 struct SmartImportView: View {
     let store: PhoneStore
+    init(store: PhoneStore, initialText: String = "") {
+        self.store = store
+        _text = State(initialValue: initialText)
+    }
     @Environment(\.dismiss) private var dismiss
     @State private var text = ""
     @State private var draft: WorkoutDraft?
