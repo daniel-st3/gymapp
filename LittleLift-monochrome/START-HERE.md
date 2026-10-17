@@ -2,7 +2,7 @@
 
 **Latest local update: Build 11.** Mixed strength/cardio logging, optional machine-change time, better deferral, Spanish/English, native typography, editable coach context, exercise help and flexible weekly goals. Watch uses an official workout session with manual fallback. See the [27-point delivery matrix](docs/feedback-27.md) and [current verification](docs/verification.md).
 
-The latest apps run on the existing paired simulators. The free-signed device build passes, including the Watch HealthKit entitlement, but the current phone lock/Watch connection prevented physical installation. Physical wrist return, haptic feel, sensor accuracy and live ChatGPT remain unverified. Original signing, icon and data are preserved; **do not uninstall**.
+Build 11 runs on the existing paired simulators and was installed and launched on both real devices on 17 October using the existing free signing. Data preservation was checked after launch; the Watch required restoration from its fresh backup, as detailed in [verification](docs/verification.md). Physical wrist return, haptic feel, sensor accuracy and live ChatGPT remain unverified. Original signing, icon and data are preserved; **do not uninstall**.
 
 For a nontechnical walkthrough, use **Settings → Start here** inside the phone app, or open the [local Spanish guide](docs/onboarding/index.html). The existing explicit-chat workflow and optional independent Shortcut remain separate. The historical Build 4 notes below are not new verification.
 

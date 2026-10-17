@@ -1,6 +1,6 @@
 # Current delivery checklist
 
-**Build 11:** [F01–F27](feedback-27.md) is the current per-requirement status, including mixed cardio, official workout runtime, language, context and weekly goals. The current verification is **112 Swift tests / 15 suites + 10 launcher tests**, both simulator builds and signed device products. Device installation remains blocked by the locked phone/unavailable Watch tunnel. The sections below preserve the earlier delivery history; they are not fresh Build 11 evidence.
+**Build 11:** [F01–F27](feedback-27.md) is the current per-requirement status, including mixed cardio, official workout runtime, language, context and weekly goals. Verification includes **112 Swift tests / 15 suites + 10 launcher tests**, both simulator builds and signed device products. Both real devices installed and launched Build 11 on 17 October. Final readback confirms data preservation after restoring the Watch's active session and motion files from its fresh backup; see [verification](verification.md). Physical wrist return, haptics, sensors and live ChatGPT remain unverified. The sections below preserve earlier delivery history; they are not fresh Build 11 evidence.
 
 Build 10 adds local Progress and security hardening; see [its checklist](progress-10-checklist.md) and [security boundaries](../SECURITY.md). Existing feature limitations below still apply.
 

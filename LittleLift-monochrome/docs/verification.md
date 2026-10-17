@@ -1,5 +1,17 @@
 # Verification
 
+## Build 11 physical delivery: 17 October 2026
+
+After the user unlocked both devices, the existing signed Build 11 products were installed and launched on the real iPhone and paired 46 mm Watch. Device app inventories confirm **bundleVersion 11** on both. The three product signatures were rechecked; the existing free Personal Team profiles cover these devices and remain valid. Bundle identifiers, signing configuration, pairing, icon and refresh script were not changed. This follow-through changes documentation only; the 112 Swift / 10 launcher test results below are from the preceding implementation pass, not a new test run.
+
+Fresh backups of each app's entire `Library/Application Support` preceded installation, including the separate motion folder. The iPhone's final state is semantically identical to its backup, its pre-upgrade checkpoint is byte-identical to the original, and its two motion records are byte-identical.
+
+The Watch required recovery: its first post-install readback lacked the original active session and both motion files. The exact cause of that installation-time change is not established; no uninstall or erase command was used. After stopping the app, the original app-owned state and motion folders were restored from the fresh backup. A readback after relaunch confirms the original session, plan, preferences, recent records and outbox are preserved; the only state differences are `storageVersion: 2` and a newer sync receipt timestamp. Both motion files are byte-identical. The Watch's automatically created checkpoint reflects the intermediate post-install state, so the verified **pre-install Mac backup** remains the recovery source. System WatchConnectivity transport files were not restored or treated as workout records.
+
+The developer connection intermittently failed with tunnel/reset errors; the user kept the Watch awake to complete restoration. Final preservation assertions passed, and both apps were launched. Private install/launch logs, app inventory, hashes, original backups and `final-preservation.json` are under `.verification/build11-device-delivery-20261017/`, excluded from Git. No test workout or sensor recording was added to either real device. Future device updates must back up **both app state and motion files** and compare their readback; an install success alone is insufficient evidence of data preservation.
+
+Physical wrist-raise return, haptic feel, another-workout interruption, sensor accuracy, battery use and live ChatGPT remain unverified. Launch and data recovery do not establish those behaviors. The simulator and platform limitations below still apply.
+
 ## Build 11: F01–F27, 16 October 2026
 
 Implemented on the existing clean local Build 10 (`c6dd20c`), beginning with the Watch workout runtime. This supersedes older “latest” notes below. [The 27-point matrix](feedback-27.md) separates implementation, simulator observations, experimental features and blockers. [Official-source research](feedback-research.md) records platform limits and the Bodytech comparison.
@@ -32,7 +44,7 @@ Generic screenshot evidence is under `.verification/screenshots/feedback11-*`; p
 
 ### Physical delivery and limits
 
-Two backup/access attempts failed before any install. iPhone: CoreDevice **12040**, inner **10003**, device locked. Watch: connection/tunnel timeout. Logs are `devices-before` and `devices-final-attempt` in the private evidence directory. The user was asked once to unlock/connect; no reply was available at delivery. **Build 11 is not installed on the physical devices in this pass.** Existing app data and installation were not modified. The real-device install remains the next action after access, with backup/readback and an in-place update; no uninstall or pairing reset is needed.
+On 16 October, two backup/access attempts failed before any install. iPhone: CoreDevice **12040**, inner **10003**, device locked. Watch: connection/tunnel timeout. Logs are `devices-before` and `devices-final-attempt` in the private evidence directory. The user was asked once to unlock/connect; no reply was available in that pass. Existing app data and installation were not modified then. **Physical delivery was subsequently completed on 17 October, with the Watch restoration and final readback documented above.**
 
 Final simulator restoration passed against both fresh original backups, including the active Watch session and haptic preference. Only storageVersion 2 and a fresh Watch receipt timestamp are allowed differences; both pre-upgrade checkpoint files are byte-identical to the original states. A queued fixture snapshot briefly applied during restoration; after the original phone context arrived, the Watch state was restored again with a current receipt cutoff and exact equality confirmed. Phone text size Large, Watch XL and Reduce Motion off were restored and read back; the known generic clipboard was restored. The latest Build 11 simulator apps are left running. See private `simulator-restoration.json` and accessibility logs.
 

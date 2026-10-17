@@ -35,6 +35,8 @@ Build 10’s local Progress dashboard, authenticated Shortcut actions and bounde
 
 Every requirement has its own status and evidence in [F01–F27](docs/feedback-27.md). Live ChatGPT, exact-thread delivery, physical haptics and repetition accuracy are not claimed verified. No app, site or personal data was published.
 
+Build 11 was installed and launched on the real iPhone and paired Watch with free Personal Team signing on 17 October. Post-launch comparison confirmed data preservation after a Watch backup restoration; see the [delivery evidence and remaining limits](docs/verification.md).
+
 ## A normal workout
 
 1. On iPhone, import a workout or choose a saved routine. Check its editable preview, then save and send it to Watch.
