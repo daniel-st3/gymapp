@@ -20,7 +20,9 @@ monochrome assets, refresh script and original records remain unchanged.
       remove generic exported/recovery files. Latest simulator apps left running.
 - [x] Back up both real devices, including separate motion files.
 - [x] Install final Build 14 on the real iPhone; native inventory confirms 14.
-- [ ] Final physical Watch install/launch/readback: Xcode connection unavailable.
+- [x] Final physical Watch install/launch/readback completed after the user woke it.
+      Native inventory confirms Build 14; session, preferences, checkpoints and
+      motion files are preserved. No data restoration was needed.
 - [x] Final physical iPhone launch and post-launch readback: original state, motion
       and checkpoints preserved; migration checkpoint matches pre-install bytes.
 - [x] Commit and push reviewed source, excluding private data and build artifacts.

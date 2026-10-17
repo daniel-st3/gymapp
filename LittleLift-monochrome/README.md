@@ -31,7 +31,7 @@ Correct an accidental load or repetition entry from **History → workout → Co
 
 Today now separates **Saved on iPhone**, **Received on Watch** and **Workout saved · review ready**. A saved-plan receipt is not a claim of a live connection. Setup stays on iPhone; ordinary Watch logging needs no new taps.
 
-**Verified:** 142 engine tests in 19 suites, 12 script tests, both simulator builds, free-signed device builds, and native phone/46 mm Watch flows using isolated generic data. Native Files export/import, duplicate/conflict handling, correction persistence, damaged-file recovery and future-format refusal were exercised. Original simulator data and accessibility settings were restored. Current physical delivery status is in the [Build 14 checklist](docs/reliability-14-checklist.md) and [verification record](docs/verification.md).
+**Verified:** 142 engine tests in 19 suites, 12 script tests, both simulator builds, free-signed device builds, and native phone/46 mm Watch flows using isolated generic data. Native Files export/import, duplicate/conflict handling, correction persistence, damaged-file recovery and future-format refusal were exercised. Original simulator data and accessibility settings were restored. Build 14 is installed and opened on both real devices with the existing free signing; post-launch readback preserved original workout, checkpoint and motion data. See the [Build 14 checklist](docs/reliability-14-checklist.md) and [verification record](docs/verification.md).
 
 ## What’s new in Build 13
 
