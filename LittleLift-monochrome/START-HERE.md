@@ -1,6 +1,6 @@
 # Run Little Lift on your Mac
 
-**Latest local update: Build 12.** Automatic offline workout reviews inside the app, exact comparisons with your saved sets, search across saved exercises, safer review timeouts and improved Watch spacing. The existing mixed workouts, routines, observations, context sharing and optional independent Shortcut remain available. See the [27-point matrix](docs/feedback-27.md) and [current verification](docs/verification.md).
+**Latest local update: Build 14.** Reviewed backup export/restore, corrections to completed strength records that preserve originals, and clearer Watch delivery/review status. On iPhone use **Settings → Backups** or **History → a workout → Correct record**. Ordinary Watch logging is unchanged. See the [Build 14 checklist](docs/reliability-14-checklist.md), [27-point matrix](docs/feedback-27.md) and [current verification](docs/verification.md).
 
 Your completed workout review appears automatically after the phone saves it. Open **Today → Your latest workout review**, or **History → a workout → Automatic review**. No account or model setup is required. ChatGPT remains a separate optional route. Original data, free signing and icon are preserved; **do not uninstall**.
 

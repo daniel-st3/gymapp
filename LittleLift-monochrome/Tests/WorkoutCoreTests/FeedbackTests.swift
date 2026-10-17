@@ -206,8 +206,8 @@ struct FeedbackRegressionTests {
 
 struct StorageVersionTests {
     @Test func legacyAndCurrentStorageAreAcceptedButFutureStorageIsNotOverwritten() throws {
-        try StorageSchema.validate(nil); try StorageSchema.validate(1); try StorageSchema.validate(2)
-        #expect(throws: (any Error).self) { try StorageSchema.validate(3) }
+        try StorageSchema.validate(nil); try StorageSchema.validate(1); try StorageSchema.validate(2); try StorageSchema.validate(3)
+        #expect(throws: (any Error).self) { try StorageSchema.validate(4) }
         #expect(throws: (any Error).self) { try StorageSchema.validate(-1) }
     }
 }

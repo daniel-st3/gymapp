@@ -123,10 +123,10 @@ extension PhoneState {
     }
     public func contextExport() -> String {
         let shareHistory = contextHistoryApproved != false
-        let actual = (shareHistory ? sessions : []).sorted { $0.startedAt > $1.startedAt }.prefix(8).map { $0.report() }.joined(separator: "\n---\n")
+        let actual = (shareHistory ? effectiveSessions : []).sorted { $0.startedAt > $1.startedAt }.prefix(8).map { $0.report() }.joined(separator: "\n---\n")
         let external = (shareHistory ? externalHistory : []).prefix(8).map { $0.report() }.joined(separator: "\n---\n")
         let routines = routineLibrary.prefix(12).map { L10n.s("\($0.plan.title): \($0.plan.totalSets) prescribed sets / segments; not completed history") }.joined(separator: "\n")
-        let progression = shareHistory ? Progression.summary(sessions) : L10n.s("Not shared")
+        let progression = shareHistory ? Progression.summary(effectiveSessions) : L10n.s("Not shared")
         let lines = [
             L10n.s("LITTLE LIFT CONTEXT — explicit export for my chosen chat"),
             L10n.s("USER-EDITABLE PROFILE / PREFERENCES"),

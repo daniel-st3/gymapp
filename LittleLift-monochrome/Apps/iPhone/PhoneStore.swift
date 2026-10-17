@@ -12,6 +12,7 @@ final class PhoneStore {
     private(set) var motionRecordings: [MotionRecording] = []
     @ObservationIgnored private let motionRepository = MotionRepository(folder: URL.applicationSupportDirectory.appending(path: "LittleLiftMotion", directoryHint: .isDirectory))
     private(set) var storageBlocked = false
+    private(set) var canRecoverFromBackup = false
     @ObservationIgnored private let reviewNotifications = ReviewNotifications()
     private(set) var syncMessage = L10n.s("Workouts sync when your watch is available.")
     private(set) var isSyncing = false
@@ -22,8 +23,21 @@ final class PhoneStore {
     private init() {
         let folder = URL.applicationSupportDirectory.appending(path: "LittleLift", directoryHint: .isDirectory)
         repository = FileRepository(url: folder.appending(path: "phone-v1.json"))
-        do { try repository.checkpointBeforeUpgrade(); let loaded = try repository.load() ?? PhoneState(); try StorageSchema.validate(loaded.storageVersion); state = loaded; UserDefaults.standard.set(state.comfort?.language, forKey: "littlelift.language") }
-        catch { storageBlocked = true; self.error = L10n.s("Stored data could not be read. It has not been overwritten. \(error.localizedDescription)") }
+        do {
+            try StorageSchema.validateHeader(at: repository.url)
+            let loaded = try repository.load() ?? PhoneState()
+            try StorageSchema.validate(loaded.storageVersion)
+            canRecoverFromBackup = true
+            try loaded.validateCorrections()
+            try repository.checkpointBeforeUpgrade()
+            if (loaded.storageVersion ?? 1) < 3 { try repository.checkpointBeforeUpgrade(suffix: "pre-build14") }
+            state = loaded; canRecoverFromBackup = false
+            UserDefaults.standard.set(state.comfort?.language, forKey: "littlelift.language")
+        } catch {
+            storageBlocked = true
+            if error is DecodingError { canRecoverFromBackup = true }
+            self.error = L10n.s("Stored data could not be read. It has not been overwritten. \(error.localizedDescription)")
+        }
         link.onMessage = { [weak self] in try self?.receive($0) }
         link.onReady = { [weak self] in self?.sendToWatch() }
         link.onStatus = { [weak self] in self?.syncMessage = $0 }
@@ -49,11 +63,34 @@ final class PhoneStore {
     }
 
     private func commit(_ candidate: PhoneState) throws {
-        var next = candidate; next.storageVersion = 2
+        var next = candidate; next.storageVersion = 3
         guard !storageBlocked else { throw WorkoutError.invalidState(L10n.s("Stored data could not be read. Restart after restoring your backup.")) }
         try repository.save(next)
         state = next
         UserDefaults.standard.set(next.comfort?.language, forKey: "littlelift.language")
+    }
+
+    func correctSet(sessionID: UUID, setID: UUID, expectedWeight: Double, expectedReps: Int, weight: Double, reps: Int, reason: String) throws {
+        var next = state
+        try next.correctSet(sessionID: sessionID, setID: setID, expectedWeight: expectedWeight, expectedReps: expectedReps, weight: weight, reps: reps, reason: reason)
+        try commit(next)
+    }
+    func restoreBackup(_ preview: BackupRestorePreview) throws {
+        var next = state; try next.restore(preview)
+        // Keep a complete local checkpoint before every explicit restoration.
+        let checkpoint = repository.url.deletingLastPathComponent().appending(path: "before-restore-\(UUID().uuidString).json")
+        if storageBlocked {
+            guard canRecoverFromBackup else {
+                throw WorkoutError.invalidState(L10n.s("Update Little Lift to read this storage version. Recovery cannot replace a newer format."))
+            }
+            try repository.saveRecovery(next, checkpoint: checkpoint)
+            state = next; storageBlocked = false; canRecoverFromBackup = false
+            UserDefaults.standard.set(next.comfort?.language, forKey: "littlelift.language")
+        } else {
+            try FileRepository<PhoneState>(url: checkpoint).save(state)
+            try commit(next)
+        }
+        if preview.preferencesIncluded { sendToWatch() }
     }
 
     func importPlan(_ text: String) throws {
@@ -77,6 +114,9 @@ final class PhoneStore {
     func discardReview() throws { var next = state; next.discardReview(); try commit(next) }
     func stageUnlinkedReview(_ id: UUID) throws {
         guard let saved = state.unlinkedCoachReviews?.first(where: { $0.id == id }) else { return }
+        if let date = state.unlinkedCoachReviewsOutdatedAt, saved.savedAt <= date {
+            throw WorkoutError.invalidState(L10n.s("Workout evidence changed. Share the updated report before using this older proposal."))
+        }
         var next = state; try next.propose(saved.response); try commit(next)
     }
     func stageSavedReview(_ id: UUID) throws {
@@ -169,6 +209,9 @@ final class PhoneStore {
         var next = state; try next.importHistory(records); try commit(next)
     }
     func sendToWatch(acknowledging id: UUID? = nil) {
+        // A blocked store contains only the in-memory fallback. Publishing that
+        // fallback would clear the Watch's saved plan while phone recovery waits.
+        guard !storageBlocked else { return }
         do {
             try link.publish(SyncLogic.snapshot(from: state, acknowledging: id))
         } catch { syncMessage = L10n.s("Saved on iPhone. \(error.localizedDescription)") }
@@ -176,6 +219,8 @@ final class PhoneStore {
     private func receive(_ message: SyncMessage) throws -> SyncMessage? {
         guard !storageBlocked else { throw WorkoutError.invalidState(L10n.s("The iPhone could not read its stored workouts. Your watch data is still saved.")) }
         if case .planReceived(let id) = message, id == state.plan?.id {
+            var next = state; next.recordWatchReceipt(id)
+            if next != state { try commit(next) }
             syncMessage = L10n.s("Workout received on watch.")
             return nil
         }

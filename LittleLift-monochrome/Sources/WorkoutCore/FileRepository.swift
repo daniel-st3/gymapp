@@ -11,9 +11,9 @@ public struct FileRepository<State: Codable> {
     }
 
     /// One-time, protected migration checkpoint. Never overwrites a prior backup.
-    public func checkpointBeforeUpgrade() throws {
+    public func checkpointBeforeUpgrade(suffix: String = "pre-build11") throws {
         guard FileManager.default.fileExists(atPath: url.path) else { return }
-        let backup = url.deletingPathExtension().appendingPathExtension("pre-build11.json")
+        let backup = url.deletingPathExtension().appendingPathExtension("\(suffix).json")
         guard !FileManager.default.fileExists(atPath: backup.path) else { return }
         let original = try Data(contentsOf: url)
         _ = try Self.decoder().decode(State.self, from: original)
@@ -22,6 +22,23 @@ public struct FileRepository<State: Codable> {
         #else
         try original.write(to: backup, options: [.atomic])
         #endif
+    }
+
+    /// Explicit recovery only: preserve even undecodable bytes before replacing
+    /// the primary file. A checkpoint or atomic-save failure leaves it intact.
+    public func saveRecovery(_ state: State, checkpoint: URL) throws {
+        guard !FileManager.default.fileExists(atPath: checkpoint.path), checkpoint != url else {
+            throw WorkoutError.invalidState(L10n.s("The recovery checkpoint already exists. No records were changed."))
+        }
+        if FileManager.default.fileExists(atPath: url.path) {
+            let original = try Data(contentsOf: url)
+            #if os(iOS) || os(watchOS)
+            try original.write(to: checkpoint, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
+            #else
+            try original.write(to: checkpoint, options: [.atomic])
+            #endif
+        }
+        try save(state)
     }
 
     public func save(_ state: State) throws {
@@ -63,8 +80,22 @@ public enum SyncCodec {
 
 /// Refuse a future schema instead of silently writing it back as an older version.
 public enum StorageSchema {
+    /// Read the version independently of the payload: a future format may no
+    /// longer decode as PhoneState, but must still never be replaced by recovery.
+    public static func validateHeader(at url: URL) throws {
+        guard FileManager.default.fileExists(atPath: url.path) else { return }
+        let data = try Data(contentsOf: url)
+        guard let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              object["storageVersion"] != nil else { return }
+        struct Header: Decodable { let storageVersion: Int? }
+        guard let header = try? JSONDecoder().decode(Header.self, from: data) else {
+            throw WorkoutError.invalidInput(L10n.s("This data was saved by a newer app version. Update Little Lift; the original file is preserved."))
+        }
+        try validate(header.storageVersion)
+    }
+
     public static func validate(_ version: Int?) throws {
-        guard version == nil || (1...2).contains(version!) else {
+        guard version == nil || (1...3).contains(version!) else {
             throw WorkoutError.invalidInput(L10n.s("This data was saved by a newer app version. Update Little Lift; the original file is preserved."))
         }
     }

@@ -70,8 +70,8 @@ struct HabitSummaryView: View {
         LiftSurface {
             if let habit = store.state.weeklyHabit, let rule = habit.goal(at: habit.week(now)) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(rule.paused ? L10n.s("Planned pause") : L10n.s("\(habit.days(in: habit.week(now), sessions: store.state.sessions, now: now)) / \(rule.minimumDays) training days this week")).font(LiftType.heading)
-                    Text(habit.streak(sessions: store.state.sessions, now: now) == 1 ? L10n.s("1 completed week · rest days welcome") : L10n.s("\(habit.streak(sessions: store.state.sessions, now: now)) completed weeks · rest days welcome")).font(.caption).foregroundStyle(.secondary)
+                    Text(rule.paused ? L10n.s("Planned pause") : L10n.s("\(habit.days(in: habit.week(now), sessions: store.state.effectiveSessions, now: now)) / \(rule.minimumDays) training days this week")).font(LiftType.heading)
+                    Text(habit.streak(sessions: store.state.effectiveSessions, now: now) == 1 ? L10n.s("1 completed week · rest days welcome") : L10n.s("\(habit.streak(sessions: store.state.effectiveSessions, now: now)) completed weeks · rest days welcome")).font(.caption).foregroundStyle(.secondary)
                     NavigationLink(L10n.s("Edit weekly goal")) { WeeklyHabitView(store: store) }
                 }.padding(18)
             } else { NavigationLink { WeeklyHabitView(store: store) } label: { LiftMenuRow(title: L10n.s("Set a flexible weekly goal"), symbol: "calendar") } }

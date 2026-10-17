@@ -36,6 +36,9 @@ public enum WorkoutFileImport {
         guard let text = String(data: data, encoding: .utf8) else {
             throw WorkoutError.invalidInput(L10n.s("Text imports must be UTF-8 and below 64 KB."))
         }
+        if let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any], object["format"] as? String == "littlelift.workout-backup" {
+            throw WorkoutError.invalidInput(L10n.s("This is a backup. Open Settings → Backups to review and restore it."))
+        }
         if let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
            object["reviewSessionID"] != nil || object["reviewAttemptID"] != nil {
             throw WorkoutError.invalidInput(L10n.s("This is a coach response. Use Save Workout Review so its workout and attempt can be checked."))

@@ -6,7 +6,8 @@ private struct SavedWorkoutReviewRoute: Hashable {
 }
 private struct IncomingWorkoutFile: Identifiable {
     let id = UUID()
-    let text: String
+    let text: String?
+    let backup: WorkoutBackup?
 }
 
 struct PhoneRootView: View {
@@ -24,20 +25,29 @@ struct PhoneRootView: View {
         .sheet(isPresented: $store.showingReviewQueue, onDismiss: { store.openedReviewSessionID = nil }) {
             NavigationStack {
                 Group {
-                    if let session = store.state.sessions.first(where: { $0.id == store.openedReviewSessionID }) {
+                    if let session = store.state.effectiveSessions.first(where: { $0.id == store.openedReviewSessionID }) {
                         WorkoutEvidenceReviewView(session: session, store: store)
                     } else { ReviewQueueView(store: store) }
                 }.toolbar { ToolbarItem(placement: .cancellationAction) { Button(L10n.s("Close")) { store.showingReviewQueue = false } } }
             }
         }
         .onChange(of: scenePhase) { _, phase in if phase == .active { store.sendToWatch() } }
-        .sheet(item: $incomingFile) { file in SmartImportView(store: store, initialText: file.text) }
+        .sheet(item: $incomingFile) { file in
+            if let backup = file.backup {
+                NavigationStack { WorkoutBackupView(store: store, initialBackup: backup)
+                    .toolbar { ToolbarItem(placement: .cancellationAction) { Button(L10n.s("Close")) { incomingFile = nil } } }
+                }
+            } else { SmartImportView(store: store, initialText: file.text ?? "") }
+        }
         .onOpenURL { url in
             do {
                 guard incomingFile == nil else { throw WorkoutError.invalidState(L10n.s("Finish or close the current import before opening another file.")) }
                 let scoped = url.startAccessingSecurityScopedResource()
                 defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-                incomingFile = IncomingWorkoutFile(text: try WorkoutFileImport.readText(url))
+                let data = try InputBoundary.read(url, maximumBytes: WorkoutBackup.maximumBytes)
+                if let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any], object["format"] as? String == "littlelift.workout-backup" {
+                    incomingFile = IncomingWorkoutFile(text: nil, backup: try WorkoutBackup.decode(data))
+                } else { incomingFile = IncomingWorkoutFile(text: try WorkoutFileImport.readText(url), backup: nil) }
             } catch { store.error = error.localizedDescription }
         }
         .alert(L10n.s("Couldn’t save"), isPresented: Binding(get: { store.error != nil }, set: { if !$0 { store.error = nil } })) {
@@ -62,6 +72,7 @@ struct TodayView: View {
             VStack(alignment: .leading, spacing: 28) {
                 if let plan = store.state.plan {
                     workoutHeader(plan)
+                    reviewStatus
                     LiftSection(title: L10n.s("Your exercises")) {
                         LiftSurface {
                             ForEach(plan.exercises) { exercise in
@@ -69,7 +80,7 @@ struct TodayView: View {
                                     LiftExerciseRow(exercise: exercise, unit: plan.unit,
                                                     number: (plan.exercises.firstIndex(where: { $0.id == exercise.id }) ?? 0) + 1)
                                         .padding(18)
-                                    if let previous = Progression.lastResult(for: exercise, unit: plan.unit, sessions: store.state.sessions) {
+                                    if let previous = Progression.lastResult(for: exercise, unit: plan.unit, sessions: store.state.effectiveSessions) {
                                         NavigationLink { SessionDetailView(session: previous.session) } label: {
                                             HStack(spacing: 8) {
                                                 Text(L10n.s("Last: \(WorkoutSession.number(previous.entry.weight)) \(plan.unit.rawValue) × \(previous.entry.reps)"))
@@ -112,16 +123,7 @@ struct TodayView: View {
                     }.font(.subheadline).frame(minHeight: 44)
                     NavigationLink(L10n.s("Start here")) { GettingStartedView(store: store) }.frame(minHeight: 44)
                     connectionActions
-                }
-                if store.state.review != nil {
-                    Button { reviewing = true } label: {
-                        LiftSurface { LiftMenuRow(title: L10n.s("A new workout to review"), symbol: "text.bubble", detail: L10n.s("Changes need your acceptance")) }
-                    }
-                }
-                if let latest = store.state.sessions.first {
-                    NavigationLink(value: SavedWorkoutReviewRoute(sessionID: latest.id)) {
-                        LiftSurface { LiftMenuRow(title: L10n.s("Your latest workout review"), symbol: "checkmark.circle", detail: L10n.s("Ready automatically · \(latest.plan.title)")) }
-                    }.accessibilityIdentifier("today.latestReview")
+                    reviewStatus
                 }
                 NavigationLink { ReviewQueueView(store: store) } label: {
                     HStack { Text(L10n.s("Workout reviews")).font(.subheadline); Spacer(); LiftChevron() }.frame(minHeight: 44)
@@ -139,7 +141,7 @@ struct TodayView: View {
         }
         .modifier(LiftRootChrome())
         .navigationDestination(for: SavedWorkoutReviewRoute.self) { route in
-            if let session = store.state.sessions.first(where: { $0.id == route.sessionID }) {
+            if let session = store.state.effectiveSessions.first(where: { $0.id == route.sessionID }) {
                 WorkoutEvidenceReviewView(session: session, store: store)
             }
         }
@@ -155,9 +157,26 @@ struct TodayView: View {
         .sensoryFeedback(trigger: copies) { _, _ in PhoneStore.shared.state.comfort?.haptics == false ? nil : .success }
     }
 
+    @ViewBuilder private var reviewStatus: some View {
+        if store.state.review != nil {
+            Button { reviewing = true } label: {
+                LiftSurface { LiftMenuRow(title: L10n.s("A new workout to review"), symbol: "text.bubble", detail: L10n.s("Changes need your acceptance")) }
+            }
+        }
+        if let latest = store.state.effectiveSessions.first {
+            let job = store.state.reviewQueue.first { $0.id == latest.id }
+            NavigationLink(value: SavedWorkoutReviewRoute(sessionID: latest.id)) {
+                LiftSurface {
+                    LiftMenuRow(title: job?.result != nil && job?.outdatedAt == nil ? L10n.s("Coach response ready") : L10n.s("Workout saved · review ready"),
+                        symbol: "checkmark.circle", detail: latest.plan.title + " · " + latest.startedAt.formatted(date: .abbreviated, time: .omitted))
+                }
+            }.accessibilityIdentifier("today.latestReview")
+        }
+    }
+
     private var sendButton: some View {
         Button { store.sendToWatch() } label: {
-            Label(store.isSyncing ? L10n.s("Sending…") : L10n.s("Send to Watch"), systemImage: "applewatch")
+            Label(store.isSyncing ? L10n.s("Sending…") : (store.state.todayReceivedOnWatch ? L10n.s("Send again") : L10n.s("Send to Watch")), systemImage: "applewatch")
                 .padding(.horizontal, 10).padding(.vertical, 3)
         }.buttonStyle(QuietButtonStyle(prominent: true))
             .disabled(store.isSyncing || store.state.plan == nil)
@@ -184,9 +203,7 @@ struct TodayView: View {
                 Button { editing = plan } label: { Label(L10n.s("Edit"), systemImage: "pencil").padding(.horizontal, 12) }
                     .buttonStyle(QuietButtonStyle()).fixedSize(horizontal: !dynamicType.isAccessibilitySize, vertical: false)
             }
-            Label(store.syncMessage, systemImage: store.isSyncing ? "arrow.triangle.2.circlepath" : "applewatch")
-                .font(.caption).foregroundStyle(.secondary)
-                .symbolEffect(.pulse, options: .nonRepeating, value: reduceMotion ? false : store.isSyncing)
+            TodayDeliveryView(store: store)
             if let slot = store.state.weeklySchedule.first(where: { $0.weekday == Calendar.current.component(.weekday, from: Date()) }),
                let routine = store.state.routineLibrary.first(where: { $0.id == slot.routineID }), routine.plan.id != plan.id {
                 Button { choosing = true } label: {
@@ -285,14 +302,14 @@ struct HistoryView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 28) {
                 LiftPageHeading(title: L10n.s("Your training"), detail: L10n.s("Every set, kept in one place."))
-                if !store.state.sessions.isEmpty {
+                if !store.state.effectiveSessions.isEmpty {
                     HStack {
-                        LiftStat(value: String(store.state.sessions.count), label: L10n.s("Recorded workouts"))
-                        LiftStat(value: String(store.state.sessions.reduce(0) { $0 + $1.loggedWorkCount }), label: L10n.s("Sets / segments logged"))
+                        LiftStat(value: String(store.state.effectiveSessions.count), label: L10n.s("Recorded workouts"))
+                        LiftStat(value: String(store.state.effectiveSessions.reduce(0) { $0 + $1.loggedWorkCount }), label: L10n.s("Sets / segments logged"))
                     }
                     LiftSection(title: L10n.s("Recorded with Little Lift")) {
                         LazyVStack(spacing: 12) {
-                            ForEach(store.state.sessions) { session in
+                            ForEach(store.state.effectiveSessions) { session in
                                 NavigationLink { SessionDetailView(session: session) } label: {
                                     LiftSurface {
                                         HStack(alignment: .top, spacing: 20) {
@@ -325,7 +342,7 @@ struct HistoryView: View {
                         }
                     }
                 }
-                if store.state.sessions.isEmpty && store.state.externalHistory.isEmpty {
+                if store.state.effectiveSessions.isEmpty && store.state.externalHistory.isEmpty {
                     LiftSurface { VStack(alignment: .leading, spacing: 14) {
                         Image(systemName: "list.bullet.rectangle").font(.title2.weight(.light))
                         Text(L10n.s("Ready for your first workout")).font(LiftType.title)
@@ -341,7 +358,10 @@ struct HistoryView: View {
 }
 
 struct SessionDetailView: View {
-    let session: WorkoutSession
+    private let original: WorkoutSession
+    private let store = PhoneStore.shared
+    private var session: WorkoutSession { store.state.effectiveSession(original.id) ?? original }
+    init(session: WorkoutSession) { original = session }
     @State private var copies = 0
     var body: some View {
         ScrollView {
@@ -356,6 +376,14 @@ struct SessionDetailView: View {
                 }
                 NavigationLink { WorkoutEvidenceReviewView(session: session, store: PhoneStore.shared) } label: {
                     LiftSurface { LiftMenuRow(title: L10n.s("Automatic review"), symbol: "checkmark.circle", detail: L10n.s("Targets, actual values and comparable earlier sets")) }
+                }
+                if !session.entries.isEmpty {
+                    NavigationLink { WorkoutCorrectionView(store: store, sessionID: session.id) } label: {
+                        LiftSurface { LiftMenuRow(title: L10n.s("Correct record"), symbol: "pencil", detail: L10n.s("Original values are preserved")) }
+                    }
+                }
+                if let corrections = session.correctionSummary {
+                    DisclosureGroup(L10n.s("Original values & corrections")) { Text(corrections).font(.caption).textSelection(.enabled) }
                 }
                 LiftSection(title: L10n.s("Recorded work")) {
                     ForEach(session.executionExercises) { exercise in
@@ -511,6 +539,8 @@ struct SettingsView: View {
                     LiftSurface {
                         NavigationLink { MotionLibraryView(store: store) } label: { LiftMenuRow(title: L10n.s("Motion test"), symbol: "waveform.path", detail: L10n.s("Optional experiment")) }
                         Divider().padding(.horizontal, 18)
+                        NavigationLink { WorkoutBackupView(store: store) } label: { LiftMenuRow(title: L10n.s("Backups"), symbol: "externaldrive", detail: L10n.s("Export or restore your training records")) }
+                        Divider().padding(.horizontal, 18)
                         NavigationLink { DataInformationView(store: store) } label: { LiftMenuRow(title: L10n.s("Data & connection"), symbol: "internaldrive") }
                     }
                 }
@@ -576,6 +606,7 @@ struct DataInformationView: View {
                 Text(L10n.s("Workouts, routines and your training profile stay on your iPhone and Watch."))
                 Text(L10n.s("Sharing a report or running a review sends only the context you choose. Little Lift has no hosted backend, analytics service or AI API key.")).foregroundStyle(.secondary)
             }
+            NavigationLink(L10n.s("Backups")) { WorkoutBackupView(store: store) }
             Section { DisclosureGroup(L10n.s("Connection details")) { Text(store.connectionDetails).font(.caption.monospaced()).textSelection(.enabled) } }
         }.scrollContentBackground(.hidden).background(.black)
             .navigationTitle(L10n.s("Data & connection")).navigationBarTitleDisplayMode(.inline)

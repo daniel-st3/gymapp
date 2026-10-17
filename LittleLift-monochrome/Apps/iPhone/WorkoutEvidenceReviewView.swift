@@ -1,11 +1,13 @@
 import SwiftUI
 
 struct WorkoutEvidenceReviewView: View {
-    let session: WorkoutSession
+    private let original: WorkoutSession
+    private var session: WorkoutSession { store.state.effectiveSession(original.id) ?? original }
+    init(session: WorkoutSession, store: PhoneStore) { original = session; self.store = store }
     let store: PhoneStore
     @Environment(\.dynamicTypeSize) private var textSize
     @State private var showingProposal = false
-    private var review: WorkoutEvidenceReview { WorkoutEvidenceReview(session: session, history: store.state.sessions) }
+    private var review: WorkoutEvidenceReview { WorkoutEvidenceReview(session: session, history: store.state.effectiveSessions) }
 
     var body: some View {
         ScrollView {
@@ -14,12 +16,23 @@ struct WorkoutEvidenceReviewView: View {
                 if let feedback = store.state.reviewQueue.first(where: { $0.id == session.id })?.result {
                     LiftSection(title: L10n.s("Saved coach response")) {
                         Text(feedback.analysis).font(.body).textSelection(.enabled)
+                        if store.state.reviewQueue.first(where: { $0.id == session.id })?.outdatedAt != nil {
+                            Text(L10n.s("Based on earlier values. Your corrected local report is up to date; this coach response has not been recalculated.")).font(.callout)
+                        }
                         Button(L10n.s("Review proposed workout")) {
                             do { try store.stageSavedReview(session.id); showingProposal = true }
                             catch { store.error = error.localizedDescription }
-                        }.frame(minHeight: 44)
+                        }.frame(minHeight: 44).disabled(store.state.reviewQueue.first(where: { $0.id == session.id })?.outdatedAt != nil)
                         Text(L10n.s("Feedback stays with this workout. Your plan changes only after acceptance.")).font(.caption).foregroundStyle(.secondary)
                     }
+                }
+                if let archive = store.state.reviewQueue.first(where: { $0.id == session.id })?.previousResults, !archive.isEmpty {
+                    DisclosureGroup(L10n.s("Earlier coach responses")) {
+                        Text(archive.map(\.analysis).joined(separator: "\n\n—\n\n")).font(.caption).textSelection(.enabled)
+                    }
+                }
+                if let correction = session.correctionSummary {
+                    DisclosureGroup(L10n.s("Original values & corrections")) { Text(correction).font(.caption).textSelection(.enabled) }
                 }
                 if textSize.isAccessibilitySize {
                     VStack(alignment: .leading, spacing: 16) { reviewMetrics }
@@ -38,7 +51,7 @@ struct WorkoutEvidenceReviewView: View {
                                     Text(L10n.s("Set \(item.entry.setNumber) · confirmed: \(WorkoutSession.number(item.entry.weight)) \(session.plan.unit.rawValue) × \(item.entry.reps)"))
                                         .font(.callout).accessibilityIdentifier("review.set.\(item.entry.setNumber)")
                                     if item.previous != nil { Text(review.comparisonText(item)).font(.caption).foregroundStyle(.secondary) }
-                                    if let id = item.previousSessionID, let previous = store.state.sessions.first(where: { $0.id == id }) {
+                                    if let id = item.previousSessionID, let previous = store.state.effectiveSessions.first(where: { $0.id == id }) {
                                         NavigationLink { SessionDetailView(session: previous) } label: {
                                             Label(L10n.s("View earlier workout"), systemImage: "clock.arrow.circlepath").font(.caption).frame(minHeight: 44)
                                         }

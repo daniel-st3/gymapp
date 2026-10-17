@@ -20,7 +20,7 @@ struct TimePlanningView: View {
             }
             if let plan = store.state.plan, let preview = try? WorkoutSession(plan: plan) {
                 Section(L10n.s("Estimated session")) {
-                    Text(WorkoutPace.remaining(preview, history: store.state.sessions).text)
+                    Text(WorkoutPace.remaining(preview, history: store.state.effectiveSessions).text)
                     Text(L10n.s("Based on matched Log-tap intervals, including setup and exercise time. With limited history the range is broad. It is not measured rest or a promised finish time.")).font(.caption).foregroundStyle(.secondary)
                 }
             }

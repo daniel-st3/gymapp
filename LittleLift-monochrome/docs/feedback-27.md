@@ -4,6 +4,8 @@ Continuación de los Builds 10 y 11 locales, sin reemplazarlos por un ZIP. Los a
 
 Estado de ejecución: **Build 13 corrige la conservación de respuestas del coach, los cálculos de tiempo y la recuperación del Watch; añade apertura directa de archivos con revisión previa y comprueba una respuesta real de ChatGPT en el Mac**. Los 27 puntos permanecen separados. Las pruebas anteriores se conservan como evidencia histórica; el [pase Build 13](audit-13-checklist.md) identifica las pruebas nuevas y los límites físicos/plataforma.
 
+**Build 14 añade fiabilidad cotidiana:** copias de seguridad con restauración revisada, correcciones auditables de carga/repeticiones y confirmación de entrega en Hoy. No reclasifica como verificados los límites físicos o de plataforma de F02/F03/F10/F19/F21. [Checklist Build 14](reliability-14-checklist.md): 142 pruebas Swift, 12 Python y recorridos nativos nuevos; la matriz conserva la versión de su evidencia anterior.
+
 | ID | Requisito | Estado | Cambio | Archivos relevantes | Evidencia (versión indicada; Build 11 si se omite) | Coste / dependencia / limitación |
 |---|---|---|---|---|---|---|
 | F01 | Máquina ocupada / Después | Implementado · simulador | Posponer antes y después de una serie; elegir siguiente; conserva orden original e IDs. | Models.swift, Flexibility.swift, AdaptiveWorkoutView.swift | defer-after-set, FeedbackTests | Local. No elimina ni completa el trabajo pendiente. |

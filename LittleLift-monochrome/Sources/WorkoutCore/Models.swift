@@ -132,6 +132,7 @@ public struct WorkoutSession: Codable, Equatable, Identifiable, Sendable {
     public private(set) var transitionUntil: Date?
     public private(set) var transitionRemaining: Double?
     public private(set) var pendingTransition: Bool?
+    public private(set) var appliedCorrections: [SetCorrection]?
     public var feedback: String?
     public var hydrationDue: Date?
 
@@ -139,6 +140,28 @@ public struct WorkoutSession: Codable, Equatable, Identifiable, Sendable {
     public init(id: UUID = UUID(), plan: WorkoutPlan, now: Date = Date()) throws {
         try plan.validate()
         self.id = id; self.plan = plan; self.startedAt = now
+    }
+
+    public func applying(_ corrections: [SetCorrection]) -> WorkoutSession {
+        var copy = self
+        for change in corrections where change.sessionID == id {
+            guard let index = copy.entries.firstIndex(where: { $0.id == change.setID }) else { continue }
+            let old = copy.entries[index]
+            copy.entries[index] = CompletedSet(id: old.id, exerciseID: old.exerciseID, setNumber: old.setNumber,
+                weight: change.weight, reps: change.reps, completedAt: old.completedAt, loggedUptime: old.loggedUptime)
+        }
+        copy.appliedCorrections = corrections.isEmpty ? nil : corrections
+        return copy
+    }
+    public var correctionSummary: String? {
+        guard let changes = appliedCorrections, !changes.isEmpty else { return nil }
+        var lines = [L10n.s("CORRECTED ON IPHONE — original Log events and prescription preserved.")]
+        for change in changes {
+            let number = entries.first(where: { $0.id == change.setID })?.setNumber ?? 0
+            lines.append(L10n.s("Set \(number) [\(change.setID.uuidString)]: \(Self.number(change.previousWeight)) × \(change.previousReps) → \(Self.number(change.weight)) × \(change.reps) \(plan.unit.rawValue). \(change.reason)"))
+            lines.append(ISO8601DateFormatter().string(from: change.recordedAt))
+        }
+        return lines.joined(separator: "\n")
     }
 
     public var currentExercise: ExercisePlan? {
@@ -334,7 +357,7 @@ public struct WorkoutSession: Codable, Equatable, Identifiable, Sendable {
         try plan.validate()
         try validateEffort()
         try validateExecution()
-        guard isReadyForDelivery, let end = endedAt, end >= startedAt,
+        guard appliedCorrections == nil, isReadyForDelivery, let end = endedAt, end >= startedAt,
               InputBoundary.validDate(startedAt), InputBoundary.validDate(end),
               entries.count <= plan.totalSets, Set(entries.map(\.id)).count == entries.count else {
             throw WorkoutError.invalidInput(L10n.s("The received workout is incomplete or invalid."))
@@ -367,6 +390,7 @@ public struct WorkoutSession: Codable, Equatable, Identifiable, Sendable {
         var lines = [L10n.s("WORKOUT LOG"), L10n.s("Session ID: \(id.uuidString)"), L10n.s("Date: \(date)"),
                      L10n.s("Workout: \(plan.title)"), L10n.s("Duration: \(Int(duration / 60)) min"),
                      L10n.s("Completed: \(loggedWorkCount) / \(plan.totalSets) sets / segments"), L10n.s("Units: \(plan.unit.rawValue)"), ""]
+        if let correctionSummary { lines.append(correctionSummary) }
         if plan.practice == true { lines.append(L10n.s("PRACTICE SESSION — excluded from weekly goals; not evidence of training progression.")) }
         for exercise in executionExercises {
             lines.append(exercise.name)
@@ -426,6 +450,9 @@ public struct PhoneState: Codable, Equatable, Sendable {
     public var storageVersion: Int? = 2
     public var plan: WorkoutPlan?
     public var sessions: [WorkoutSession] = []
+    public var setCorrections: [SetCorrection]?
+    public var lastWatchReceipt: WatchPlanReceipt?
+    public var unlinkedCoachReviewsOutdatedAt: Date?
     public var comfort: ComfortPreferences?
     public var weeklyHabit: WeeklyHabit?
     public var onboardingSteps: [String]?

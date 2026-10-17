@@ -16645,6 +16645,1286 @@
           }
         }
       }
+    },
+    "A correction does not match the saved original values.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A correction does not match the saved original values."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una corrección no coincide con los valores originales guardados."
+          }
+        }
+      }
+    },
+    "A correction has no original workout.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A correction has no original workout."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una corrección no tiene un entrenamiento original válido."
+          }
+        }
+      }
+    },
+    "A receipt confirms the saved plan, not a live connection or a completed session. Finished workouts appear in History after the phone saves them.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A receipt confirms the saved plan, not a live connection or a completed session. Finished workouts appear in History after the phone saves them."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La confirmación acredita que el plan se guardó; no indica conexión en vivo ni sesión terminada. Los entrenamientos aparecen en Historial cuando el iPhone los guarda."
+          }
+        }
+      }
+    },
+    "Adds missing records. Existing records win conflicts. Today’s workout and the Watch session stay in place. The backup’s current plan is kept in Routines.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adds missing records. Existing records win conflicts. Today’s workout and the Watch session stay in place. The backup’s current plan is kept in Routines."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añade registros faltantes. En los conflictos se conservan los actuales. El entrenamiento de Hoy y la sesión del Watch se mantienen. El plan de la copia se guarda en Rutinas."
+          }
+        }
+      }
+    },
+    "Also restore profile, schedule and preferences": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Also restore profile, schedule and preferences"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurar también perfil, calendario y preferencias"
+          }
+        }
+      }
+    },
+    "Backup exported.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backup exported."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copia exportada."
+          }
+        }
+      }
+    },
+    "Backup restored. Your current workout is unchanged.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backup restored. Your current workout is unchanged."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copia restaurada. Tu entrenamiento actual se mantiene."
+          }
+        }
+      }
+    },
+    "Backups": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backups"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copias de seguridad"
+          }
+        }
+      }
+    },
+    "Based on earlier values. Your corrected local report is up to date; this coach response has not been recalculated.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Based on earlier values. Your corrected local report is up to date; this coach response has not been recalculated."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se basa en valores anteriores. Tu informe local ya está actualizado; esta respuesta del coach no se ha recalculado."
+          }
+        }
+      }
+    },
+    "CORRECTED ON IPHONE — original Log events and prescription preserved.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CORRECTED ON IPHONE — original Log events and prescription preserved."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CORREGIDO EN IPHONE — se conservan los eventos de registro y la prescripción originales."
+          }
+        }
+      }
+    },
+    "Cancel preview": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel preview"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelar vista previa"
+          }
+        }
+      }
+    },
+    "Change an accidental load or repetition entry. The original record, prescription and timestamps stay intact. Local reports update; older coach feedback is marked for review.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change an accidental load or repetition entry. The original record, prescription and timestamps stay intact. Local reports update; older coach feedback is marked for review."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Corrige un peso o unas repeticiones registrados por error. Se conservan el registro original, la prescripción y las horas. Los informes locales se actualizan; las respuestas anteriores del coach quedan señaladas para revisar."
+          }
+        }
+      }
+    },
+    "Change the load or repetitions before saving a correction.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change the load or repetitions before saving a correction."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cambia el peso o las repeticiones antes de guardar una corrección."
+          }
+        }
+      }
+    },
+    "Check Watch delivery": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check Watch delivery"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comprobar envío al Watch"
+          }
+        }
+      }
+    },
+    "Choose a Little Lift backup. A workout import or damaged file cannot be restored as a backup.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a Little Lift backup. A workout import or damaged file cannot be restored as a backup."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige una copia de seguridad de Little Lift. Un entrenamiento para importar o un archivo dañado no son copias válidas."
+          }
+        }
+      }
+    },
+    "Choose backup to restore": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose backup to restore"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elegir copia para restaurar"
+          }
+        }
+      }
+    },
+    "Coach response conflict · {0}": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coach response conflict · {0}"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conflicto de respuesta del coach · {0}"
+          }
+        }
+      }
+    },
+    "Coach response ready": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coach response ready"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Respuesta del coach disponible"
+          }
+        }
+      }
+    },
+    "Connection & retry": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connection & retry"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conexión y reintento"
+          }
+        }
+      }
+    },
+    "Correct a logged strength set": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Correct a logged strength set"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Corregir una serie registrada"
+          }
+        }
+      }
+    },
+    "Correct record": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Correct record"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Corregir registro"
+          }
+        }
+      }
+    },
+    "Correct values": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Correct values"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valores correctos"
+          }
+        }
+      }
+    },
+    "Corrected entry": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Corrected entry"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Corrección de registro"
+          }
+        }
+      }
+    },
+    "Corrected load": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Corrected load"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Peso corregido"
+          }
+        }
+      }
+    },
+    "Corrected repetitions": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Corrected repetitions"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repeticiones corregidas"
+          }
+        }
+      }
+    },
+    "Correction conflict · {0} [{1}]": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Correction conflict · {0} [{1}]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conflicto de correcciones · {0} [{1}]"
+          }
+        }
+      }
+    },
+    "Corrections": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Corrections"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Correcciones"
+          }
+        }
+      }
+    },
+    "Currently saved": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Currently saved"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardado actualmente"
+          }
+        }
+      }
+    },
+    "Earlier coach responses": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Earlier coach responses"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Respuestas anteriores del coach"
+          }
+        }
+      }
+    },
+    "Evidence changed · request an updated response": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Evidence changed · request an updated response"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los datos cambiaron · solicita una respuesta actualizada"
+          }
+        }
+      }
+    },
+    "Export backup": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export backup"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exportar copia"
+          }
+        }
+      }
+    },
+    "Export or restore your training records": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export or restore your training records"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exporta o restaura tus entrenamientos"
+          }
+        }
+      }
+    },
+    "Imported record conflict · {0} [{1}]": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imported record conflict · {0} [{1}]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conflicto de registro importado · {0} [{1}]"
+          }
+        }
+      }
+    },
+    "Imported records": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imported records"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registros importados"
+          }
+        }
+      }
+    },
+    "Keep a copy you control": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep a copy you control"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guarda una copia contigo"
+          }
+        }
+      }
+    },
+    "New data arrived during the preview. Preview this backup again before restoring.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New data arrived during the preview. Preview this backup again before restoring."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Llegaron datos nuevos durante la vista previa. Revísala otra vez antes de restaurar."
+          }
+        }
+      }
+    },
+    "Only confirmed values change. No new exercise time or rest measurement is created.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only confirmed values change. No new exercise time or rest measurement is created."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo cambian los valores confirmados. No se crean nuevas mediciones de ejercicio ni de descanso."
+          }
+        }
+      }
+    },
+    "Original values & corrections": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Original values & corrections"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valores originales y correcciones"
+          }
+        }
+      }
+    },
+    "Original values are preserved": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Original values are preserved"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se conservan los valores originales"
+          }
+        }
+      }
+    },
+    "Profile in backup: empty": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profile in backup: empty"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perfil en la copia: vacío"
+          }
+        }
+      }
+    },
+    "Ready to start on Watch. An active workout keeps its original plan.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ready to start on Watch. An active workout keeps its original plan."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listo para empezar en el Watch. Una sesión en curso conserva su plan original."
+          }
+        }
+      }
+    },
+    "Reason, optional": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reason, optional"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Motivo, opcional"
+          }
+        }
+      }
+    },
+    "Receipt confirmed: {0}": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Receipt confirmed: {0}"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recepción confirmada: {0}"
+          }
+        }
+      }
+    },
+    "Received on Watch": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Received on Watch"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recibido en el Watch"
+          }
+        }
+      }
+    },
+    "Refresh preview": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh preview"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualizar vista previa"
+          }
+        }
+      }
+    },
+    "Replaces your profile, equipment notes, weekly schedule, weekly goal, language and Watch control preferences. Sharing permissions and motion opt-in stay unchanged.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Replaces your profile, equipment notes, weekly schedule, weekly goal, language and Watch control preferences. Sharing permissions and motion opt-in stay unchanged."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sustituye perfil, notas de equipo, calendario semanal, meta semanal, idioma y preferencias del Watch. Los permisos para compartir y el experimento de movimiento se mantienen."
+          }
+        }
+      }
+    },
+    "Restore reviewed backup": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore reviewed backup"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurar copia revisada"
+          }
+        }
+      }
+    },
+    "Restored from backup. Run a new review only if you choose.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restored from backup. Run a new review only if you choose."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurado desde una copia. Puedes solicitar una nueva revisión si lo deseas."
+          }
+        }
+      }
+    },
+    "Review before restoring": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Review before restoring"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revisa antes de restaurar"
+          }
+        }
+      }
+    },
+    "Routine conflict · {0} [{1}]": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Routine conflict · {0} [{1}]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conflicto de rutina · {0} [{1}]"
+          }
+        }
+      }
+    },
+    "Save correction": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save correction"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardar corrección"
+          }
+        }
+      }
+    },
+    "Saved on iPhone": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved on iPhone"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardado en el iPhone"
+          }
+        }
+      }
+    },
+    "Saved responses remain available. Restoring never starts ChatGPT or accepts a proposal. A local copy of your current data is saved first.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved responses remain available. Restoring never starts ChatGPT or accepts a proposal. A local copy of your current data is saved first."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las respuestas guardadas siguen disponibles. Restaurar no inicia ChatGPT ni acepta propuestas. Primero se guarda una copia local de tus datos actuales."
+          }
+        }
+      }
+    },
+    "Scheduled days in backup: {0}": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scheduled days in backup: {0}"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Días programados en la copia: {0}"
+          }
+        }
+      }
+    },
+    "Send again": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send again"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reenviar"
+          }
+        }
+      }
+    },
+    "Set {0} [{1}]: {2} × {3} → {4} × {5} {6}. {7}": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set {0} [{1}]: {2} × {3} → {4} × {5} {6}. {7}"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serie {0} [{1}]: {2} × {3} → {4} × {5} {6}. {7}"
+          }
+        }
+      }
+    },
+    "The correction archive is invalid or too large.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The correction archive is invalid or too large."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El archivo de correcciones no es válido o es demasiado grande."
+          }
+        }
+      }
+    },
+    "The file contains personal training data. Experimental motion recordings and Apple permissions are not included.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The file contains personal training data. Experimental motion recordings and Apple permissions are not included."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El archivo contiene datos personales de entrenamiento. No incluye grabaciones experimentales de movimiento ni permisos de Apple."
+          }
+        }
+      }
+    },
+    "This backup format is not supported. Update Little Lift before restoring it.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This backup format is not supported. Update Little Lift before restoring it."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este formato de copia no es compatible. Actualiza Little Lift antes de restaurarla."
+          }
+        }
+      }
+    },
+    "This backup is invalid or exceeds its supported limits. No saved records were changed.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This backup is invalid or exceeds its supported limits. No saved records were changed."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La copia no es válida o supera los límites admitidos. No se modificó ningún registro guardado."
+          }
+        }
+      }
+    },
+    "This is a backup. Open Settings → Backups to review and restore it.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This is a backup. Open Settings → Backups to review and restore it."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es una copia de seguridad. Abre Ajustes → Copias de seguridad para revisarla y restaurarla."
+          }
+        }
+      }
+    },
+    "This set changed while you were editing. Reopen it to review the current values.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This set changed while you were editing. Reopen it to review the current values."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La serie cambió mientras la editabas. Ábrela otra vez para revisar los valores actuales."
+          }
+        }
+      }
+    },
+    "This workout has 100 saved review versions. Share the corrected report for further feedback.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This workout has 100 saved review versions. Share the corrected report for further feedback."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este entrenamiento tiene 100 versiones de revisión guardadas. Comparte el informe corregido para recibir más comentarios."
+          }
+        }
+      }
+    },
+    "To undo a correction, enter the earlier values as a new correction. Timed activity events and imported history cannot be edited here.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To undo a correction, enter the earlier values as a new correction. Timed activity events and imported history cannot be edited here."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Para deshacer una corrección, guarda los valores anteriores como una nueva corrección. Aquí no se editan eventos cronometrados ni historial importado."
+          }
+        }
+      }
+    },
+    "Waiting for the Watch to confirm this workout. Your plan is safe on this iPhone.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting for the Watch to confirm this workout. Your plan is safe on this iPhone."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esperando que el Watch confirme este entrenamiento. Tu plan está guardado en el iPhone."
+          }
+        }
+      }
+    },
+    "What will be added": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What will be added"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qué se añadirá"
+          }
+        }
+      }
+    },
+    "Workout conflict · {0} [{1}]": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workout conflict · {0} [{1}]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conflicto de entrenamiento · {0} [{1}]"
+          }
+        }
+      }
+    },
+    "Workout evidence changed. Share the updated report before using this older proposal.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workout evidence changed. Share the updated report before using this older proposal."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los datos del entrenamiento cambiaron. Comparte el informe actualizado antes de usar esta propuesta anterior."
+          }
+        }
+      }
+    },
+    "Workout evidence changed. Start a new review with the corrected report.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workout evidence changed. Start a new review with the corrected report."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los datos del entrenamiento cambiaron. Inicia una nueva revisión con el informe corregido."
+          }
+        }
+      }
+    },
+    "Workout saved · review ready": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workout saved · review ready"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrenamiento guardado · revisión lista"
+          }
+        }
+      }
+    },
+    "Workouts, original records, corrections, routines, schedule, profile and saved coach responses. Choose where to save the file.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workouts, original records, corrections, routines, schedule, profile and saved coach responses. Choose where to save the file."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrenamientos, registros originales, correcciones, rutinas, calendario, perfil y respuestas guardadas del coach. Elige dónde guardar el archivo."
+          }
+        }
+      }
+    },
+    "{0} conflicts · keeping current records": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{0} conflicts · keeping current records"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{0} conflictos · se conservan los registros actuales"
+          }
+        }
+      }
+    },
+    "{0} existing records already match.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{0} existing records already match."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{0} registros existentes ya coinciden."
+          }
+        }
+      }
+    },
+    "Included data": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Included data"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datos incluidos"
+          }
+        }
+      }
+    },
+    "How restoration works": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How restoration works"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cómo funciona la restauración"
+          }
+        }
+      }
+    },
+    "Adds missing records and preserves current ones. Today stays unchanged; the archived plan goes to Routines.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adds missing records and preserves current ones. Today stays unchanged; the archived plan goes to Routines."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añade registros faltantes y conserva los actuales. Hoy se mantiene; el plan de la copia pasa a Rutinas."
+          }
+        }
+      }
+    },
+    "Correct the load or repetitions. Original values stay saved; reports update and older coach responses are flagged.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Correct the load or repetitions. Original values stay saved; reports update and older coach responses are flagged."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Corrige el peso o las repeticiones. Se conserva el original, se actualizan los informes y se señalan las respuestas anteriores del coach."
+          }
+        }
+      }
+    },
+    "The recovery checkpoint already exists. No records were changed.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The recovery checkpoint already exists. No records were changed."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La copia previa de recuperación ya existe. No se modificó ningún registro."
+          }
+        }
+      }
+    },
+    "Update Little Lift to read this storage version. Recovery cannot replace a newer format.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update Little Lift to read this storage version. Recovery cannot replace a newer format."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualiza Little Lift para leer esta versión de datos. La recuperación no puede sustituir un formato más reciente."
+          }
+        }
+      }
+    },
+    "Your current file could not be read. Recovery uses the selected backup and keeps the unreadable file separately. Records missing from the backup cannot be merged automatically.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your current file could not be read. Recovery uses the selected backup and keeps the unreadable file separately. Records missing from the backup cannot be merged automatically."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo leer el archivo actual. La recuperación usa la copia elegida y conserva aparte el archivo ilegible. Los registros que falten en la copia no se pueden combinar automáticamente."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

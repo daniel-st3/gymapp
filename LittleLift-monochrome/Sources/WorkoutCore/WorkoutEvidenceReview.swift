@@ -79,8 +79,8 @@ extension PhoneState {
     /// Only acknowledged, validated completed records can have a local review.
     /// Deriving it from the saved session preserves idempotence and old schemas.
     public func localReview(for id: UUID) -> WorkoutEvidenceReview? {
-        guard let session = sessions.first(where: { $0.id == id && $0.phase == .completed }) else { return nil }
-        return WorkoutEvidenceReview(session: session, history: sessions)
+        guard let session = effectiveSessions.first(where: { $0.id == id && $0.phase == .completed }) else { return nil }
+        return WorkoutEvidenceReview(session: session, history: effectiveSessions)
     }
 }
 

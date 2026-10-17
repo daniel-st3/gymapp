@@ -12,6 +12,8 @@ public struct ReviewJob: Codable, Equatable, Identifiable, Sendable {
     // belongs to its workout and survives accepting or dismissing a proposal.
     public var result: TrainingReview?
     public var receivedAt: Date?
+    public var outdatedAt: Date?
+    public var previousResults: [TrainingReview]?
     public init(sessionID: UUID) { id = sessionID; status = .queued }
 }
 public struct ReviewTicket: Equatable, Sendable { public let sessionID: UUID; public let attemptID: UUID }
@@ -48,7 +50,10 @@ extension PhoneState {
         guard sessions.contains(where: { $0.id == id }) else { throw WorkoutError.invalidInput(L10n.s("The workout for this review is unavailable.")) }
         if !jobs.contains(where: { $0.id == id }) { jobs.append(ReviewJob(sessionID: id)) }
         let i = jobs.firstIndex { $0.id == id }!
-        guard jobs[i].status != .received else { throw WorkoutError.invalidState(L10n.s("This workout already has a saved review. Share its report for a follow-up in your existing chat.")) }
+        guard jobs[i].status != .received || jobs[i].outdatedAt != nil else { throw WorkoutError.invalidState(L10n.s("This workout already has a saved review. Share its report for a follow-up in your existing chat.")) }
+        guard (jobs[i].previousResults?.count ?? 0) < 100 else {
+            throw WorkoutError.invalidState(L10n.s("This workout has 100 saved review versions. Share the corrected report for further feedback."))
+        }
         let attempt = UUID(); jobs[i].status = .running; jobs[i].attemptID = attempt; jobs[i].startedAt = now; jobs[i].detail = nil
         reviewJobs = jobs
         return ReviewTicket(sessionID: id, attemptID: attempt)
@@ -82,6 +87,10 @@ extension PhoneState {
             // Receiving feedback must not replace a proposal already being read.
             // The other proposal remains available from this workout's review.
             if review == nil { try propose(proposal) }
+            if let old = jobs[i].result {
+                var archive = jobs[i].previousResults ?? []; archive.append(old); jobs[i].previousResults = archive
+            }
+            jobs[i].outdatedAt = nil
             jobs[i].result = proposal; jobs[i].receivedAt = now
             jobs[i].status = .received; jobs[i].detail = L10n.s("Saved for explicit acceptance."); reviewJobs = jobs
         } else {
@@ -91,13 +100,14 @@ extension PhoneState {
         }
     }
     public mutating func stageSavedReview(for sessionID: UUID) throws {
-        guard let result = reviewQueue.first(where: { $0.id == sessionID })?.result else {
+        guard let job = reviewQueue.first(where: { $0.id == sessionID }), job.outdatedAt == nil,
+              let result = job.result else {
             throw WorkoutError.invalidInput(L10n.s("The saved coach response is unavailable."))
         }
         try propose(result)
     }
     public func prompt(for ticket: ReviewTicket) throws -> String {
-        guard let session = sessions.first(where: { $0.id == ticket.sessionID }) else { throw WorkoutError.invalidInput(L10n.s("Review workout missing.")) }
+        guard let session = effectiveSession(ticket.sessionID) else { throw WorkoutError.invalidInput(L10n.s("Review workout missing.")) }
         let prescription = String(decoding: try FileRepository<WorkoutPlan>.encoder().encode(session.plan), as: UTF8.self)
         return """
         \(PlanImport.reviewPrompt(profile: contextExport(), sessions: [session]))
@@ -108,7 +118,7 @@ extension PhoneState {
         "reviewSessionID": "\(ticket.sessionID.uuidString)",
         "reviewAttemptID": "\(ticket.attemptID.uuidString)"
         Write analysis in \(comfort?.language == "es" ? "Spanish" : "the user’s preferred language"). Keep JSON keys and stable identifiers unchanged.
-        LOCAL FACTUAL REVIEW: \(WorkoutEvidenceReview(session: session, history: contextHistoryApproved != false ? sessions : []).report())
+        LOCAL FACTUAL REVIEW: \(WorkoutEvidenceReview(session: session, history: contextHistoryApproved != false ? effectiveSessions : []).report())
         Review this specific completed workout, including delayed delivery. A failed or cancelled attempt will not be applied. Never claim access to an existing chat.
         """
     }

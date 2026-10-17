@@ -50,7 +50,7 @@ public struct TrainingAnalytics: Sendable {
         let start = calendar.date(byAdding: .weekOfYear, value: -(count - 1), to: current) ?? current
         self.start = start; end = now
         var seen = Set<UUID>()
-        let records = state.sessions.filter {
+        let records = state.effectiveSessions.filter {
             $0.phase == .completed && $0.hasRecordedWork && $0.plan.practice != true && $0.startedAt >= start &&
             $0.startedAt <= now && ($0.endedAt.map { $0 <= now } ?? false) && seen.insert($0.id).inserted
         }.sorted { $0.startedAt > $1.startedAt }

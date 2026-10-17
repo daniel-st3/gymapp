@@ -23,6 +23,16 @@ No backend. No ads. No API keys. No paid inference or runtime dependencies.
 | Explore History, Progress and factual reports | Undo, finish early and recover after relaunch |
 | Share context with your existing coach chat | Keep logging offline; deliver completed workouts later |
 
+## What’s new in Build 14
+
+Keep a portable backup from **Settings → Backups**, preview what restoration will add, and retain current records when IDs conflict. Repeating a restore does not duplicate workouts. Today stays unchanged; the archived plan becomes a routine. A damaged local file can be recovered explicitly while its original bytes are preserved separately. Backups contain personal training data and are not encrypted by Little Lift; experimental motion recordings and Apple permissions are excluded.
+
+Correct an accidental load or repetition entry from **History → workout → Correct record**. The original Watch record, targets and timing remain intact. Reports, Progress and local comparisons use the corrected values and show the audit trail. Older coach responses remain available but are marked outdated; in-flight review receipts are revoked. Reversing a correction means recording another correction, not deleting the original.
+
+Today now separates **Saved on iPhone**, **Received on Watch** and **Workout saved · review ready**. A saved-plan receipt is not a claim of a live connection. Setup stays on iPhone; ordinary Watch logging needs no new taps.
+
+**Verified:** 142 engine tests in 19 suites, 12 script tests, both simulator builds, free-signed device builds, and native phone/46 mm Watch flows using isolated generic data. Native Files export/import, duplicate/conflict handling, correction persistence, damaged-file recovery and future-format refusal were exercised. Original simulator data and accessibility settings were restored. Current physical delivery status is in the [Build 14 checklist](docs/reliability-14-checklist.md) and [verification record](docs/verification.md).
+
 ## What’s new in Build 13
 
 Coach responses now stay with their workout after a proposed plan is accepted or discarded. Imported responses without a workout receipt remain clearly separate. Another result cannot silently replace a proposal you are reviewing. Opening a workout text/JSON file takes you directly to an editable preview; saving remains explicit.

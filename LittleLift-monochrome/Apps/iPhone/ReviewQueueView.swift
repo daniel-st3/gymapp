@@ -6,7 +6,7 @@ struct ReviewQueueView: View {
         LiftList {
             Section(L10n.s("Automatic reviews")) {
                 Text(L10n.s("Every saved workout has a local review. No setup, account or connection is needed.")).font(.caption).foregroundStyle(.secondary)
-                ForEach(store.state.sessions) { session in
+                ForEach(store.state.effectiveSessions) { session in
                     NavigationLink { WorkoutEvidenceReviewView(session: session, store: store) } label: {
                         VStack(alignment: .leading, spacing: 6) {
                             Text(session.plan.title)
@@ -15,7 +15,7 @@ struct ReviewQueueView: View {
                     }
                 }
             }
-            if store.state.sessions.isEmpty { Text(L10n.s("Completed workouts appear here after syncing from Watch.")) }
+            if store.state.effectiveSessions.isEmpty { Text(L10n.s("Completed workouts appear here after syncing from Watch.")) }
             if let saved = store.state.unlinkedCoachReviews, !saved.isEmpty {
                 Section(L10n.s("Imported coach responses")) {
                     ForEach(saved.reversed()) { item in
@@ -37,6 +37,9 @@ private struct UnlinkedCoachReviewView: View {
             Section {
                 Text(saved.response.analysis).textSelection(.enabled)
                 Text(L10n.s("Imported response · not linked to a specific workout.")).font(.caption).foregroundStyle(.secondary)
+                if let date = store.state.unlinkedCoachReviewsOutdatedAt, saved.savedAt <= date {
+                    Text(L10n.s("Workout evidence changed. Share the updated report before using this older proposal.")).font(.caption)
+                }
                 Button(L10n.s("Review proposed workout")) {
                     do { try store.stageUnlinkedReview(saved.id); showingProposal = true }
                     catch { store.error = error.localizedDescription }
@@ -63,14 +66,15 @@ struct OptionalCoachReviewsView: View {
                 }
             }
             ForEach(store.state.reviewQueue.reversed()) { job in
-                Section(store.state.sessions.first(where: { $0.id == job.id })?.plan.title ?? L10n.s("Workout")) {
+                Section(store.state.effectiveSessions.first(where: { $0.id == job.id })?.plan.title ?? L10n.s("Workout")) {
                     Text(L10n.key("review." + job.status.rawValue))
+                    if job.outdatedAt != nil { Text(L10n.s("Evidence changed · request an updated response")).font(.caption) }
                     if let detail = job.detail { Text(detail).font(.caption).foregroundStyle(.secondary) }
-                    if let session = store.state.sessions.first(where: { $0.id == job.id }) {
+                    if let session = store.state.effectiveSessions.first(where: { $0.id == job.id }) {
                         if job.result != nil { NavigationLink(L10n.s("Saved coach response")) { WorkoutEvidenceReviewView(session: session, store: store) } }
                         ShareLink(item: session.report()) { Text(L10n.s("Share report to my existing chat")) }
                     }
-                    if job.status != .received {
+                    if job.status != .received || job.outdatedAt != nil {
                         Button(L10n.s("Run review Shortcut")) {
                             do { try store.selectReview(job.id); runShortcut() } catch { store.error = error.localizedDescription }
                         }.disabled(store.state.reviewQueue.contains(where: { $0.status == .running }) || (openedAt.map { Date().timeIntervalSince($0) < 3 } ?? false))
