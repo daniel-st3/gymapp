@@ -21,6 +21,7 @@ public struct WorkoutBackup: Codable, Equatable, Sendable {
     }
     public static func decode(_ data: Data) throws -> Self {
         guard data.count <= maximumBytes else { throw invalid() }
+        try JSONBoundary.validate(data)
         let backup: Self
         do { backup = try FileRepository<Self>.decoder().decode(Self.self, from: data) }
         catch { throw WorkoutError.invalidInput(L10n.s("Choose a Little Lift backup. A workout import or damaged file cannot be restored as a backup.")) }

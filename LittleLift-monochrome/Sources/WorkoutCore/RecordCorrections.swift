@@ -24,6 +24,7 @@ extension PhoneState {
         sessions.first { $0.id == id }?.applying(correctionLog.filter { $0.sessionID == id })
     }
     public func validateCorrections() throws {
+        try coachConnectionCheck?.validate()
         guard correctionLog.count <= 20_000, Set(correctionLog.map(\.id)).count == correctionLog.count else {
             throw WorkoutError.invalidInput(L10n.s("The correction archive is invalid or too large."))
         }

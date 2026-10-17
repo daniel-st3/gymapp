@@ -61,6 +61,7 @@ public enum HistoryImport {
     public static func parse(_ text: String) throws -> [HistoricalWorkout] {
         guard text.utf8.count <= 256_000 else { throw WorkoutError.invalidInput(L10n.s("Import at most 256 KB of history at once.")) }
         let rows: [HistoricalWorkout]
+        try JSONBoundary.validate(Data(text.utf8))
         do { rows = try JSONDecoder().decode([HistoricalWorkout].self, from: Data(text.utf8)) }
         catch { throw WorkoutError.invalidInput(L10n.s("Use the history example schema: an array of records with stable UUID id, ISO date, title, source, unit and actual exercise sets.")) }
         guard (1...100).contains(rows.count), Set(rows.map(\.id)).count == rows.count else { throw WorkoutError.invalidInput(L10n.s("Import 1–100 records with unique IDs.")) }

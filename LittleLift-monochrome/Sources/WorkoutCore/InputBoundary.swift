@@ -32,15 +32,18 @@ public enum InputBoundary {
 /// never applies a plan or treats receipt-bearing coach JSON as a fresh workout.
 public enum WorkoutFileImport {
     public static func readText(_ url: URL) throws -> String {
-        let data = try InputBoundary.read(url, maximumBytes: 64_000)
-        guard let text = String(data: data, encoding: .utf8) else {
+        return try text(from: InputBoundary.read(url, maximumBytes: 64_000))
+    }
+    public static func text(from data: Data) throws -> String {
+        guard data.count <= 64_000, let text = String(data: data, encoding: .utf8) else {
             throw WorkoutError.invalidInput(L10n.s("Text imports must be UTF-8 and below 64 KB."))
         }
+        if text.trimmingCharacters(in: .whitespacesAndNewlines).hasPrefix("{") { try JSONBoundary.validate(data) }
         if let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any], object["format"] as? String == "littlelift.workout-backup" {
             throw WorkoutError.invalidInput(L10n.s("This is a backup. Open Settings → Backups to review and restore it."))
         }
         if let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-           object["reviewSessionID"] != nil || object["reviewAttemptID"] != nil {
+           object["reviewSessionID"] != nil || object["reviewAttemptID"] != nil || object["connectionCheckID"] != nil {
             throw WorkoutError.invalidInput(L10n.s("This is a coach response. Use Save Workout Review so its workout and attempt can be checked."))
         }
         return text

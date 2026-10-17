@@ -68,6 +68,7 @@ public enum SyncCodec {
     }
     public static func decode(_ data: Data) throws -> SyncMessage {
         guard data.count < 60_000 else { throw WorkoutError.invalidInput(L10n.s("The received workout is too large.")) }
+        try JSONBoundary.validate(data)
         let message = try FileRepository<PhoneState>.decoder().decode(SyncMessage.self, from: data)
         switch message {
         case .snapshot(let snapshot): try SyncLogic.validate(snapshot)

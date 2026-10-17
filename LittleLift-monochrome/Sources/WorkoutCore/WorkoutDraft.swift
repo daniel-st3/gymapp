@@ -106,6 +106,9 @@ public enum SmartWorkoutImport {
         if trimmed.hasPrefix("{") || trimmed.hasPrefix("```") {
             return WorkoutDraft(plan: try PlanImport.parse(text))
         }
+        if let table = TabularWorkoutImport.extract(trimmed) {
+            guard table.exercises.count <= 50 else { throw WorkoutError.invalidInput(L10n.s("Import at most 50 exercise lines.")) }; return table
+        }
         var draft = WorkoutDraft(); draft.source = text
         draft.notes = [L10n.s("Check every extracted field against the source. Missing values and ranges require your decision. A load convention and exact variation ID enable later comparisons; leave both blank when unknown.")]
         for raw in trimmed.components(separatedBy: .newlines).filter({ !$0.trimmingCharacters(in: .whitespaces).isEmpty }) {
@@ -113,33 +116,53 @@ public enum SmartWorkoutImport {
             if line.lowercased().hasPrefix("workout:") || line.lowercased().hasPrefix("title:") || line.lowercased().hasPrefix("entrenamiento:") {
                 draft.title = String(line.split(separator: ":", maxSplits: 1).last ?? "").trimmingCharacters(in: .whitespaces); continue
             }
+            if let rest = first(#"(?i)^(?:rest|descanso)\s*[:=]?\s*(\d+)\s*(s|sec(?:onds?)?|seg(?:undos?)?|min(?:utes?|utos?)?)\b"#, line), !draft.exercises.isEmpty,
+               let n = Int(rest.1[0]), n <= 1800 {
+                let last = draft.exercises.count - 1
+                if draft.exercises[last].rest.isEmpty {
+                    draft.exercises[last].rest = String(n * (rest.1[1].lowercased().hasPrefix("min") ? 60 : 1))
+                    draft.exercises[last].source += "\n" + line
+                    continue
+                }
+            }
             var row = DraftExercise(); row.source = line
             let lower = line.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: Locale(identifier: "en_US_POSIX"))
             if lower.range(of: #"\b(caminar|caminata|caminadora|walking|walk|treadmill|correr|running|run|movilidad|mobility)\b"#, options: .regularExpression) != nil {
                 row.kind = lower.contains("correr") || lower.contains("running") || lower.hasPrefix("run ") ? .running : (lower.contains("movilidad") || lower.contains("mobility") ? .mobility : .walking)
                 row.name = line.components(separatedBy: CharacterSet.decimalDigits).first?.trimmingCharacters(in: .whitespacesAndNewlines) ?? line
-                if let duration = first(#"(?i)(\d+(?:[.,]\d+)?)\s*(?:min|minutes|minutos)\b"#, line) { row.durationMinutes = duration.1[0] }
-                if let speed = first(#"(?i)(\d+(?:[.,]\d+)?)\s*(km/h|kph|mph)\b"#, line) { row.speed = speed.1[0]; row.distanceUnit = speed.1[1].lowercased() == "mph" ? .mi : .km }
-                if let distance = first(#"(?i)(\d+(?:[.,]\d+)?)\s*(km|mi)(?!/h)\b"#, line) { row.distance = distance.1[0]; row.distanceUnit = distance.1[1].lowercased() == "mi" ? .mi : .km }
+                if let duration = first(#"(?i)([-+]?\d+(?:[.,]\d+)?(?:\s*[-–]\s*\d+(?:[.,]\d+)?)?)\s*(?:min|minutes|minutos)\b"#, line) { row.durationMinutes = duration.1[0] }
+                var speedUnit: DistanceUnit?
+                var distanceUnit: DistanceUnit?
+                if let speed = first(#"(?i)([-+]?\d+(?:[.,]\d+)?(?:\s*[-–]\s*\d+(?:[.,]\d+)?)?)\s*(km/h|kph|mph)\b"#, line) { row.speed = speed.1[0]; row.distanceUnit = speed.1[1].lowercased() == "mph" ? .mi : .km; speedUnit = row.distanceUnit }
+                if let distance = first(#"(?i)([-+]?\d+(?:[.,]\d+)?(?:\s*[-–]\s*\d+(?:[.,]\d+)?)?)\s*(km|mi)(?!/h)\b"#, line) { row.distance = distance.1[0]; row.distanceUnit = distance.1[1].lowercased() == "mi" ? .mi : .km; distanceUnit = row.distanceUnit }
                 if let incline = first(#"(-?\d+(?:[.,]\d+)?)\s*%"#, line) { row.incline = incline.1[0] }
-                if let load = first(#"(?i)(\d+(?:[.,]\d+)?)\s*(kg|lb)\b"#, line) { row.addedLoad = load.1[0]; row.unit = load.1[1].lowercased() }
+                if let load = first(#"(?i)([-+]?\d+(?:[.,]\d+)?(?:\s*[-–]\s*\d+(?:[.,]\d+)?)?)\s*(kg|lb)\b"#, line) { row.addedLoad = load.1[0]; row.unit = load.1[1].lowercased() }
                 if let pace = first(#"(?i)(\d+):(\d{2})\s*(?:min)?/(km|mi)"#, line), let minutes = Double(pace.1[0]), let seconds = Double(pace.1[1]), seconds < 60, minutes * 60 + seconds > 0 {
-                    row.speed = String(3600 / (minutes * 60 + seconds)); row.distanceUnit = pace.1[2].lowercased() == "mi" ? .mi : .km
+                    row.speed = String(3600 / (minutes * 60 + seconds)); row.distanceUnit = pace.1[2].lowercased() == "mi" ? .mi : .km; speedUnit = row.distanceUnit
+                }
+                if let speedUnit, let distanceUnit, speedUnit != distanceUnit {
+                    row.speed = ""; row.distance = ""
+                    draft.notes.append(L10n.s("Speed and distance use different units. Choose one unit and confirm both values from the source."))
                 }
                 draft.exercises.append(row); continue
             }
-            let pattern = #"(?i)(\d+)\s*(?:x|×|sets?\s*(?:of)?)\s*(\d+)(?!\d)(?:\s*reps?)?"#
-            if let match = first(pattern, line) {
+            let pattern = #"(?i)(?<![\d–-])(\d+)\s*(?:x|×|sets?\s*(?:of)?|series\s*(?:de)?)\s*(\d+)(?!\d)(?:\s*reps?)?"#
+            if let range = first(#"(?i)(\d+)\s*[-–]\s*(\d+)\s*(?:x|×|sets?\s*(?:of)?|series\s*(?:de)?)\s*(\d+)"#, line) {
+                row.kind = .strength; row.sets = ""; row.reps = range.1[2]
+                row.name = String(line[..<range.0.lowerBound]).trimmingCharacters(in: CharacterSet(charactersIn: " -–—:•\t"))
+                if String(line[range.0.upperBound...]).range(of: #"^\s*[-–]\s*\d"#, options: .regularExpression) != nil { row.reps = "" }
+                draft.notes.append(L10n.s("A range in “\(row.name)” needs a single confirmed target."))
+            } else if let match = first(pattern, line) {
                 row.kind = .strength; row.sets = match.1[0]; row.reps = match.1[1]
                 row.name = String(line[..<match.0.lowerBound]).trimmingCharacters(in: CharacterSet(charactersIn: " -–—:•\t"))
-                if line.range(of: #"\d\s*[-–]\s*\d"#, options: .regularExpression) != nil {
+                if String(line[match.0.upperBound...]).range(of: #"^\s*[-–]\s*\d"#, options: .regularExpression) != nil {
                     row.reps = ""; draft.notes.append(L10n.s("A range in “\(row.name)” needs a single confirmed target."))
                 }
             } else { row.name = line }
-            if let load = first(#"(?i)(?<![-\d.,])(\d+(?:[.,]\d+)?)\s*(kg|lb)\b"#, line) {
-                row.weight = load.1[0]; row.unit = load.1[1].lowercased()
+            if let load = first(#"(?i)([-+]?\d+(?:[.,]\d+)?(?:\s*[-–]\s*\d+(?:[.,]\d+)?)?)\s*(kg|lb)\b"#, line) {
+                row.weight = Double(load.1[0]).map({ $0 < 0 }) == true ? "" : load.1[0]; row.unit = load.1[1].lowercased()
             }
-            if let rest = first(#"(?i)(?:rest|descanso)\s*[:=]?\s*(\d+)\s*(s|sec(?:onds?)?|min(?:utes?)?)\b"#, line), let n = Int(rest.1[0]) {
+            if let rest = first(#"(?i)(?:rest|descanso)\s*[:=]?\s*(\d+)\s*(s|sec(?:onds?)?|seg(?:undos?)?|min(?:utes?|utos?)?)\b"#, line), let n = Int(rest.1[0]), n <= 1800 {
                 row.rest = String(n * (rest.1[1].lowercased().hasPrefix("min") ? 60 : 1))
             }
             // A displayed convention without an explicit variation ID remains a
@@ -154,16 +177,16 @@ public enum SmartWorkoutImport {
         return draft
     }
     public static func explicitConvention(in text: String) -> String {
-        let phrases: [(String, String)] = [("per dumbbell", "perDumbbell"), ("machine stack", "machineStack"), ("total load", "total"), ("total external load", "total"), ("assistance setting", "assistance"), ("bodyweight", "bodyweight")]
+        let phrases: [(String, String)] = [("per dumbbell", "perDumbbell"), ("machine stack", "machineStack"), ("total load", "total"), ("total external load", "total"), ("assistance setting", "assistance"), ("bodyweight", "bodyweight"), ("por mancuerna", "perDumbbell"), ("pila de maquina", "machineStack"), ("carga total", "total"), ("asistencia", "assistance"), ("peso corporal", "bodyweight")]
         let found = Set(phrases.filter { text.localizedCaseInsensitiveContains($0.0) }.map(\.1))
         return found.count == 1 ? found.first! : ""
     }
     public static func cleanExtractedNumber(_ text: String, kind: String) -> String {
         let value = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        if kind == "rest", let m = first(#"(?i)^(\d+)\s*(s|sec(?:onds?)?|min(?:utes?)?)$"#, value), let n = Int(m.1[0]) {
+        if kind == "rest", let m = first(#"(?i)^(\d+)\s*(s|sec(?:onds?)?|seg(?:undos?)?|min(?:utes?|utos?)?)$"#, value), let n = Int(m.1[0]), n <= 1800 {
             return String(n * (m.1[1].lowercased().hasPrefix("min") ? 60 : 1))
         }
-        let suffix = kind == "weight" ? "(?:kg|lb)?" : "(?:sets?|reps?)?"
+        let suffix = kind == "weight" ? "(?:kg|lbs?)?" : "(?:sets?|series|reps?|repeticiones)?"
         if let m = first("(?i)^(\\d+(?:[.,]\\d+)?)\\s*" + suffix + "$", value) { return m.1[0] }
         return value // leave ranges and unsupported values visibly unresolved
     }

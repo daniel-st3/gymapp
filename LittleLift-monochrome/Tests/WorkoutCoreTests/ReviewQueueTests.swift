@@ -24,8 +24,8 @@ struct ReviewQueueTests {
     @Test func successfulReviewIsIdempotentAndPlanRequiresAcceptance() throws {
         var state = PhoneState(); let s = try completed(); try state.receive(s); state.plan = s.plan
         let original = state.plan; let ticket = try state.beginReview(now: now)
-        try state.receiveReview(response(ticket)); let proposal = state.review
-        try state.receiveReview(response(ticket))
+        try state.receiveReview(response(ticket), now: now.addingTimeInterval(3)); let proposal = state.review
+        try state.receiveReview(response(ticket), now: now.addingTimeInterval(3))
         #expect(state.review == proposal && state.plan == original)
         #expect(state.reviewQueue.first?.status == .received)
         try state.acceptReview(); #expect(state.plan == proposal?.plan)
@@ -37,7 +37,7 @@ struct ReviewQueueTests {
         #expect(throws: (any Error).self) { try state.receiveReview(response(first)) }
         let second = try state.beginReview(sessionID: s.id, now: now.addingTimeInterval(2))
         #expect(throws: (any Error).self) { try state.receiveReview(response(first)) }
-        try state.receiveReview(response(second)); #expect(state.review != nil)
+        try state.receiveReview(response(second), now: now.addingTimeInterval(3)); #expect(state.review != nil)
     }
     @Test func invalidModelResultDoesNotLoseRunningReceiptOrOverwritePlan() throws {
         var state = PhoneState(); let s = try completed(); try state.receive(s)

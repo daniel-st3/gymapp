@@ -44,6 +44,9 @@ public struct Substitution: Codable, Equatable, Sendable {
     public let alternativeID: UUID
     public var proposeForFuture: Bool?
     public var reason: String?
+    /// Original-machine sets retained before switching. Missing means the legacy
+    /// whole-exercise substitution. Alternative set numbers start at one.
+    public var retainedSets: Int? = nil
 }
 public struct SessionAdjustment: Codable, Equatable, Identifiable, Sendable {
     public let id: UUID
@@ -143,14 +146,24 @@ public enum WorkoutPace {
 extension WorkoutSession {
     public var execution: ExecutionConfiguration { configuration ?? ExecutionConfiguration(order: plan.exercises.map(\.id)) }
     public var executionExercises: [ExercisePlan] {
-        execution.order.compactMap { id in
-            guard let original = plan.exercises.first(where: { $0.id == id }) else { return nil }
+        execution.order.flatMap { id -> [ExercisePlan] in
+            guard let original = plan.exercises.first(where: { $0.id == id }) else { return [] }
             if let substitution = execution.substitutions.first(where: { $0.originalID == id }),
                let choice = original.alternatives?.first(where: { $0.id == substitution.alternativeID }) {
-                var e = choice.exercise(sets: original.sets); e.workPolicy = original.workPolicy; return e
+                let retained = substitution.retainedSets ?? 0
+                guard retained >= 0, retained < original.sets else { return [original] }
+                var e = choice.exercise(sets: max(1, original.sets - retained)); e.workPolicy = original.workPolicy
+                if retained > 0 { var first = original; first.sets = retained; return [first, e] }
+                return [e]
             }
-            return original
+            return [original]
         }
+    }
+    public var completedExerciseCount: Int {
+        plan.exercises.filter { original in
+            let parts = executionExercises.filter { originalID(for: $0.id) == original.id }
+            return !parts.isEmpty && parts.allSatisfy { completedCount(for: $0) == $0.sets }
+        }.count
     }
     public func originalID(for executionID: UUID) -> UUID { execution.substitutions.first { $0.alternativeID == executionID }?.originalID ?? executionID }
     public var remainingExercises: [ExercisePlan] {
@@ -178,7 +191,26 @@ extension WorkoutSession {
         for s in config.substitutions {
             guard (s.reason?.count ?? 0) <= 120 else { throw WorkoutError.invalidInput(L10n.s("Keep the substitution reason short.")) }
             guard let original = plan.exercises.first(where: { $0.id == s.originalID }), let alt = original.alternatives?.first(where: { $0.id == s.alternativeID }), alt.unit == plan.unit else { throw WorkoutError.invalidInput(L10n.s("Substitution was not approved with matching units.")) }
+            let retained = s.retainedSets ?? 0
+            guard original.kind == .strength, retained >= 0, retained < original.sets,
+                  entries.filter({ $0.exerciseID == original.id }).count == retained else {
+                throw WorkoutError.invalidInput(L10n.s("The machine change does not match the original logged sets."))
+            }
+            let originalEntries = entries.filter { $0.exerciseID == original.id }
+            let alternateEntries = entries.filter { $0.exerciseID == alt.id }
+            if let last = originalEntries.last, let first = alternateEntries.first {
+                guard last.completedAt <= first.completedAt,
+                      entries.firstIndex(where: { $0.id == last.id })! < entries.firstIndex(where: { $0.id == first.id })! else {
+                    throw WorkoutError.invalidInput(L10n.s("The machine change does not match the original logged sets."))
+                }
+            }
         }
+    }
+    public func canSubstitute(with alternative: ExerciseAlternative) -> Bool {
+        guard activityTimer == nil, phase != .completed, let current = currentExercise,
+              let original = plan.exercises.first(where: { $0.id == originalID(for: current.id) }),
+              original.alternatives?.contains(alternative) == true, alternative.unit == plan.unit else { return false }
+        return !entries.contains { originalID(for: $0.exerciseID) == original.id && $0.exerciseID != original.id }
     }
 }
 

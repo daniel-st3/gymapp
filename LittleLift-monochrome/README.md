@@ -23,6 +23,15 @@ No backend. No ads. No API keys. No paid inference or runtime dependencies.
 | Explore History, Progress and factual reports | Undo, finish early and recover after relaunch |
 | Share context with your existing coach chat | Keep logging offline; deliver completed workouts later |
 
+## What’s new in Build 15
+
+- Switch the **remaining sets** to a previously approved machine after starting an exercise. Keep the original sets, rest and prescription; separate variation history, undo and recovery stay intact.
+- Import labelled tables and multiline Spanish workout text. Review ranges and missing values explicitly. OCR preserves empty columns instead of shifting numbers; the editor names fields needing a decision. [Examples](docs/smart-import.md).
+- Reject ambiguous/deep JSON, oversized files, forged substitutions and stale replies. On-device model extraction cannot silently supply unsupported numeric targets. [Security boundaries](SECURITY.md).
+- Test the optional coach connection with **fictional data only**. The prepared ChatGPT Shortcut returned a validated receipt on the real iPhone after user authorization. The same screen shows the result; personal history and Today remain unchanged.
+
+**Verified:** 153 engine tests, 13 script tests, native iPhone/46 mm Watch flows, real Vision OCR, both simulator builds and free-signed device builds. Build 15 is installed and opened on both actual devices with data preservation checked. Notification-driven unattended review, wrist-down reliability, haptic feel and sensor accuracy remain separate unverified checks. See the [Build 15 checklist](docs/upgrade-15-checklist.md) and [verification record](docs/verification.md).
+
 ## What’s new in Build 14
 
 Keep a portable backup from **Settings → Backups**, preview what restoration will add, and retain current records when IDs conflict. Repeating a restore does not duplicate workouts. Today stays unchanged; the archived plan becomes a routine. A damaged local file can be recovered explicitly while its original bytes are preserved separately. Backups contain personal training data and are not encrypted by Little Lift; experimental motion recordings and Apple permissions are excluded.

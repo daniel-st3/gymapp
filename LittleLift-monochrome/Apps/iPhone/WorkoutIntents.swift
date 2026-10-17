@@ -15,8 +15,8 @@ struct SaveWorkoutReviewIntent: AppIntent {
     static let description = IntentDescription("Save ChatGPT’s analysis and proposed plan for review in Little Lift. Does not replace today’s workout until accepted.")
     @Parameter(title: "Review JSON") var reviewJSON: String
     @MainActor func perform() async throws -> some IntentResult & ProvidesDialog {
-        try PhoneStore.shared.saveReview(reviewJSON)
-        return .result(dialog: "Saved. Open Little Lift to review your next workout.")
+        let isCheck = try PhoneStore.shared.saveReview(reviewJSON)
+        return .result(dialog: isCheck ? "Connection check received. Your workout history was not used or changed." : "Saved. Open Little Lift to review your next workout.")
     }
 }
 
@@ -47,5 +47,14 @@ struct CancelWorkoutReviewIntent: AppIntent {
             try PhoneStore.shared.endReview(job.id, cancelled: true, detail: L10n.s("Cancelled from Shortcuts."))
         }
         return .result()
+    }
+}
+
+struct PrepareCoachConnectionCheckIntent: AppIntent {
+    static let authenticationPolicy: IntentAuthenticationPolicy = .requiresAuthentication
+    static let title: LocalizedStringResource = "Prepare Coach Connection Check"
+    static let description = IntentDescription("Test the review workflow with fictional data only. Does not send your profile, history or plan.")
+    @MainActor func perform() async throws -> some IntentResult & ReturnsValue<String> {
+        .result(value: try PhoneStore.shared.prepareConnectionCheck())
     }
 }

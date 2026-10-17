@@ -176,6 +176,10 @@ struct WorkoutEditorView: View {
     }
     var body: some View {
         LiftForm {
+            if draft.exercises.contains(where: { !$0.fieldsToReview.isEmpty }) {
+                Section { Label(L10n.s("\(draft.exercises.filter { !$0.fieldsToReview.isEmpty }.count) exercises need a decision"), systemImage: "pencil.circle").font(.callout)
+                    Text(L10n.s("Open the marked exercises. Missing values stay empty until you confirm them.")).font(.caption).foregroundStyle(.secondary) }
+            }
             Section(L10n.s("Workout name")) { TextField(L10n.s("Workout name"), text: $draft.title).font(LiftType.title).padding(.vertical, 6).accessibilityLabel(L10n.s("Workout name")) }
             Section {
                 ForEach($draft.exercises) { $exercise in
@@ -272,7 +276,7 @@ struct DraftExerciseSummary: View {
             Text(exercise.name.isEmpty ? L10n.s("New exercise") : exercise.name).font(.body)
             Text(exercise.kind != nil && exercise.kind != .strength ? ((try? exercise.exercise())?.activity?.summary ?? L10n.s("Complete activity details")) : L10n.s("\(exercise.sets.isEmpty ? "?" : exercise.sets) × \(exercise.reps.isEmpty ? "?" : exercise.reps) · \(exercise.weight.isEmpty ? "?" : exercise.weight) \(exercise.unit) · \(exercise.rest.isEmpty ? "?" : exercise.rest)s rest"))
                 .font(.caption).foregroundStyle(.secondary)
-            if (try? exercise.exercise()) == nil { Text(L10n.s("Complete missing details")).font(.caption).foregroundStyle(.secondary) }
+            if !exercise.fieldsToReview.isEmpty { Text(L10n.s("Review: \(exercise.fieldsToReview.joined(separator: " · "))")).font(.caption).foregroundStyle(.secondary) }
             if exercise.optionalWork { Text(L10n.s("Optional · priority \(exercise.priority)")).font(.caption).foregroundStyle(.secondary) }
         }.padding(.vertical, 4).accessibilityElement(children: .combine)
     }

@@ -17925,6 +17925,486 @@
           }
         }
       }
+    },
+    "A connection check is running. Cancel it or wait 10 minutes before retrying.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A connection check is running. Cancel it or wait 10 minutes before retrying."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hay una prueba de conexión en curso. Cancélala o espera 10 minutos antes de reintentar."
+          }
+        }
+      }
+    },
+    "A table row does not match its headings. Check the source before filling its fields.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A table row does not match its headings. Check the source before filling its fields."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una fila no coincide con las columnas. Revisa el texto original antes de completar sus campos."
+          }
+        }
+      }
+    },
+    "Activity targets": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activity targets"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Objetivos de actividad"
+          }
+        }
+      }
+    },
+    "Add test Shortcut": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add test Shortcut"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir Atajo de prueba"
+          }
+        }
+      }
+    },
+    "Add the test Shortcut first. It uses Prepare Coach Connection Check → Use Model with ChatGPT → Save Workout Review. Apple may ask you to allow the actions. Opening Shortcuts alone does not pass the test.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add the test Shortcut first. It uses Prepare Coach Connection Check → Use Model with ChatGPT → Save Workout Review. Apple may ask you to allow the actions. Opening Shortcuts alone does not pass the test."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añade primero el Atajo de prueba. Usa Prepare Coach Connection Check → Usar modelo con ChatGPT → Save Workout Review. Apple puede pedir permiso para ejecutar las acciones. Abrir Atajos no confirma que la prueba funcione."
+          }
+        }
+      }
+    },
+    "Cancel connection check": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel connection check"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelar prueba"
+          }
+        }
+      }
+    },
+    "Check the connection": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check the connection"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comprobar conexión"
+          }
+        }
+      }
+    },
+    "Choose an approved alternative in the same units. Once sets are logged on the alternative, defer or skip the remaining work instead.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose an approved alternative in the same units. Once sets are logged on the alternative, defer or skip the remaining work instead."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige una alternativa aprobada con las mismas unidades. Tras registrar series en ella, puedes aplazar u omitir lo que quede."
+          }
+        }
+      }
+    },
+    "Duplicate table columns need a manual decision. The source is preserved below.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplicate table columns need a manual decision. The source is preserved below."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hay columnas repetidas. Revisa el texto original que se conserva abajo."
+          }
+        }
+      }
+    },
+    "Invalid connection-check dates.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Invalid connection-check dates."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las fechas de la prueba de conexión no son válidas."
+          }
+        }
+      }
+    },
+    "JSON must have unique field names and at most 32 nested levels. No saved data was changed.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JSON must have unique field names and at most 32 nested levels. No saved data was changed."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El JSON debe tener campos sin repetir y un máximo de 32 niveles. No se ha cambiado ningún dato guardado."
+          }
+        }
+      }
+    },
+    "No response confirmed. Check Shortcuts permissions and run the test again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No response confirmed. Check Shortcuts permissions and run the test again."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se ha confirmado una respuesta. Revisa los permisos de Atajos y repite la prueba."
+          }
+        }
+      }
+    },
+    "Open the marked exercises. Missing values stay empty until you confirm them.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open the marked exercises. Missing values stay empty until you confirm them."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre los ejercicios marcados. Los valores que falten siguen vacíos hasta que los confirmes."
+          }
+        }
+      }
+    },
+    "Response received · history unchanged": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Response received · history unchanged"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Respuesta recibida · historial intacto"
+          }
+        }
+      }
+    },
+    "Review: {0}": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Review: {0}"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revisa: {0}"
+          }
+        }
+      }
+    },
+    "Run generic connection check": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run generic connection check"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Probar con datos ficticios"
+          }
+        }
+      }
+    },
+    "Speed and distance use different units. Choose one unit and confirm both values from the source.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speed and distance use different units. Choose one unit and confirm both values from the source."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La velocidad y la distancia usan unidades distintas. Elige una unidad y confirma ambos valores con el texto original."
+          }
+        }
+      }
+    },
+    "Table headings were used. Empty or conflicting fields need confirmation; no missing values were assumed.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Table headings were used. Empty or conflicting fields need confirmation; no missing values were assumed."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se han usado los encabezados de la tabla. Confirma los campos vacíos o contradictorios; no se han supuesto valores."
+          }
+        }
+      }
+    },
+    "The machine change does not match the original logged sets.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The machine change does not match the original logged sets."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El cambio de máquina no coincide con las series originales registradas."
+          }
+        }
+      }
+    },
+    "The model could not support every exercise with a source quote. Ordinary extraction was used; review the marked fields.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The model could not support every exercise with a source quote. Ordinary extraction was used; review the marked fields."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El modelo no pudo justificar cada ejercicio con el texto original. Se usó la extracción habitual; revisa los campos marcados."
+          }
+        }
+      }
+    },
+    "The on-device model finds exercise lines. Only explicitly parsed quantities are filled. Check the source and complete the marked fields.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The on-device model finds exercise lines. Only explicitly parsed quantities are filled. Check the source and complete the marked fields."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El modelo local identifica los ejercicios. Solo se rellenan cantidades explícitas que se pueden interpretar. Revisa el original y completa los campos marcados."
+          }
+        }
+      }
+    },
+    "The workout change has an invalid timestamp.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The workout change has an invalid timestamp."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La fecha del cambio de entrenamiento no es válida."
+          }
+        }
+      }
+    },
+    "This connection check expired or was cancelled. Run a new check explicitly.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This connection check expired or was cancelled. Run a new check explicitly."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La prueba caducó o fue cancelada. Inicia una nueva prueba."
+          }
+        }
+      }
+    },
+    "This test response does not match the current connection check. Nothing was changed.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This test response does not match the current connection check. Nothing was changed."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta respuesta no corresponde a la prueba actual. No se ha cambiado nada."
+          }
+        }
+      }
+    },
+    "Undid an original-machine set and its pending machine change.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Undid an original-machine set and its pending machine change."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se deshizo una serie de la máquina original y el cambio pendiente de máquina."
+          }
+        }
+      }
+    },
+    "Uses a fictional set. Your profile, workouts and current plan stay on this device. A returned response confirms the round trip, not coaching quality or automatic execution.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uses a fictional set. Your profile, workouts and current plan stay on this device. A returned response confirms the round trip, not coaching quality or automatic execution."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usa una serie ficticia. Tu perfil, historial y plan se quedan en este dispositivo. La respuesta confirma el envío y la recepción; no evalúa al entrenador ni la ejecución automática."
+          }
+        }
+      }
+    },
+    "Waiting for the response…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting for the response…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esperando la respuesta…"
+          }
+        }
+      }
+    },
+    "{0} exercises need a decision": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{0} exercises need a decision"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ejercicios por revisar: {0}"
+          }
+        }
+      }
+    },
+    "{0} sets kept · {1} on this machine": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{0} sets kept · {1} on this machine"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardadas: {0} · en esta máquina: {1}"
+          }
+        }
+      }
+    },
+    "Logged sets and current rest stay unchanged. Observations stay with the original machine.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Logged sets and current rest stay unchanged. Observations stay with the original machine."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se conservan las series y el descanso actual. Las observaciones siguen vinculadas a la máquina original."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

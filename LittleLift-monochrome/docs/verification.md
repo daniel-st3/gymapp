@@ -1,5 +1,125 @@
 # Verification
 
+## Build 15: partial machine changes, conservative imports and connection checks, 17 October 2026
+
+Continued the current local Build 14. The existing free signing, bundle IDs,
+pairings, refresh script, monochrome icon and original data were retained.
+The [delivery checklist](upgrade-15-checklist.md) and [F01–F27 matrix](feedback-27.md)
+separate completed features from remaining physical/platform checks.
+
+### Implemented and tested
+
+- **153 Swift tests / 20 suites and 13 Python tests passed.** Both simulator apps
+  and the signed iPhone/Watch/launcher products built; all signatures passed
+  strict verification. Final iPhone-only layout cleanup was rebuilt for simulator
+  and device. Logs: `BuildLogs/upgrade15-delivery-checks.log`,
+  `upgrade15-delivery-signed.log`, `upgrade15-final-ui*.log`.
+- Approved substitutions now retain already logged original sets and execute only
+  the pending sets on the alternative. Prescriptions, IDs, targets, current rest
+  and original observation links remain intact. Tests cover undo across the switch,
+  recovery, alternative-specific reports/analytics, duplicate delivery, backup
+  roundtrip and forged retained counts, including extreme integers. Further
+  machine changes after logging on the alternative remain unsupported; defer/skip
+  stays available. One original exercise is counted once in Watch progress/summary.
+- Table import recognizes explicit English/Spanish headings, units and rest
+  labels; multiline Spanish rest is associated with the preceding exercise.
+  Set/repetition/load ranges remain decisions. Missing and contradictory fields
+  are named in the editable preview. Mixed speed/distance units are not silently
+  reinterpreted. Optional local-model output must quote actual source exercise
+  lines, and deterministic parsing supplies quantities.
+- External JSON boundaries reject duplicate keys, including escaped aliases,
+  excessive depth and byte limits before decoding. Receipt-bearing responses
+  cannot be imported as an ordinary plan. File opening reuses the same bounded
+  byte buffer. Overflow-sized rest values, forged substitutions, clock reversal
+  and expired/cancelled/foreign generic-check replies are covered. These are
+  defensive regression checks, not a penetration test or an immunity claim.
+
+### Native simulator and actual OCR evidence
+
+Fresh backups preceded fixture use on the existing paired iPhone and 46 mm Watch.
+Native taps logged an original-machine set, confirmed a switch with one retained
+and two remaining sets, and recovered that switch after relaunch. Edited alternate
+load/repetitions were observed in saved state, then undone without removing the
+original set. Rest extension/skip and relogging reached Summary; exactly one
+completed record arrived in phone History. Relaunch retained that single record;
+Done remained visible and dismissed the summary. Core tests separately replayed
+identical delivery and validated full report/evidence identity.
+
+Native phone text entry of an ambiguous table displayed the ranges, named the
+repetitions/load fields and disabled Save. A valid two-exercise table reached the
+editable preview at accessibility-large, then saved only after tapping Save.
+Saved sets, loads and rest matched source; the active Watch workout retained its
+original prescription while Today changed. Relaunch preserved the accepted plan.
+
+An actual Apple Vision request ran locally on a generated generic table image.
+Vision missed two isolated digits. The initial QA run exposed that loss; the final
+reading-order implementation kept those cells blank and preserved recognized
+10 reps/20 kg/60 seconds and the other row's 90 seconds in the proper columns.
+It did not invent the missing set/rep counts. Screenshot parsing still needs user
+review; arbitrary image layouts and Foundation Models inference quality are not
+newly certified. Private reproducible harness/evidence: `vision.swift`,
+`vision-result.txt`, `vision.log` under `.verification/upgrade-15/`.
+
+Actual Today, logging, rest, switch preview, summary, import and connection setup
+screenshots were inspected. A blank connection-status row found during QA was
+removed. Watch effective XXXL and fixed Log/input controls were inspected; iPhone
+accessibility-large retained fixed Preview/Save. Reduce Motion was enabled and
+read back in both runtimes. This verifies settings/reachable layouts, not physical
+haptic sensation or frame-rate performance. Original app files/preferences, older
+checkpoints and motion were restored afterward; only expected sync metadata may
+differ. Phone text size Large and Reduce Motion off were restored. New private
+fixture files were removed, and the latest simulator apps were left running.
+
+### Physical installation and the generic ChatGPT test
+
+After the user woke the Watch, fresh app-support backups succeeded. Build 15 was
+installed over both real apps with the existing Personal Team, and both launched.
+Native app inventories confirm version 15. Before/after readbacks preserved all
+state values and checkpoint/motion files; no uninstall, restore, pairing change
+or real workout fixture was needed. Evidence: `device-preservation.json`.
+
+The separate **Little Lift Connection Check** Shortcut was prepared, signed and
+placed in the phone's Documents. Its first action prepares fictional data only;
+the middle action explicitly selects ChatGPT with Text output and no fallback;
+Save Workout Review validates a dedicated random test receipt. This never reads
+profile/history/Today and never creates a workout or proposal. All five App
+Intents require authentication. The production review Shortcut is preserved.
+
+The user reported adding, authorizing and running the test on the actual iPhone.
+A subsequent native app-container readback found matching started/received test
+state, approximately **1.32 seconds apart**. The only changes relative to the
+post-install state were the user-selected coach mode and this test receipt. Plan,
+profile, history and workout records were unchanged. This is evidence of the
+physical generic prepare/return/save path, combined with the explicitly configured
+provider; it is not a model-quality test or a guarantee of future availability.
+No personal workout data was sent for the test. The final phone UI patch was
+then installed and launched; all app-owned files, including the successful test
+receipt and mode choice, remained byte-identical. Evidence:
+`phone-after-shortcut.json`, `final-phone-preservation.json`.
+
+**Still unverified:** unattended notification-triggered review of a completed
+workout on this iPhone, including locked execution/authentication and model failure
+recovery at OS level. Local receipt/cancel/timeout handling is tested. The signed
+workflow and one-tap explicit review remain available; the exact-existing-chat
+route still requires explicit report sharing/import, never hidden thread targeting.
+Apple's [WWDC26 Shortcuts session](https://developer.apple.com/videos/play/wwdc2026/310/)
+documents notification triggers and app-specific filtering; the current
+[automation guide](https://support.apple.com/en-az/guide/shortcuts/apdfbdbd7123/10.0/ios/27)
+describes editor setup and permission controls. Platform documentation alone does
+not establish this device's unattended authenticated model execution.
+
+The physical Watch's bounded local diagnostic log contained 26 scene events;
+none established a running wrist-down workout session. Two pre-existing motion
+captures (231 and 587 samples) were preserved, with no confirmed repetition counts.
+Their existence does not establish wrist-down continuity, accuracy, battery cost
+or safe technique. Physical haptic feel, hardware double tap and prolonged sensor
+runtime remain unverified; experimental motion stays opt-in. No new paid service,
+API credential, account enrollment or app publication was introduced.
+
+Private data, signing identifiers, diagnostic logs, screenshots and test receipts
+remain ignored under `.verification/` and `BuildLogs/`. Published documentation
+contains only generic examples and aggregate verification results.
+
 ## Build 14: reviewed backups, record corrections and delivery clarity, 17 October 2026
 
 Continued the current local Build 13, preserving free Personal Team signing, bundle IDs, pairings, refresh script, monochrome assets and the Foundation-only engine. The [Build 14 checklist](reliability-14-checklist.md) tracks delivery separately; [all 27 requirements](feedback-27.md) retain their individual evidence and limits.

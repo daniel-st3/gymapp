@@ -15,3 +15,10 @@ class ReviewShortcutContractTests(unittest.TestCase):
     def test_unsupported_provider_never_falls_back(self):
         with self.assertRaises(ValueError): workflow('com.example.generic','TESTTEAM','paid-fallback')
         self.assertEqual(workflow('com.example.generic','TESTTEAM','ask')['WFWorkflowActions'][1]['WFWorkflowActionParameters']['WFLLMModel']['Value']['Type'],'Ask')
+
+    def test_generic_check_never_uses_history_preparation(self):
+        result = workflow('com.example.generic', 'TESTTEAM', connection_check=True)
+        self.assertEqual(result['WFWorkflowName'], 'Little Lift Connection Check')
+        prepare = result['WFWorkflowActions'][0]['WFWorkflowActionParameters']
+        self.assertEqual(prepare['AppIntentDescriptor']['AppIntentIdentifier'], 'PrepareCoachConnectionCheckIntent')
+        self.assertNotIn('PrepareWorkoutReviewIntent', str(result))

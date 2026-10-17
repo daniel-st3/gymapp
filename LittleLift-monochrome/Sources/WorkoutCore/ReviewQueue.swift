@@ -69,6 +69,7 @@ extension PhoneState {
         guard text.utf8.count <= 64_000 else { throw WorkoutError.invalidInput(L10n.s("The review is too large.")) }
         let plain = text.trimmingCharacters(in: .whitespacesAndNewlines)
         let stripped = plain.hasPrefix("```") ? plain.components(separatedBy: .newlines).dropFirst().dropLast().joined(separator: "\n") : plain
+        try JSONBoundary.validate(Data(stripped.utf8))
         let object = (try? JSONSerialization.jsonObject(with: Data(stripped.utf8))) as? [String: Any]
         let sessionID = (object?["reviewSessionID"] as? String).flatMap(UUID.init(uuidString:))
         let attemptID = (object?["reviewAttemptID"] as? String).flatMap(UUID.init(uuidString:))
@@ -80,7 +81,7 @@ extension PhoneState {
             guard let i = jobs.firstIndex(where: { $0.id == sessionID }), jobs[i].attemptID == attemptID else { throw WorkoutError.invalidInput(L10n.s("This review belongs to an unknown or older attempt. It was not applied.")) }
             if jobs[i].status == .received { return }
             guard jobs[i].status == .running else { throw WorkoutError.invalidState(L10n.s("This review was cancelled or failed. Start a new attempt explicitly.")) }
-            guard let started = jobs[i].startedAt, now.timeIntervalSince(started) < 600 else {
+            guard let started = jobs[i].startedAt, (0..<600).contains(now.timeIntervalSince(started)) else {
                 throw WorkoutError.invalidState(L10n.s("This review attempt expired. Your workout and local review are saved; start a new attempt to request ChatGPT again."))
             }
             let proposal = try PlanImport.parseReview(text)

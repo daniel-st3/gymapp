@@ -104,8 +104,17 @@ final class PhoneStore {
         try next.propose(TrainingReview(analysis: L10n.s("Review this imported workout and what it will collect before accepting."), plan: PlanImport.parse(text)))
         try commit(next)
     }
-    func saveReview(_ text: String) throws {
-        var next = state; try next.receiveReview(text); try commit(next)
+    @discardableResult func saveReview(_ text: String) throws -> Bool {
+        var next = state
+        let isCheck = try next.receiveConnectionCheck(text)
+        if !isCheck { try next.receiveReview(text) }
+        try commit(next); return isCheck
+    }
+    func prepareConnectionCheck() throws -> String {
+        var next = state; let prompt = try next.beginConnectionCheck(); try commit(next); return prompt
+    }
+    func cancelConnectionCheck() throws {
+        var next = state; next.cancelConnectionCheck(); try commit(next)
     }
     func acceptReview() throws {
         var next = state; try next.acceptReview()

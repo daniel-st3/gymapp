@@ -11,7 +11,7 @@ import plistlib
 import uuid
 from pathlib import Path
 
-def workflow(bundle, team, model="chatgpt"):
+def workflow(bundle, team, model="chatgpt", connection_check=False):
     if model not in {"chatgpt", "ask"}:
         raise ValueError("Choose chatgpt or ask explicitly")
     selection = "ChatGPT" if model == "chatgpt" else {"Value": {"Type": "Ask"}, "WFSerializationType": "WFTextTokenAttachment"}
@@ -22,12 +22,12 @@ def workflow(bundle, team, model="chatgpt"):
         return {"WFWorkflowActionIdentifier": bundle + "." + name, "WFWorkflowActionParameters": {
             "AppIntentDescriptor": {"TeamIdentifier": team, "BundleIdentifier": bundle, "Name": "Little Lift", "AppIntentIdentifier": name},
             "UUID": identifier, **parameters}}
-    actions = [intent("PrepareWorkoutReviewIntent", prepare), {
+    actions = [intent("PrepareCoachConnectionCheckIntent" if connection_check else "PrepareWorkoutReviewIntent", prepare), {
         "WFWorkflowActionIdentifier": "is.workflow.actions.askllm", "WFWorkflowActionParameters": {
             "UUID": model, "WFGenerativeResultType": "Text", "WFLLMModel": selection,
-            "WFLLMPrompt": output(prepare, "Prepare Workout Review")}},
+            "WFLLMPrompt": output(prepare, "Prepare Coach Connection Check" if connection_check else "Prepare Workout Review")}},
         intent("SaveWorkoutReviewIntent", save, reviewJSON=output(model, "Response"))]
-    return {"WFWorkflowName": "Little Lift Review", "WFWorkflowActions": actions,
+    return {"WFWorkflowName": "Little Lift Connection Check" if connection_check else "Little Lift Review", "WFWorkflowActions": actions,
             "WFWorkflowClientVersion": "4013.0.3", "WFWorkflowMinimumClientVersion": 900,
             "WFWorkflowMinimumClientVersionString": "900", "WFWorkflowIcon": {"WFWorkflowIconStartColor": 0x8E8E93FF, "WFWorkflowIconGlyphNumber": 61440},
             "WFWorkflowTypes": [], "WFWorkflowInputContentItemClasses": [], "WFWorkflowImportQuestions": []}
@@ -38,9 +38,10 @@ def main():
     parser.add_argument("--team", default="None")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--model", choices=["chatgpt", "ask"], default="chatgpt")
+    parser.add_argument("--connection-check", action="store_true", help="Use fictional data; never read the saved workout history")
     args = parser.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_bytes(plistlib.dumps(workflow(args.bundle, args.team, args.model)))
+    args.output.write_bytes(plistlib.dumps(workflow(args.bundle, args.team, args.model, args.connection_check)))
     print("Prepared an unsigned review workflow with an explicit model setting and no fallback. Sign and inspect in Shortcuts before use.")
 
 if __name__ == "__main__": main()

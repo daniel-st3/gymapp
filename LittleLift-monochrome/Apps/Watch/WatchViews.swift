@@ -172,7 +172,7 @@ struct SetView: View {
                 EffortInvitation(store: store, session: session)
                 if let exercise = session.currentExercise {
                     WorkoutSetPanel(exercise: exercise, unit: session.plan.unit, setNumber: session.currentSetNumber,
-                                weight: $store.draftWeight, reps: $store.draftReps, haptics: store.state.haptics, completedExercises: session.executionExercises.filter { session.completedCount(for: $0) == $0.sets }.count, totalExercises: session.plan.exercises.count)
+                                weight: $store.draftWeight, reps: $store.draftReps, haptics: store.state.haptics, completedExercises: session.completedExerciseCount, totalExercises: session.plan.exercises.count)
                 }
             }
         } actions: {
@@ -378,7 +378,7 @@ struct SummaryView: View {
                         Spacer(minLength: 4)
                         summaryMetric(L10n.s("Min"), value: Int(session.duration / 60))
                         Spacer(minLength: 4)
-                        summaryMetric(L10n.s("Exercises"), value: Set(session.entries.map(\.exerciseID) + (session.activities ?? []).map(\.exerciseID)).count)
+                        summaryMetric(L10n.s("Exercises"), value: Set((session.entries.map(\.exerciseID) + (session.activities ?? []).map(\.exerciseID)).map { session.originalID(for: $0) }).count)
                     }
                     if let feedback = session.feedback, store.state.comfort?.quietFeedback != true { Text(feedback).watchText(.caption).foregroundStyle(.secondary).lineLimit(3) }
                     Text(store.summarySynced ? L10n.s("Synced to iPhone") : L10n.s("Saved on watch. Waiting for iPhone."))

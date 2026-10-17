@@ -94,6 +94,7 @@ public struct MotionRepository {
     }
     public func receive(_ data: Data) throws {
         guard data.count <= 2_000_000 else { throw WorkoutError.invalidInput(L10n.s("Motion recording exceeds the local transfer limit.")) }
+        try JSONBoundary.validate(data)
         let received = try FileRepository<MotionRecording>.decoder().decode(MotionRecording.self, from: data)
         try received.validate()
         guard received.status != "recording" else { throw WorkoutError.invalidInput(L10n.s("Only stopped motion recordings can be imported.")) }

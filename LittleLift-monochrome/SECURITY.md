@@ -8,7 +8,24 @@ Little Lift is a local-first personal workout logger. This is a defensive code r
 - Workout imports and model responses are untrusted data. Typed schemas, byte/count/value limits, stable IDs and reference checks reject malformed plans. Preview and explicit acceptance remain required; a model response cannot execute commands or silently replace today’s plan. A model can still misunderstand text, so editable review is essential.
 - Text plans/reviews are capped at 64 KB; historical imports at 256 KB; images at 20 MB with a 2,400-pixel OCR thumbnail; extracted OCR text at 64 KB. Files and Photos transfers use a chunked reader that limits actual bytes, even if file-size metadata changes. Motion files are limited to 2 MB and 4,500 validated samples.
 - WatchConnectivity communicates with the paired companion app. Incoming messages have a strict sub-60 KB limit and semantic validation before state mutation. Receipts have bounded, unique IDs. Invalid records do not receive successful acknowledgments. Identical completed-workout replays are harmless; the same ID with different contents is rejected and the original remains untouched.
-- All four App Intents explicitly require authentication. Preparing a review can expose personal history, and importing/saving/cancelling changes local state. iOS controls the actual authentication experience. Locked, unattended review is therefore not promised.
+- All five App Intents explicitly require authentication. Preparing a review can expose personal history, and importing/saving/cancelling changes local state. iOS controls the actual authentication experience. Locked, unattended review is therefore not promised.
+
+Build 15 adds a bounded pre-decoding JSON scan at plan/review, sync, history,
+backup and motion-transfer boundaries. Duplicate keys (including escaped aliases)
+and more than 32 nested levels are rejected. Opening a shared file routes the same
+bounded byte buffer instead of rereading a potentially changed file. Rest parsing
+bounds values before multiplication; partial machine changes validate retained
+set counts before indexing/arithmetic. Imported ranges and mixed unit conventions
+remain explicit decisions. Model-generated exercise source quotes must exist in
+the supplied text; deterministic parsing supplies quantities. This reduces
+unsupported extraction but cannot certify the meaning of a workout description.
+
+The generic connection check has its own durable random receipt, a 10-minute
+window, explicit cancellation and replay rejection. Its response cannot create a
+workout or a plan proposal, and its prompt does not read profile/history/Today.
+The receipt proves the matching response returned through Save; it is not a
+cryptographic attestation of model identity or quality. The prepared native
+Shortcut explicitly selects ChatGPT and contains no provider fallback.
 
 ## Local storage and recovery
 

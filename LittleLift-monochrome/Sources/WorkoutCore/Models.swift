@@ -226,6 +226,13 @@ public struct WorkoutSession: Codable, Equatable, Identifiable, Sendable {
         let removed = entries.removeLast()
         if configuration != nil {
             var config = execution; let original = originalID(for: removed.exerciseID)
+            if config.substitutions.contains(where: { $0.originalID == removed.exerciseID && ($0.retainedSets ?? 0) > 0 }) {
+                // Undoing the original-machine set crosses back before the
+                // switch; no alternate set can remain after removing the last log.
+                config.substitutions.removeAll { $0.originalID == removed.exerciseID }
+                previousConfiguration = nil; adjustmentEntryCount = nil
+                var changes = adjustments ?? []; if changes.count < 100 { changes.append(SessionAdjustment(id: UUID(), date: Date(), detail: L10n.s("Undid an original-machine set and its pending machine change."))) }; adjustments = changes
+            }
             config.order.removeAll { $0 == original }; config.order.insert(original, at: 0); configuration = config
         }
         if effortResponse?.setID == removed.id { effortResponse = nil }
@@ -294,6 +301,7 @@ public struct WorkoutSession: Codable, Equatable, Identifiable, Sendable {
 
     private mutating func changeExecution(_ next: ExecutionConfiguration, detail: String, now: Date) throws {
         guard phase != .completed, (adjustments?.count ?? 0) < 99 else { throw WorkoutError.invalidState(L10n.s("No more changes can be made in this session.")) }
+        guard InputBoundary.validDate(now), now >= latestWorkDate else { throw WorkoutError.invalidInput(L10n.s("The workout change has an invalid timestamp.")) }
         let old = execution
         var candidate = self; candidate.configuration = next
         try candidate.validateExecution()
@@ -310,12 +318,12 @@ public struct WorkoutSession: Codable, Equatable, Identifiable, Sendable {
     }
     public mutating func substituteCurrent(with alternativeID: UUID, reason: String = "Preference", proposeForFuture: Bool = false, now: Date = Date()) throws {
         guard activityTimer == nil, phase != .completed, let current = currentExercise, let original = plan.exercises.first(where: { $0.id == originalID(for: current.id) }),
-              !entries.contains(where: { originalID(for: $0.exerciseID) == original.id }),
-              let alternative = original.alternatives?.first(where: { $0.id == alternativeID }), alternative.unit == plan.unit else {
-            throw WorkoutError.invalidInput(L10n.s("Choose a previously approved alternative with the same units before logging any sets of this exercise."))
+              let alternative = original.alternatives?.first(where: { $0.id == alternativeID }), canSubstitute(with: alternative) else {
+            throw WorkoutError.invalidInput(L10n.s("Choose an approved alternative in the same units. Once sets are logged on the alternative, defer or skip the remaining work instead."))
         }
+        let retained = entries.filter { $0.exerciseID == original.id }.count
         var next = execution; next.substitutions.removeAll { $0.originalID == original.id }
-        next.substitutions.append(Substitution(originalID: original.id, alternativeID: alternative.id, proposeForFuture: proposeForFuture, reason: String(reason.prefix(120))))
+        next.substitutions.append(Substitution(originalID: original.id, alternativeID: alternative.id, proposeForFuture: proposeForFuture, reason: String(reason.prefix(120)), retainedSets: retained == 0 ? nil : retained))
         try changeExecution(next, detail: L10n.s("\(proposeForFuture ? L10n.s("Proposed also for future review") : L10n.s("Today only")). Reason: \((reason == "Preference" ? L10n.s("Preference") : String(reason.prefix(120)))). Approved substitution: \(original.name) → \(alternative.name); \(alternative.reps) reps at \(Self.number(alternative.weight)) \(alternative.unit.rawValue), \(alternative.restSeconds)s prescribed rest. Original observation requests are not transferred to this variation."), now: now)
     }
     public mutating func omitOptional(_ ids: [UUID], now: Date = Date()) throws {
@@ -467,6 +475,7 @@ public struct PhoneState: Codable, Equatable, Sendable {
     public var schedule: [WeeklySlot]?
     public var importedHistory: [HistoricalWorkout]?
     public var reviewJobs: [ReviewJob]?
+    public var coachConnectionCheck: CoachConnectionCheck?
     public var reviewNotificationsEnabled: Bool?
     public var selectedReviewSessionID: UUID?
     public var doubleTapEnabled: Bool?

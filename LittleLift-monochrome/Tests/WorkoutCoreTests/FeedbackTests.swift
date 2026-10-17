@@ -80,8 +80,8 @@ struct FeedbackTests {
     }
     @Test func chooseDeferSkipNeverChangesOriginalOrPretendsCompletion() throws {
         let p = try mixed(); var s = try WorkoutSession(plan: p, now: start)
-        try s.deferCurrent(); #expect(s.currentExercise?.name == "Row")
-        try s.chooseNext(p.exercises[0].id); #expect(s.currentExercise?.name == "Caminar")
+        try s.deferCurrent(now: start); #expect(s.currentExercise?.name == "Row")
+        try s.chooseNext(p.exercises[0].id, now: start); #expect(s.currentExercise?.name == "Caminar")
         try s.skipExercise(reason: "Not today", now: start)
         #expect(s.plan == p && s.loggedWorkCount == 0 && s.currentExercise?.name == "Row")
         try s.undoAdjustment(); #expect(s.currentExercise?.name == "Caminar")
@@ -89,7 +89,7 @@ struct FeedbackTests {
     @Test func suggestedSubstitutionStaysProposal() throws {
         let p = FlexibilityTests().plan(); var s = try WorkoutSession(plan: p, now: start)
         let alt = try #require(p.exercises[0].alternatives?.first)
-        try s.substituteCurrent(with: alt.id, proposeForFuture: true)
+        try s.substituteCurrent(with: alt.id, proposeForFuture: true, now: start)
         #expect(s.nextSessionProposal?.exercises.first?.id == alt.id && s.plan == p)
         try s.undoAdjustment(); #expect(s.nextSessionProposal == nil && s.plan == p)
     }

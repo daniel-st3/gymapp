@@ -39,7 +39,7 @@ public enum PlanImport {
     }
     private struct ReviewInput: Decodable { let analysis: String; let plan: PlanInput }
 
-    private static func jsonData(_ text: String) throws -> Data {
+    static func jsonData(_ text: String) throws -> Data {
         guard text.utf8.count <= 64_000 else { throw WorkoutError.invalidInput(L10n.s("This import is too large. Paste one workout at a time.")) }
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         let json: String
@@ -51,6 +51,7 @@ public enum PlanImport {
             json = lines.dropFirst().dropLast().joined(separator: "\n")
         } else { json = trimmed }
         guard let data = json.data(using: .utf8), !data.isEmpty else { throw WorkoutError.invalidInput(L10n.s("Paste your workout JSON first.")) }
+        try JSONBoundary.validate(data)
         return data
     }
 
@@ -60,6 +61,9 @@ public enum PlanImport {
         let plan: WorkoutPlan
         do {
             let object = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+            if object?["reviewSessionID"] != nil || object?["reviewAttemptID"] != nil || object?["connectionCheckID"] != nil {
+                throw WorkoutError.invalidInput(L10n.s("This is a coach response. Use Save Workout Review so its workout and attempt can be checked."))
+            }
             if object?["plan"] != nil { plan = try decoder.decode(ReviewInput.self, from: data).plan.plan }
             else { plan = try decoder.decode(PlanInput.self, from: data).plan }
         } catch let error as WorkoutError { throw error

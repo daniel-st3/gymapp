@@ -45,9 +45,10 @@ struct PhoneRootView: View {
                 let scoped = url.startAccessingSecurityScopedResource()
                 defer { if scoped { url.stopAccessingSecurityScopedResource() } }
                 let data = try InputBoundary.read(url, maximumBytes: WorkoutBackup.maximumBytes)
+                if data.first(where: { ![9, 10, 13, 32].contains($0) }) == 123 { try JSONBoundary.validate(data) }
                 if let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any], object["format"] as? String == "littlelift.workout-backup" {
                     incomingFile = IncomingWorkoutFile(text: nil, backup: try WorkoutBackup.decode(data))
-                } else { incomingFile = IncomingWorkoutFile(text: try WorkoutFileImport.readText(url), backup: nil) }
+                } else { incomingFile = IncomingWorkoutFile(text: try WorkoutFileImport.text(from: data), backup: nil) }
             } catch { store.error = error.localizedDescription }
         }
         .alert(L10n.s("Couldn’t save"), isPresented: Binding(get: { store.error != nil }, set: { if !$0 { store.error = nil } })) {
@@ -638,12 +639,40 @@ struct TrainingProfileView: View {
 }
 
 struct ShortcutHelpView: View {
+    private let store = PhoneStore.shared
+    @Environment(\.openURL) private var openURL
+    private var preparedCheck: URL? {
+        let url = URL.documentsDirectory.appending(path: "Little Lift Connection Check.shortcut")
+        return FileManager.default.fileExists(atPath: url.path) ? url : nil
+    }
     private var preparedShortcut: URL? {
         let url = URL.documentsDirectory.appending(path: "Little Lift Review.shortcut")
         return FileManager.default.fileExists(atPath: url.path) ? url : nil
     }
     var body: some View {
         LiftList {
+            Section(L10n.s("Check the connection")) {
+                Text(L10n.s("Uses a fictional set. Your profile, workouts and current plan stay on this device. A returned response confirms the round trip, not coaching quality or automatic execution.")).font(.subheadline)
+                if let preparedCheck {
+                    ShareLink(item: preparedCheck) { LiftLabel(L10n.s("Add test Shortcut"), "arrow.down.document") }
+                }
+                Button { openURL(URL(string: "shortcuts://run-shortcut?name=Little%20Lift%20Connection%20Check")!) } label: {
+                    LiftLabel(L10n.s("Run generic connection check"), "arrow.triangle.2.circlepath")
+                }
+                if let check = store.state.coachConnectionCheck {
+                    TimelineView(.periodic(from: .now, by: 30)) { context in
+                        if check.receivedAt != nil {
+                            Label(L10n.s("Response received · history unchanged"), systemImage: "checkmark.circle").font(.subheadline)
+                        } else if check.isWaiting(now: context.date) {
+                            Text(L10n.s("Waiting for the response…")).font(.subheadline)
+                            Button(L10n.s("Cancel connection check")) { do { try store.cancelConnectionCheck() } catch { store.error = error.localizedDescription } }
+                        } else {
+                            Text(L10n.s("No response confirmed. Check Shortcuts permissions and run the test again.")).font(.subheadline)
+                        }
+                    }
+                }
+                Text(L10n.s("Add the test Shortcut first. It uses Prepare Coach Connection Check → Use Model with ChatGPT → Save Workout Review. Apple may ask you to allow the actions. Opening Shortcuts alone does not pass the test.")).font(.caption).foregroundStyle(.secondary)
+            }
             if let preparedShortcut {
                 Section(L10n.s("Prepared on this Mac")) {
                     ShareLink(item: preparedShortcut) { Text(L10n.s("Open prepared review Shortcut")) }

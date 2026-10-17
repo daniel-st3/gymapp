@@ -15,8 +15,8 @@ struct AdaptiveWorkoutView: View {
                         if let current = session.currentExercise,
                            let original = session.plan.exercises.first(where: { $0.id == session.originalID(for: current.id) }) {
                             ForEach(original.alternatives ?? []) { item in
-                                Button(L10n.s("Use \(item.name)")) { alternative = item }
-                                    .disabled(item.unit != session.plan.unit || session.entries.contains { session.originalID(for: $0.exerciseID) == original.id })
+                                Button(L10n.s("Use \(item.name)")) { future = false; alternative = item }
+                                    .disabled(!session.canSubstitute(with: item))
                             }
                             if original.alternatives?.isEmpty ?? true { Text(L10n.s("Add approved alternatives in iPhone Routines.")).watchText(.caption).foregroundStyle(.secondary) }
                         }
@@ -66,9 +66,14 @@ struct AdaptiveWorkoutView: View {
                 WatchPage {
                     ScrollView { VStack(alignment: .leading, spacing: 8) {
                         Text(item.name)
+                        if let session = store.state.session, let current = session.currentExercise,
+                           let original = session.plan.exercises.first(where: { $0.id == session.originalID(for: current.id) }) {
+                            let kept = session.entries.filter { $0.exerciseID == original.id }.count
+                            Text(L10n.s("\(kept) sets kept · \(original.sets - kept) on this machine")).watchText(.secondary)
+                        }
                         Text(L10n.s("\(WorkoutSession.number(item.weight)) \(item.unit.rawValue) × \(item.reps) · \(item.restSeconds)s rest")).watchText(.secondary)
-                        Toggle(L10n.s("Propose for future review"), isOn: $future)
-                        Text(L10n.s("Approved alternative. Coach observations for the original won’t transfer.")).watchText(.secondary).foregroundStyle(.secondary)
+                        Toggle(L10n.s("Propose for future review"), isOn: $future).watchText(.secondary)
+                        Text(L10n.s("Logged sets and current rest stay unchanged. Observations stay with the original machine.")).watchText(.secondary).foregroundStyle(.secondary)
                     } }
                 } actions: {
                     Button(L10n.s("Use alternative")) { store.perform { try store.substitute(item.id, future: future) }; alternative = nil }.buttonStyle(QuietButtonStyle())
