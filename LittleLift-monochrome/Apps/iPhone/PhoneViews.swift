@@ -1,6 +1,10 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
+private struct SavedWorkoutReviewRoute: Hashable {
+    let sessionID: UUID
+}
+
 struct PhoneRootView: View {
     @Bindable var store: PhoneStore
     @Environment(\.scenePhase) private var scenePhase
@@ -92,8 +96,13 @@ struct TodayView: View {
                         LiftSurface { LiftMenuRow(title: L10n.s("A new workout to review"), symbol: "text.bubble", detail: L10n.s("Changes need your acceptance")) }
                     }
                 }
+                if let latest = store.state.sessions.first {
+                    NavigationLink(value: SavedWorkoutReviewRoute(sessionID: latest.id)) {
+                        LiftSurface { LiftMenuRow(title: L10n.s("Your latest workout review"), symbol: "checkmark.circle", detail: L10n.s("Ready automatically · \(latest.plan.title)")) }
+                    }.accessibilityIdentifier("today.latestReview")
+                }
                 NavigationLink { ReviewQueueView(store: store) } label: {
-                    HStack { Text(L10n.s("Coach reviews")).font(.subheadline); Spacer(); LiftChevron() }.frame(minHeight: 44)
+                    HStack { Text(L10n.s("Workout reviews")).font(.subheadline); Spacer(); LiftChevron() }.frame(minHeight: 44)
                 }
             }.padding(.horizontal, 24).padding(.top, 18).padding(.bottom, 20)
                 .modifier(LiftContentEntrance())
@@ -107,6 +116,11 @@ struct TodayView: View {
             }.padding(.horizontal, 24).padding(.vertical, 12).background(.black)
         }
         .modifier(LiftRootChrome())
+        .navigationDestination(for: SavedWorkoutReviewRoute.self) { route in
+            if let session = store.state.sessions.first(where: { $0.id == route.sessionID }) {
+                WorkoutEvidenceReviewView(session: session, store: store)
+            }
+        }
         .sheet(isPresented: $choosing) { WorkoutChooserView(store: store) }
         .sheet(item: $editing) { plan in
             NavigationStack {
@@ -317,6 +331,9 @@ struct SessionDetailView: View {
                         LiftStat(value: "\(session.loggedWorkCount) / \(session.plan.totalSets)", label: L10n.s("Sets / segments logged"))
                         LiftStat(value: "\(Int(session.duration / 60)) min", label: L10n.s("Session duration"))
                     }
+                }
+                NavigationLink { WorkoutEvidenceReviewView(session: session, store: PhoneStore.shared) } label: {
+                    LiftSurface { LiftMenuRow(title: L10n.s("Automatic review"), symbol: "checkmark.circle", detail: L10n.s("Targets, actual values and comparable earlier sets")) }
                 }
                 LiftSection(title: L10n.s("Recorded work")) {
                     ForEach(session.executionExercises) { exercise in

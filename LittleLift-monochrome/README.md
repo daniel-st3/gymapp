@@ -11,7 +11,7 @@ No backend. No ads. No API keys. No paid inference or runtime dependencies.
   <img src="docs/images/watch-logging.png" width="210" alt="Watch logging with fixed weight, repetitions and Log set controls">
 </p>
 
-*Actual simulator captures from Build 10 using generic demonstration data. Build 11 verification is documented below.*
+*Actual simulator captures from Build 10 using generic demonstration data. Current verification is documented below.*
 
 ## At a glance
 
@@ -22,6 +22,18 @@ No backend. No ads. No API keys. No paid inference or runtime dependencies.
 | Keep routines and a weekly schedule | Defer a busy exercise or choose an approved alternative |
 | Explore History, Progress and factual reports | Undo, finish early and recover after relaunch |
 | Share context with your existing coach chat | Keep logging offline; deliver completed workouts later |
+
+## What’s new in Build 12
+
+Every completed workout now has an automatic review inside Little Lift: prescribed targets, actual logged values, coach observations and exact matching earlier sets. It is calculated from your saved records, works offline and needs no account or Shortcut setup. Missing evidence stays explicit; logging intervals are never called actual rest. Open it from Today, History or Workout reviews.
+
+Search exercises from your own plan and routines alongside the local guide. Optional ChatGPT attempts expire safely if no result returns; the local review remains available. A rapid second Log touch no longer dismisses the newly opened Watch summary, and a review stays on the selected workout when another arrives.
+
+Rhythm pulses can remain eligible while an actual HealthKit workout is running, including when the scene is inactive. Pause, interruption, completion, changed sets and disabled haptics stop them. Physical wrist-down behavior and haptic feel still require observation. This is a metronome, not a repetition detector.
+
+Build 12 was installed and launched on the real iPhone and paired Watch with the existing free signing. Post-launch readback preserved the original state, active Watch session and motion files; no restore was needed.
+
+See the [Build 12 checklist](docs/in-app-12-checklist.md) and [all 27 requirements](docs/feedback-27.md). The local factual review does not represent a ChatGPT response or an automatic connection to your existing conversation.
 
 ## What’s new in Build 11
 
@@ -77,7 +89,7 @@ bash scripts/verify-mac.sh
 python3 scripts/check_repository.py
 ```
 
-Build 11 passes **112 engine tests** across fifteen suites, plus **10 launcher tests**. The Mac check also validates project generation, resources and icons, and builds both native simulator apps. See [observed verification](docs/verification.md) for simulator/device evidence and remaining limits.
+Build 12 passes **121 engine tests** across sixteen suites, plus **10 launcher tests**. The Mac check also validates project generation, resources and icons, and builds both native simulator apps. See [observed verification](docs/verification.md) for simulator/device evidence and remaining limits.
 
 After adding or removing native Swift files:
 

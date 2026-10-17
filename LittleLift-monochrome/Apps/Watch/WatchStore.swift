@@ -25,6 +25,7 @@ final class WatchStore {
     @ObservationIgnored private let repository: FileRepository<WatchState>
     @ObservationIgnored private let link = DeviceLink()
     @ObservationIgnored private let notifications = RestNotifications()
+    @ObservationIgnored private var completionUptime: TimeInterval?
 
     private init() {
         let folder = URL.applicationSupportDirectory.appending(path: "LittleLift", directoryHint: .isDirectory)
@@ -45,7 +46,9 @@ final class WatchStore {
         guard !storageBlocked else { throw WorkoutError.invalidState(L10n.s("Stored data could not be read. Restart after restoring your backup.")) }
         if let active = next.session, active.phase != .completed { try active.validateDeliveryReserve() }
         let changedExercise = state.session?.currentExercise?.id != next.session?.currentExercise?.id
+        let justCompleted = state.session?.phase != .completed && next.session?.phase == .completed
         try repository.save(next); state = next
+        if justCompleted { completionUptime = ProcessInfo.processInfo.systemUptime }
         if changedExercise { WorkoutRuntime.shared.changeActivity(next.session?.currentExercise) }
         UserDefaults.standard.set(next.comfort?.language, forKey: "littlelift.language")
     }
@@ -160,6 +163,8 @@ final class WatchStore {
     }
     func dismissSummary() throws {
         guard state.session?.phase == .completed else { return }
+        // A second touch on the former Log button must not also dismiss Summary.
+        if let completionUptime, ProcessInfo.processInfo.systemUptime - completionUptime < 0.8 { return }
         var next = state
         if next.session?.pendingEffort != nil { try next.session?.answerEffort(nil) }
         next.enqueueCompleted(); next.session = nil; try commit(next); retrySync()

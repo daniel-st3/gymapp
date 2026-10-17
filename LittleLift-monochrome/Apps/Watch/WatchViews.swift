@@ -83,8 +83,8 @@ struct WatchRootView: View {
                 Button(L10n.s("OK")) { store.error = nil }
             } message: { Text(store.error ?? "") }
         }
-        .onChange(of: scenePhase) { _, phase in if phase != .active { RhythmGuide.shared.stop() }; WorkoutRuntime.shared.scene(String(describing: phase)); if phase == .active { store.foreground() } }
-        .onAppear { store.foreground() }
+        .onChange(of: scenePhase) { _, phase in RhythmGuide.shared.sceneChanged(active: phase == .active); WorkoutRuntime.shared.scene(String(describing: phase)); if phase == .active { store.foreground() } }
+        .onAppear { RhythmGuide.shared.sceneChanged(active: scenePhase == .active); store.foreground() }
         .onOpenURL { url in
             if url.scheme == "littlelift", url.host == "motion", store.state.motionOptIn == true { store.presentedSheet = .motion }
         }
@@ -133,10 +133,6 @@ struct WatchTodayView: View {
         WatchPage {
             VStack(alignment: .leading, spacing: 8) {
                 if let plan = store.state.plan {
-                    HStack(spacing: 6) {
-                        Image(systemName: "dumbbell").accessibilityHidden(true)
-                        Text(L10n.s("TODAY")).tracking(1.5)
-                    }.watchText(.caption).foregroundStyle(.secondary)
                     Text(plan.title).font(.system(size: titleSize, weight: .regular, design: .default)).lineLimit(2)
                     Text(LiftCopy.workoutSummary(plan))
                         .watchText(.secondary).foregroundStyle(.secondary)
@@ -338,7 +334,7 @@ struct RestClock: View {
     let duration: TimeInterval
     var compact = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @ScaledMetric(relativeTo: .title2) private var numberSize: CGFloat = 36
+    @ScaledMetric(relativeTo: .title2) private var numberSize: CGFloat = 32
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 1)) { context in

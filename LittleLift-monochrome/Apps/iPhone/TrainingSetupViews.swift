@@ -113,8 +113,34 @@ struct CoachContextView: View {
 }
 struct ExerciseHelpView: View {
     @State private var query = ""
+    private var store: PhoneStore { .shared }
     var body: some View {
         LiftList {
+            let saved = store.state.savedExercises(matching: query)
+            if !saved.isEmpty {
+                Section(L10n.s("In your saved workouts")) {
+                    ForEach(saved) { reference in
+                        NavigationLink {
+                            LiftForm {
+                                Section(reference.exercise.name) {
+                                    Text(reference.plan.title).font(.caption)
+                                    Text(reference.exercise.prescription(unit: reference.plan.unit))
+                                    if let convention = reference.exercise.loadConvention { Text(convention.label).font(.caption) }
+                                }
+                                Section {
+                                    Text(L10n.s("This is your saved prescription. Similar machine names do not make their loads equivalent. Availability at your gym is not confirmed.")).font(.callout)
+                                }
+                            }.navigationTitle(L10n.s("Saved exercise")).navigationBarTitleDisplayMode(.inline)
+                        } label: {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text(reference.exercise.name)
+                                Text(reference.plan.title).font(.caption).foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                }
+            }
+            Section(L10n.s("Local exercise guide")) {
             ForEach(ExerciseCatalog.search(query)) { item in
                 NavigationLink {
                     LiftForm {
@@ -124,6 +150,10 @@ struct ExerciseHelpView: View {
                         Section { Text(L10n.s("General description, not an approved substitute or a confirmed gym inventory. Keep your preferred exercise name and exact machine in your plan.")).font(.caption).foregroundStyle(.secondary) }
                     }.navigationTitle(L10n.s("Exercise help")).navigationBarTitleDisplayMode(.inline)
                 } label: { VStack(alignment: .leading) { Text(item.displayName); Text(item.translatedName).font(.caption).foregroundStyle(.secondary) } }
+            }
+            }
+            if saved.isEmpty && ExerciseCatalog.search(query).isEmpty {
+                Text(L10n.s("No saved exercise or guide matches. Keep the name from your coach; an unfamiliar name does not identify a machine automatically.")).font(.callout)
             }
         }.searchable(text: $query, prompt: L10n.s("Name in Spanish or English")).navigationTitle(L10n.s("Exercise help")).navigationBarTitleDisplayMode(.inline)
     }
@@ -151,6 +181,8 @@ struct GettingStartedView: View {
                 Text(L10n.s("Allow Workouts for the workout runtime. Denying it leaves manual logging available. Only one workout app can record at once.")).font(.caption)
             }
             Section(L10n.s("4 · Review when ready")) {
+                NavigationLink(L10n.s("Workout reviews")) { ReviewQueueView(store: store) }
+                Text(L10n.s("Every saved workout has a local review. No setup, account or connection is needed.")).font(.caption)
                 NavigationLink(L10n.s("Choose coach connection")) { CoachingSettingsView(store: store) }
                 NavigationLink(L10n.s("Review shared context")) { CoachContextView(store: store) }
                 Text(L10n.s("Your existing chat receives explicit shares. Shortcuts needs its own setup and does not inherit that chat. A suggested plan always waits for acceptance.")).font(.caption)

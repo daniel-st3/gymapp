@@ -96,6 +96,11 @@ final class PhoneStore {
     func selectReview(_ id: UUID) throws {
         var next = state; next.selectedReviewSessionID = id; try commit(next)
     }
+    func refreshReviewStatus() {
+        guard !storageBlocked else { return }
+        do { var next = state; next.expireReviewAttempts(); if next != state { try commit(next) } }
+        catch { self.error = error.localizedDescription }
+    }
     func endReview(_ id: UUID, cancelled: Bool, detail: String) throws {
         var next = state; try next.endReview(id, cancelled: cancelled, detail: detail); try commit(next)
     }

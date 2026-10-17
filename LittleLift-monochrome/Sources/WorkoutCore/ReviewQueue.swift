@@ -14,6 +14,16 @@ public struct ReviewTicket: Equatable, Sendable { public let sessionID: UUID; pu
 
 extension PhoneState {
     public var reviewQueue: [ReviewJob] { reviewJobs ?? [] }
+    public mutating func expireReviewAttempts(now: Date = Date()) {
+        guard var jobs = reviewJobs else { return }
+        for i in jobs.indices where jobs[i].status == .running {
+            if jobs[i].startedAt.map({ now.timeIntervalSince($0) >= 600 }) ?? true {
+                jobs[i].status = .failed
+                jobs[i].detail = L10n.s("No model result arrived within 10 minutes. Your local review is ready; retry ChatGPT only if you want to.")
+            }
+        }
+        reviewJobs = jobs
+    }
     public mutating func queueReview(for sessionID: UUID) {
         guard sessions.contains(where: { $0.id == sessionID }), !reviewQueue.contains(where: { $0.id == sessionID }) else { return }
         var jobs = reviewQueue; jobs.append(ReviewJob(sessionID: sessionID)); reviewJobs = jobs
@@ -47,7 +57,7 @@ extension PhoneState {
     }
     /// Replays of the same successful result are harmless. Stale/cancelled attempts
     /// cannot overwrite a newer proposal, even after a delayed model response.
-    public mutating func receiveReview(_ text: String) throws {
+    public mutating func receiveReview(_ text: String, now: Date = Date()) throws {
         guard text.utf8.count <= 64_000 else { throw WorkoutError.invalidInput(L10n.s("The review is too large.")) }
         let plain = text.trimmingCharacters(in: .whitespacesAndNewlines)
         let stripped = plain.hasPrefix("```") ? plain.components(separatedBy: .newlines).dropFirst().dropLast().joined(separator: "\n") : plain
@@ -62,6 +72,9 @@ extension PhoneState {
             guard let i = jobs.firstIndex(where: { $0.id == sessionID }), jobs[i].attemptID == attemptID else { throw WorkoutError.invalidInput(L10n.s("This review belongs to an unknown or older attempt. It was not applied.")) }
             if jobs[i].status == .received { return }
             guard jobs[i].status == .running else { throw WorkoutError.invalidState(L10n.s("This review was cancelled or failed. Start a new attempt explicitly.")) }
+            guard let started = jobs[i].startedAt, now.timeIntervalSince(started) < 600 else {
+                throw WorkoutError.invalidState(L10n.s("This review attempt expired. Your workout and local review are saved; start a new attempt to request ChatGPT again."))
+            }
             guard review == nil else { throw WorkoutError.invalidState(L10n.s("Review the existing proposal before saving another.")) }
             let proposal = try PlanImport.parseReview(text)
             try propose(proposal); jobs[i].status = .received; jobs[i].detail = L10n.s("Saved for explicit acceptance."); reviewJobs = jobs
@@ -79,6 +92,7 @@ extension PhoneState {
         "reviewSessionID": "\(ticket.sessionID.uuidString)",
         "reviewAttemptID": "\(ticket.attemptID.uuidString)"
         Write analysis in \(comfort?.language == "es" ? "Spanish" : "the user’s preferred language"). Keep JSON keys and stable identifiers unchanged.
+        LOCAL FACTUAL REVIEW: \(WorkoutEvidenceReview(session: session, history: contextHistoryApproved != false ? sessions : []).summary)
         Review this specific completed workout, including delayed delivery. A failed or cancelled attempt will not be applied. Never claim access to an existing chat.
         """
     }

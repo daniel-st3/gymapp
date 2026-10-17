@@ -82,6 +82,7 @@ import os
         record("activity changed")
     }
     func finish() {
+        RhythmGuide.shared.stop()
         attempt = nil; starting = false
         let old = workout; workout = nil; running = false
         old?.end(); UserDefaults.standard.removeObject(forKey: ownerKey)
@@ -99,6 +100,7 @@ import os
         Task { @MainActor [weak self] in
             guard let self, self.workout === workoutSession else { return }
             self.running = toState == .running
+            if !self.running { RhythmGuide.shared.stop() }
             self.record("state \(fromState.rawValue) → \(toState.rawValue)")
             if toState == .ended || toState == .stopped {
                 self.workout = nil
@@ -109,6 +111,7 @@ import os
     nonisolated func workoutSession(_ workoutSession: HKWorkoutSession, didFailWithError error: Error) {
         Task { @MainActor [weak self] in
             guard let self, self.workout === workoutSession else { return }
+            RhythmGuide.shared.stop()
             self.workout = nil; self.running = false
             self.status = L10n.s("Workout runtime interrupted. Manual logging still works.")
             self.record("interrupted: \((error as NSError).code)")

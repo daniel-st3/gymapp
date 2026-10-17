@@ -9,6 +9,11 @@ import Observation
     private(set) var pulses = 0
     @ObservationIgnored private var task: Task<Void, Never>?
     @ObservationIgnored private var token: UUID?
+    @ObservationIgnored private var appActive = true
+    func sceneChanged(active: Bool) {
+        appActive = active
+        if !active && !WorkoutRuntime.shared.running { stop() }
+    }
     func start(store: WatchStore) {
         stop()
         guard store.state.haptics, store.state.comfort?.rhythmEnabled == true,
@@ -18,8 +23,12 @@ import Observation
         task = Task { @MainActor [weak self, weak store] in
             for _ in 0..<120 {
                 do { try await Task.sleep(for: .seconds(interval)); try Task.checkCancellation() } catch { return }
-                guard let self, let store, self.token == current, store.state.haptics, store.state.session?.id == session.id,
-                      store.state.session?.phase == .active, store.state.session?.currentExercise?.id == exercise.id else { self?.stop(); return }
+                guard let self, let store, self.token == current,
+                      RhythmEligibility.allows(appActive: self.appActive, workoutRunning: WorkoutRuntime.shared.running,
+                        haptics: store.state.haptics, enabled: store.state.comfort?.rhythmEnabled == true,
+                        sameSet: store.state.session?.id == session.id && store.state.session?.phase == .active &&
+                            store.state.session?.entries.count == session.entries.count && store.state.session?.currentExercise?.id == exercise.id)
+                else { self?.stop(); return }
                 WKInterfaceDevice.current().play(.click); self.pulses += 1
             }
             self?.stop()

@@ -1,8 +1,8 @@
 # Run Little Lift on your Mac
 
-**Latest local update: Build 11.** Mixed strength/cardio logging, optional machine-change time, better deferral, Spanish/English, native typography, editable coach context, exercise help and flexible weekly goals. Watch uses an official workout session with manual fallback. See the [27-point delivery matrix](docs/feedback-27.md) and [current verification](docs/verification.md).
+**Latest local update: Build 12.** Automatic offline workout reviews inside the app, exact comparisons with your saved sets, search across saved exercises, safer review timeouts and improved Watch spacing. The existing mixed workouts, routines, observations, context sharing and optional independent Shortcut remain available. See the [27-point matrix](docs/feedback-27.md) and [current verification](docs/verification.md).
 
-Build 11 runs on the existing paired simulators and was installed and launched on both real devices on 17 October using the existing free signing. Data preservation was checked after launch; the Watch required restoration from its fresh backup, as detailed in [verification](docs/verification.md). Physical wrist return, haptic feel, sensor accuracy and live ChatGPT remain unverified. Original signing, icon and data are preserved; **do not uninstall**.
+Your completed workout review appears automatically after the phone saves it. Open **Today → Your latest workout review**, or **History → a workout → Automatic review**. No account or model setup is required. ChatGPT remains a separate optional route. Original data, free signing and icon are preserved; **do not uninstall**.
 
 For a nontechnical walkthrough, use **Settings → Start here** inside the phone app, or open the [local Spanish guide](docs/onboarding/index.html). The existing explicit-chat workflow and optional independent Shortcut remain separate. The historical Build 4 notes below are not new verification.
 

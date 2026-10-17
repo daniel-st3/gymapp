@@ -29,3 +29,25 @@ public enum ExerciseCatalog {
         return items.filter { q.isEmpty || ([$0.english, $0.spanish] + $0.aliases).contains { normalized($0).contains(q) } }
     }
 }
+
+public struct SavedExerciseReference: Identifiable, Sendable {
+    public let plan: WorkoutPlan
+    public let exercise: ExercisePlan
+    public var id: String { "\(plan.id)-\(exercise.id)" }
+}
+extension PhoneState {
+    /// Search the user's actual prescriptions without inferring gym inventory or
+    /// merging similarly named machines. No history or private profile is sent.
+    public func savedExercises(matching query: String) -> [SavedExerciseReference] {
+        let query = query.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: Locale(identifier: "en_US_POSIX")).trimmingCharacters(in: .whitespacesAndNewlines)
+        var seen = Set<String>()
+        return ([plan].compactMap { $0 } + routineLibrary.map(\.plan)).flatMap { plan in
+            plan.exercises.compactMap { exercise in
+                let reference = SavedExerciseReference(plan: plan, exercise: exercise)
+                let text = (exercise.name + " " + plan.title).folding(options: [.diacriticInsensitive, .caseInsensitive], locale: Locale(identifier: "en_US_POSIX"))
+                guard (query.isEmpty || text.contains(query)), seen.insert(reference.id).inserted else { return nil }
+                return reference
+            }
+        }
+    }
+}

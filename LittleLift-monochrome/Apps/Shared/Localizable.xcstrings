@@ -2893,13 +2893,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rhythm is a metronome, not repetition detection. It never changes your actual count. Pulses can interrupt Watch heart-rate sampling. There is no app-controlled vibration intensity. It stops when you leave the active app."
+            "value": "Rhythm is an optional metronome, not repetition detection. It never changes your recorded count. With an active workout session it can continue when your wrist is down. It stops if that session pauses or ends. Haptic timing and feel depend on watchOS."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Es un metrónomo, no un detector de repeticiones. No cambia tu registro. Los pulsos pueden interrumpir las muestras de pulso cardiaco. La app no controla la intensidad de vibración. Se detiene al salir de la app activa."
+            "value": "El ritmo es un metrónomo opcional, no un detector de repeticiones. No cambia tu registro. Con una sesión de entrenamiento activa puede continuar al bajar la muñeca. Se detiene si la sesión se pausa o termina. El tiempo y la sensación del pulso dependen de watchOS."
           }
         }
       }
@@ -15826,6 +15826,646 @@
           "stringUnit": {
             "state": "translated",
             "value": "{0}: una repetición más con la misma carga que en la última serie comparable anterior."
+          }
+        }
+      }
+    },
+    "In your saved workouts": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In your saved workouts"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En tus rutinas guardadas"
+          }
+        }
+      }
+    },
+    "This is your saved prescription. Similar machine names do not make their loads equivalent. Availability at your gym is not confirmed.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This is your saved prescription. Similar machine names do not make their loads equivalent. Availability at your gym is not confirmed."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta es tu prescripción guardada. Nombres de máquinas parecidos no hacen equivalentes sus cargas. La disponibilidad en tu gimnasio no está confirmada."
+          }
+        }
+      }
+    },
+    "Saved exercise": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved exercise"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ejercicio guardado"
+          }
+        }
+      }
+    },
+    "Local exercise guide": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Local exercise guide"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guía local de ejercicios"
+          }
+        }
+      }
+    },
+    "No saved exercise or guide matches. Keep the name from your coach; an unfamiliar name does not identify a machine automatically.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No saved exercise or guide matches. Keep the name from your coach; an unfamiliar name does not identify a machine automatically."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay coincidencias en tus ejercicios ni en la guía. Conserva el nombre de tu coach; un nombre desconocido no identifica una máquina automáticamente."
+          }
+        }
+      }
+    },
+    "Workout reviews": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workout reviews"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revisiones de entrenamientos"
+          }
+        }
+      }
+    },
+    "Every saved workout has a local review. No setup, account or connection is needed.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every saved workout has a local review. No setup, account or connection is needed."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cada entrenamiento guardado tiene una revisión local. No requiere configuración, cuenta ni conexión."
+          }
+        }
+      }
+    },
+    "Optional": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Optional"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcional"
+          }
+        }
+      }
+    },
+    "Workout": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workout"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrenamiento"
+          }
+        }
+      }
+    },
+    "Workout review": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workout review"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revisión del entrenamiento"
+          }
+        }
+      }
+    },
+    "Ready automatically when your workout is saved. Calculated locally from your records; no ChatGPT or internet required.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ready automatically when your workout is saved. Calculated locally from your records; no ChatGPT or internet required."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lista automáticamente al guardar el entrenamiento. Se calcula en el teléfono con tus registros; no requiere ChatGPT ni internet."
+          }
+        }
+      }
+    },
+    "Set {0} · confirmed: {1} {2} × {3}": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set {0} · confirmed: {1} {2} × {3}"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serie {0} · confirmado: {1} {2} × {3}"
+          }
+        }
+      }
+    },
+    "View earlier workout": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View earlier workout"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ver entrenamiento anterior"
+          }
+        }
+      }
+    },
+    "Log-tap interval: {0} s · includes exercise time": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Log-tap interval: {0} s · includes exercise time"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intervalo entre registros: {0} s · incluye la ejecución"
+          }
+        }
+      }
+    },
+    "What timing can tell you": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What timing can tell you"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qué indican los tiempos"
+          }
+        }
+      }
+    },
+    "Full record & original prescription": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full record & original prescription"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registro completo y prescripción original"
+          }
+        }
+      }
+    },
+    "Share review with my coach": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share review with my coach"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compartir revisión con mi coach"
+          }
+        }
+      }
+    },
+    "Your next plan stays unchanged. Coach proposals always need your acceptance.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your next plan stays unchanged. Coach proposals always need your acceptance."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu próximo plan no cambia. Las propuestas del coach siempre necesitan tu aceptación."
+          }
+        }
+      }
+    },
+    "Automatic reviews": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatic reviews"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revisiones automáticas"
+          }
+        }
+      }
+    },
+    "ChatGPT is optional and separate. Sharing uses your chosen chat; Shortcuts does not inherit it. Local reviews remain available if the model fails.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ChatGPT is optional and separate. Sharing uses your chosen chat; Shortcuts does not inherit it. Local reviews remain available if the model fails."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ChatGPT es opcional y funciona aparte. Compartes con el chat que elijas; Atajos no hereda esa conversación. Las revisiones locales siguen disponibles si falla el modelo."
+          }
+        }
+      }
+    },
+    "Optional ChatGPT setup": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Optional ChatGPT setup"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configuración opcional de ChatGPT"
+          }
+        }
+      }
+    },
+    "Your latest workout review": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your latest workout review"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revisión de tu último entrenamiento"
+          }
+        }
+      }
+    },
+    "Ready automatically · {0}": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ready automatically · {0}"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lista automáticamente · {0}"
+          }
+        }
+      }
+    },
+    "Automatic review": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatic review"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revisión automática"
+          }
+        }
+      }
+    },
+    "Targets, actual values and comparable earlier sets": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Targets, actual values and comparable earlier sets"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Objetivos, valores reales y series anteriores comparables"
+          }
+        }
+      }
+    },
+    "Strength sets recorded: {0}. Timed segments recorded: {1}. Sets with a comparable earlier record: {2}.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strength sets recorded: {0}. Timed segments recorded: {1}. Sets with a comparable earlier record: {2}."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Series de fuerza registradas: {0}. Tramos cronometrados: {1}. Series con un registro anterior comparable: {2}."
+          }
+        }
+      }
+    },
+    "Strength timing is the interval between Log taps, including exercise time. Actual rest and repetition timing are unavailable. Timed activities use your Start, Pause, Resume and Done events.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strength timing is the interval between Log taps, including exercise time. Actual rest and repetition timing are unavailable. Timed activities use your Start, Pause, Resume and Done events."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En fuerza, el intervalo entre registros incluye la ejecución. No se conoce el descanso real ni el tiempo por repetición. Las actividades cronometradas usan tus eventos de iniciar, pausar, reanudar y terminar."
+          }
+        }
+      }
+    },
+    "Practice workout: excluded from historical comparisons.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Practice workout: excluded from historical comparisons."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrenamiento de práctica: excluido de las comparaciones históricas."
+          }
+        }
+      }
+    },
+    "No comparable earlier set. Exact variation, unit, load convention and set number must match.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No comparable earlier set. Exact variation, unit, load convention and set number must match."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay una serie anterior comparable. Deben coincidir la variante exacta, la unidad, la convención de carga y el número de serie."
+          }
+        }
+      }
+    },
+    "Previous: {0} {1} × {2}. Change: {3} {4}, {5} reps. Describes recorded values, not a strength score.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previous: {0} {1} × {2}. Change: {3} {4}, {5} reps. Describes recorded values, not a strength score."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anterior: {0} {1} × {2}. Cambio: {3} {4}, {5} repeticiones. Describe valores registrados, no una puntuación de fuerza."
+          }
+        }
+      }
+    },
+    "Automatic workout review · calculated on this iPhone": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatic workout review · calculated on this iPhone"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revisión automática · calculada en este iPhone"
+          }
+        }
+      }
+    },
+    "{0} · Set {1}: {2}": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{0} · Set {1}: {2}"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{0} · Serie {1}: {2}"
+          }
+        }
+      }
+    },
+    "No model result arrived within 10 minutes. Your local review is ready; retry ChatGPT only if you want to.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No model result arrived within 10 minutes. Your local review is ready; retry ChatGPT only if you want to."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No llegó una respuesta del modelo en 10 minutos. Tu revisión local está lista; vuelve a intentar ChatGPT solo si quieres."
+          }
+        }
+      }
+    },
+    "This review attempt expired. Your workout and local review are saved; start a new attempt to request ChatGPT again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This review attempt expired. Your workout and local review are saved; start a new attempt to request ChatGPT again."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este intento de revisión venció. Tu entrenamiento y revisión local están guardados; inicia otro intento para pedir una nueva respuesta de ChatGPT."
+          }
+        }
+      }
+    },
+    "Previous: {0} {1} × {2}. Change: {3} {4}, {5} rep.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previous: {0} {1} × {2}. Change: {3} {4}, {5} rep."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anterior: {0} {1} × {2}. Cambio: {3} {4}, {5} rep."
+          }
+        }
+      }
+    },
+    "Automatic review · saved on this iPhone": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatic review · saved on this iPhone"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revisión automática · guardada en este iPhone"
+          }
+        }
+      }
+    },
+    "How this review is calculated": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How this review is calculated"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cómo se calcula esta revisión"
+          }
+        }
+      }
+    },
+    "Strength sets recorded": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strength sets recorded"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Series de fuerza registradas"
+          }
+        }
+      }
+    },
+    "Timed segments recorded": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timed segments recorded"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tramos cronometrados"
+          }
+        }
+      }
+    },
+    "With an earlier match": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With an earlier match"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Con referencia anterior"
           }
         }
       }

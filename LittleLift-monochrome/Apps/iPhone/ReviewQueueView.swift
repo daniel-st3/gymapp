@@ -2,16 +2,36 @@ import SwiftUI
 
 struct ReviewQueueView: View {
     let store: PhoneStore
+    var body: some View {
+        LiftList {
+            Section(L10n.s("Automatic reviews")) {
+                Text(L10n.s("Every saved workout has a local review. No setup, account or connection is needed.")).font(.caption).foregroundStyle(.secondary)
+                ForEach(store.state.sessions) { session in
+                    NavigationLink { WorkoutEvidenceReviewView(session: session, store: store) } label: {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(session.plan.title)
+                            Text(session.startedAt, format: .dateTime.day().month().year()).font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            }
+            if store.state.sessions.isEmpty { Text(L10n.s("Completed workouts appear here after syncing from Watch.")) }
+            NavigationLink(L10n.s("Optional ChatGPT setup")) { OptionalCoachReviewsView(store: store) }
+        }.navigationTitle(L10n.s("Workout reviews")).navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+struct OptionalCoachReviewsView: View {
+    let store: PhoneStore
     @State private var openedAt: Date?
     @State private var launchMessage: String?
     @Environment(\.openURL) private var openURL
-    @Environment(\.dismiss) private var dismiss
     var body: some View {
         LiftList {
             Section {
                 if let launchMessage { Text(launchMessage).font(.caption) }
-                Text(L10n.s("Share a report with your gym chat, or use your configured review Shortcut. You always review a proposed workout before accepting it.")).font(.caption).foregroundStyle(.secondary)
-                NavigationLink(L10n.s("Shortcut and notification setup")) { ShortcutHelpView() }
+                Text(L10n.s("ChatGPT is optional and separate. Sharing uses your chosen chat; Shortcuts does not inherit it. Local reviews remain available if the model fails.")).font(.caption).foregroundStyle(.secondary)
+                NavigationLink(L10n.s("Optional ChatGPT setup")) { ShortcutHelpView() }
                 Button(store.state.reviewNotificationsEnabled == true ? L10n.s("Turn off review notifications") : L10n.s("Enable review notifications")) {
                     Task { await store.enableReviewNotifications(store.state.reviewNotificationsEnabled != true) }
                 }
@@ -36,7 +56,13 @@ struct ReviewQueueView: View {
             }
             if store.state.review != nil { NavigationLink(L10n.s("Review proposed workout")) { ReviewView(store: store) } }
             if store.state.reviewQueue.isEmpty { Text(L10n.s("Completed workouts appear here after syncing from Watch.")) }
-        }.scrollContentBackground(.hidden).background(.black).navigationTitle(L10n.s("Coach reviews")).navigationBarTitleDisplayMode(.inline)
+        }.scrollContentBackground(.hidden).background(.black).navigationTitle(L10n.s("Workout reviews")).navigationBarTitleDisplayMode(.inline)
+            .task {
+                while !Task.isCancelled {
+                    store.refreshReviewStatus()
+                    do { try await Task.sleep(for: .seconds(30)) } catch { return }
+                }
+            }
     }
     private func runShortcut() {
         var parts = URLComponents(); parts.scheme = "shortcuts"; parts.host = "run-shortcut"
