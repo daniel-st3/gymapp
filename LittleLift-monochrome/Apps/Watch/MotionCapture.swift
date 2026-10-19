@@ -195,7 +195,7 @@ struct MotionCaptureView: View {
                         .watchText(.secondary).foregroundStyle(.secondary)
                     Button(L10n.s("Delete replay")) { deleting = true }.watchText(.secondary)
                 } else {
-                    Text(L10n.s("3-minute test.\nStop other workout apps first."))
+                    Text(store.state.motionOptIn == true ? L10n.s("3-minute test.\nStop other workout apps first.") : L10n.s("Enable Motion test in iPhone Settings first."))
                         .watchText(.secondary).foregroundStyle(.secondary)
                 }
             }.frame(maxWidth: .infinity, alignment: .leading)

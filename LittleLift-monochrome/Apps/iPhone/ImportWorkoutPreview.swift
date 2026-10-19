@@ -5,11 +5,13 @@ import SwiftUI
 struct ImportWorkoutPreview: View {
     let store: PhoneStore
     let finished: () -> Void
+    let useToday: Bool
+    let chatReply: ChatWorkoutReply?
     @State private var draft: WorkoutDraft
     @State private var error: String?
     @Environment(\.dynamicTypeSize) private var dynamicType
-    init(store: PhoneStore, initial: WorkoutDraft, finished: @escaping () -> Void) {
-        self.store = store; self.finished = finished
+    init(store: PhoneStore, initial: WorkoutDraft, useToday: Bool = true, chatReply: ChatWorkoutReply? = nil, finished: @escaping () -> Void) {
+        self.store = store; self.finished = finished; self.useToday = useToday; self.chatReply = chatReply
         _draft = State(initialValue: initial) // isolated, intentional review snapshot
     }
     private var plan: WorkoutPlan? { try? draft.validated() }
@@ -24,6 +26,11 @@ struct ImportWorkoutPreview: View {
                 TextField(L10n.s("Workout name"), text: $draft.title).font(LiftType.title).accessibilityLabel(L10n.s("Workout name"))
                 Text(L10n.s("Check the exercises against your chat. Nothing changes until you use this workout."))
                     .font(.subheadline).foregroundStyle(.secondary)
+                if let chatReply {
+                    Text(chatReply.review.analysis).font(.subheadline).textSelection(.enabled)
+                    Label(L10n.s("Reply linked to your copied message"), systemImage: "checkmark.circle").font(.caption).foregroundStyle(.secondary)
+                }
+                if !useToday { Text(L10n.s("Save for later. Today and any active workout stay as they are.")).font(.caption).foregroundStyle(.secondary) }
                 if missingUnit || missingRest {
                     LiftSurface {
                         VStack(alignment: .leading, spacing: 12) {
@@ -108,13 +115,21 @@ struct ImportWorkoutPreview: View {
             }.padding(20)
         }.scrollDismissesKeyboard(.interactively).background(.black).buttonStyle(.plain)
             .navigationTitle(L10n.s("Check your workout")).navigationBarTitleDisplayMode(.inline)
+            .alert(L10n.s("Needs attention"), isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
+                Button(L10n.s("OK")) { error = nil }
+            } message: { Text(error ?? "") }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 VStack(spacing: 6) {
                     if plan == nil {
                         Text(L10n.s("Complete the empty fields above to continue.")).font(.caption).foregroundStyle(.secondary)
                     }
-                    Button(L10n.s("Use this workout · send to Watch")) {
-                        do { try store.saveWorkout(draft.validated(), useToday: true); finished() }
+                    Button(useToday ? L10n.s("Use this workout · send to Watch") : L10n.s("Save routine")) {
+                        do {
+                            let plan = try draft.validated()
+                            if let chatReply { try store.acceptChatReply(chatReply, editedPlan: plan, useToday: useToday) }
+                            else { try store.saveWorkout(plan, useToday: useToday) }
+                            finished()
+                        }
                         catch { self.error = error.localizedDescription }
                     }.buttonStyle(QuietButtonStyle(prominent: true)).disabled(plan == nil)
                 }.padding(.horizontal, 20).padding(.vertical, 10).background(.black)

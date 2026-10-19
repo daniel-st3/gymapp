@@ -52,7 +52,8 @@ private struct UnlinkedCoachReviewView: View {
 
 struct OptionalCoachReviewsView: View {
     let store: PhoneStore
-    @State private var openedAt: Date?
+    @State private var launching = false
+    @State private var showingProposal = false
     @State private var launchMessage: String?
     @Environment(\.openURL) private var openURL
     var body: some View {
@@ -77,7 +78,7 @@ struct OptionalCoachReviewsView: View {
                     if job.status != .received || job.outdatedAt != nil {
                         Button(L10n.s("Run review Shortcut")) {
                             do { try store.selectReview(job.id); runShortcut() } catch { store.error = error.localizedDescription }
-                        }.disabled(store.state.reviewQueue.contains(where: { $0.status == .running }) || (openedAt.map { Date().timeIntervalSince($0) < 3 } ?? false))
+                        }.disabled(store.state.reviewQueue.contains(where: { $0.status == .running }) || launching)
                         if job.status == .running {
                             Button(L10n.s("Cancel this review")) { do { try store.endReview(job.id, cancelled: true, detail: L10n.s("Cancelled by user. Delayed results will be rejected.")) } catch { store.error = error.localizedDescription } }
                             Button(L10n.s("Allow retry")) { do { try store.endReview(job.id, cancelled: false, detail: L10n.s("Model or Shortcut did not return a result. Retry explicitly.")) } catch { store.error = error.localizedDescription } }
@@ -85,9 +86,10 @@ struct OptionalCoachReviewsView: View {
                     }
                 }
             }
-            if store.state.review != nil { NavigationLink(L10n.s("Review proposed workout")) { ReviewView(store: store) } }
+            if store.state.review != nil { Button(L10n.s("Review proposed workout")) { showingProposal = true } }
             if store.state.reviewQueue.isEmpty { Text(L10n.s("Completed workouts appear here after syncing from Watch.")) }
         }.scrollContentBackground(.hidden).background(.black).navigationTitle(L10n.s("Workout reviews")).navigationBarTitleDisplayMode(.inline)
+            .sheet(isPresented: $showingProposal) { ReviewView(store: store) }
             .task {
                 while !Task.isCancelled {
                     store.refreshReviewStatus()
@@ -99,7 +101,11 @@ struct OptionalCoachReviewsView: View {
         var parts = URLComponents(); parts.scheme = "shortcuts"; parts.host = "run-shortcut"
         parts.queryItems = [URLQueryItem(name: "name", value: "Little Lift Review")]
         if let url = parts.url {
-            openedAt = Date()
+            launching = true
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(3))
+                launching = false
+            }
             openURL(url) { accepted in launchMessage = accepted ? L10n.s("Opened Shortcuts to continue. Analysis is confirmed only when a result returns.") : L10n.s("Shortcuts could not open. Check setup and retry.") }
         }
     }

@@ -62,6 +62,9 @@ public enum PlanImport {
         let plan: WorkoutPlan
         do {
             let object = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+            if object?["handoffID"] != nil {
+                throw WorkoutError.invalidInput(L10n.s("Paste this reply in My gym chat so the app can check its request before you accept it."))
+            }
             if object?["reviewSessionID"] != nil || object?["reviewAttemptID"] != nil || object?["connectionCheckID"] != nil {
                 throw WorkoutError.invalidInput(L10n.s("This is a coach response. Use Save Workout Review so its workout and attempt can be checked."))
             }
@@ -76,6 +79,9 @@ public enum PlanImport {
 
     public static func parseReview(_ text: String) throws -> TrainingReview {
         let data = try jsonData(text)
+        if let object = try JSONSerialization.jsonObject(with: data) as? [String: Any], object["handoffID"] != nil {
+            throw WorkoutError.invalidInput(L10n.s("Paste this reply in My gym chat so the app can check its request before you accept it."))
+        }
         let input: ReviewInput
         do { input = try JSONDecoder().decode(ReviewInput.self, from: data) }
         catch let error as WorkoutError { throw error }

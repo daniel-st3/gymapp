@@ -1,6 +1,6 @@
 # Run Little Lift on your Mac
 
-**Latest local update: Build 16.** Start with **Today → Change workout → Screenshot or Paste → Review → Use workout** when your coach gives you a different session. Missing weight can be chosen on Watch; missing units/rest and ranges stay explicit decisions. The saved workout is clearly labelled and the app does not read your chat automatically. Both real devices received the free-signed update with their original data preserved. [Build 16 checklist](docs/upgrade-16-checklist.md), [27-point matrix](docs/feedback-27.md), [verification](docs/verification.md).
+**Latest local update: Build 17.** Open **Today → My gym chat → Copy updated message** to prepare the message for your existing gym conversation. Bring its reply back with Paste, review/edit and accept. Copying does not send anything automatically. Add routine now preserves Today; import errors and retries give visible feedback. Both real apps received the free-signed update with original data preserved. [Chat guide](docs/gym-chat.md), [Build 17 checklist](docs/upgrade-17-checklist.md), [27-point matrix](docs/feedback-27.md).
 
 Your completed workout review appears automatically after the phone saves it. Open **Today → Your latest workout review**, or **History → a workout → Automatic review**. No account or model setup is required. ChatGPT remains a separate optional route. Original data, free signing and icon are preserved; **do not uninstall**.
 

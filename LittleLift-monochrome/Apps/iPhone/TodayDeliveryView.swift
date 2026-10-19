@@ -12,6 +12,7 @@ struct TodayDeliveryView: View {
                     .contentTransition(.opacity)
                 Text(store.state.todayReceivedOnWatch ? L10n.s("Open Little Lift on Watch and tap Start workout.") : L10n.s("Waiting for the Watch to confirm this workout. Your plan is safe on this iPhone."))
                     .font(.caption).foregroundStyle(.secondary)
+                if !store.state.todayReceivedOnWatch { Text(store.syncMessage).font(.caption).accessibilityIdentifier("today.syncResult") }
                 DisclosureGroup(L10n.s("Connection & retry")) {
                     VStack(alignment: .leading, spacing: 8) {
                         if let receipt = store.state.lastWatchReceipt, store.state.todayReceivedOnWatch {

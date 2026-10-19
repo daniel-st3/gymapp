@@ -1,5 +1,12 @@
 # Feedback F01–F27 · actualización Build 16
 
+Actualización Build 17: [Mi chat del gym y revisión de controles](upgrade-17-checklist.md)
+añade un mensaje contextual con recibo, revisión explícita y rechazo de respuestas
+antiguas/duplicadas (F05/F10/F18/F24). El intercambio con el hilo existente sigue siendo
+manual. Las limitaciones físicas y de automatización de la matriz no se elevan a
+verificadas por esta actualización. [Guía del chat](gym-chat.md).
+
+
 Continuación de los Builds 10 y 11 locales, sin reemplazarlos por un ZIP. Los adjuntos son requisitos adoptados por el usuario; sus afirmaciones técnicas se contrastan. Ningún resultado antiguo cuenta como una prueba nueva.
 
 Estado de ejecución: **Build 13 corrige la conservación de respuestas del coach, los cálculos de tiempo y la recuperación del Watch; añade apertura directa de archivos con revisión previa y comprueba una respuesta real de ChatGPT en el Mac**. Los 27 puntos permanecen separados. Las pruebas anteriores se conservan como evidencia histórica; el [pase Build 13](audit-13-checklist.md) identifica las pruebas nuevas y los límites físicos/plataforma.

@@ -160,10 +160,12 @@ struct ExerciseHelpView: View {
 }
 struct GettingStartedView: View {
     let store: PhoneStore
+    @State private var importing = false
     var body: some View {
         LiftForm {
             Section(L10n.s("1 · Choose a workout")) {
-                NavigationLink(L10n.s("Import text, screenshot or JSON")) { SmartImportView(store: store) }
+                Button(L10n.s("Import text, screenshot or JSON")) { importing = true }
+                    .sheet(isPresented: $importing) { SmartImportView(store: store) }
                 Button(L10n.s("Use a practice workout")) {
                     do { var plan = try PlanImport.parse(PlanImport.example); plan.title = L10n.s("Practice · upper body"); plan.practice = true; try store.acceptImportedPlan(plan); try store.completeOnboarding("plan") }
                     catch { store.error = error.localizedDescription }

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MotionLibraryView: View {
     let store: PhoneStore
+    @State private var refreshed = false
     var body: some View {
         LiftList {
             Section {
@@ -20,7 +21,8 @@ struct MotionLibraryView: View {
                     Text(L10n.s("Wrist rotation cannot measure weight or certify technique. Repetition counts are estimates you can edit and confirm. Wrist-down continuity, battery use and counting accuracy are not yet validated."))
                     Text(L10n.s("Processing stays on your devices. Raw recordings are excluded from cloud backup. Ordinary workout logging does not use this experiment."))
                 }
-                Button(L10n.s("Refresh replays")) { store.loadMotion() }
+                Button(L10n.s("Refresh replays")) { store.loadMotion(); refreshed = true }
+                if refreshed { Text(L10n.s("Refresh complete. Received replays are listed below.")).font(.caption) }
             }
             ForEach(store.motionRecordings) { recording in
                 NavigationLink { MotionReplayDetailView(store: store, initial: recording) } label: {

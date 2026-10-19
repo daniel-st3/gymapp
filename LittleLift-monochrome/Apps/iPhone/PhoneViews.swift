@@ -65,6 +65,7 @@ struct TodayView: View {
     @State private var editing: WorkoutPlan?
     @State private var reviewing = false
     @State private var copies = 0
+    @State private var shortcutNotice: String?
     @Environment(\.openURL) private var openURL
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -73,6 +74,9 @@ struct TodayView: View {
             VStack(alignment: .leading, spacing: 28) {
                 if let plan = store.state.plan {
                     workoutHeader(plan)
+                    NavigationLink { ChatHandoffView(store: store) } label: {
+                        LiftSurface { LiftMenuRow(title: L10n.s("My gym chat"), symbol: "bubble.left.and.text.bubble.right", detail: L10n.s("Update your chat · bring back its workout")) }
+                    }
                     reviewStatus
                     LiftSection(title: L10n.s("Your exercises")) {
                         LiftSurface {
@@ -218,17 +222,18 @@ struct TodayView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text(store.state.mode.title).font(.callout.weight(.medium))
             if store.state.mode == .existingChat {
-                Button {
-                    UIPasteboard.general.string = PlanImport.coachingPrompt; copies += 1
-                } label: { Label(copies > 0 ? L10n.s("Prompt copied") : L10n.s("Copy coaching prompt"), systemImage: copies > 0 ? "checkmark" : "doc.on.doc") }.buttonStyle(QuietButtonStyle())
-                    .contentTransition(.opacity)
-                    .animation(reduceMotion ? nil : LiftMotion.feedback, value: copies > 0)
+                NavigationLink { ChatHandoffView(store: store) } label: {
+                    Label(L10n.s("My gym chat"), systemImage: "bubble.left.and.text.bubble.right")
+                }.buttonStyle(QuietButtonStyle())
             } else {
                 Button(L10n.s("Run review Shortcut")) {
                     var parts = URLComponents(); parts.scheme = "shortcuts"; parts.host = "run-shortcut"
                     parts.queryItems = [URLQueryItem(name: "name", value: "Little Lift Review")]
-                    if let url = parts.url { openURL(url) }
+                    if let url = parts.url { openURL(url) { accepted in
+                        shortcutNotice = accepted ? L10n.s("Opened Shortcuts to continue. Analysis is confirmed only when a result returns.") : L10n.s("Shortcuts could not open. Check setup and retry.")
+                    } }
                 }.buttonStyle(QuietButtonStyle())
+                if let shortcutNotice { Text(shortcutNotice).font(.caption) }
                 NavigationLink(L10n.s("Set up the Shortcut")) { ShortcutHelpView() }.font(.subheadline)
             }
         }.padding(.top, 8)
@@ -479,6 +484,7 @@ struct ObservationDetailView: View {
 
 struct ReviewView: View {
     let store: PhoneStore
+    @State private var error: String?
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         NavigationStack {
@@ -493,14 +499,17 @@ struct ReviewView: View {
                     Section { ObservationCollectionView(plan: review.plan) }
                     Section {
                         Button(L10n.s("Accept and send to watch")) {
-                            do { try store.acceptReview(); dismiss() } catch { store.error = error.localizedDescription }
+                            do { try store.acceptReview(); dismiss() } catch { self.error = error.localizedDescription }
                         }
                         Button(L10n.s("Discard proposal")) {
-                            do { try store.discardReview(); dismiss() } catch { store.error = error.localizedDescription }
+                            do { try store.discardReview(); dismiss() } catch { self.error = error.localizedDescription }
                         }
                     }
                 }
             }.scrollContentBackground(.hidden).background(.black).navigationTitle(L10n.s("Next workout")).navigationBarTitleDisplayMode(.inline)
+                .alert(L10n.s("Couldn’t save"), isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
+                    Button(L10n.s("OK")) { error = nil }
+                } message: { Text(error ?? "") }
                 .toolbar { ToolbarItem(placement: .cancellationAction) { Button(L10n.s("Close")) { dismiss() } } }
         }
     }
@@ -514,6 +523,8 @@ struct SettingsView: View {
                 LiftPageHeading(title: L10n.s("Preferences"), detail: L10n.s("Training, coaching and Watch controls."))
                 LiftSection(title: L10n.s("Training & coach")) {
                     LiftSurface {
+                        NavigationLink { ChatHandoffView(store: store) } label: { LiftMenuRow(title: L10n.s("My gym chat"), symbol: "bubble.left.and.text.bubble.right") }
+                        Divider().padding(.horizontal, 18)
                         NavigationLink { TrainingProfileView(store: store) } label: { LiftMenuRow(title: L10n.s("Training profile"), symbol: "person.crop.circle") }
                         Divider().padding(.horizontal, 18)
                         NavigationLink { CoachingSettingsView(store: store) } label: {
@@ -640,6 +651,7 @@ struct TrainingProfileView: View {
 
 struct ShortcutHelpView: View {
     private let store = PhoneStore.shared
+    @State private var launchMessage: String?
     @Environment(\.openURL) private var openURL
     private var preparedCheck: URL? {
         let url = URL.documentsDirectory.appending(path: "Little Lift Connection Check.shortcut")
@@ -656,9 +668,12 @@ struct ShortcutHelpView: View {
                 if let preparedCheck {
                     ShareLink(item: preparedCheck) { LiftLabel(L10n.s("Add test Shortcut"), "arrow.down.document") }
                 }
-                Button { openURL(URL(string: "shortcuts://run-shortcut?name=Little%20Lift%20Connection%20Check")!) } label: {
+                Button { openURL(URL(string: "shortcuts://run-shortcut?name=Little%20Lift%20Connection%20Check")!) { accepted in
+                    launchMessage = accepted ? L10n.s("Opened Shortcuts to continue. Analysis is confirmed only when a result returns.") : L10n.s("Shortcuts could not open. Check setup and retry.")
+                } } label: {
                     LiftLabel(L10n.s("Run generic connection check"), "arrow.triangle.2.circlepath")
                 }
+                if let launchMessage { Text(launchMessage).font(.caption) }
                 if let check = store.state.coachConnectionCheck {
                     TimelineView(.periodic(from: .now, by: 30)) { context in
                         if check.receivedAt != nil {

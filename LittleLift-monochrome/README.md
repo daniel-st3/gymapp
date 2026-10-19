@@ -23,6 +23,26 @@ No backend. No ads. No API keys. No paid inference or runtime dependencies.
 | Explore History, Progress and factual reports | Undo, finish early and recover after relaunch |
 | Share context with your existing coach chat | Keep logging offline; deliver completed workouts later |
 
+## What’s new in Build 17
+
+**Today → My gym chat** prepares a context message for the gym conversation you already
+use. Copy it there, bring back the reply, review/edit the workout, then accept and send
+to Watch. The app shows copied, accepted and new-data states without claiming to read
+or message your conversation. Linked replies reject stale or repeated requests;
+ordinary text/image/JSON imports remain available.
+
+Fixed blank first-paste presentation, disappearing import errors, Add routine replacing
+Today, nested import/proposal navigation, Shortcut retry feedback, and action errors
+hidden behind sheets. Watch actions and monochrome styling stay intact.
+
+**Verified:** 167 engine tests / 22 suites, 13 script tests, both simulator builds and
+free-signed device builds. Native phone/46 mm Watch import, editing, acceptance, logging,
+rest, undo, early finish, History, duplicate delivery and relaunch passed with isolated
+fixtures. Build 17 installed and opened on both real devices with data preservation
+checked. A fresh live ChatGPT prompt test was blocked by Apple's Shortcut signing 502;
+that result is not claimed as verified. [Chat guide](docs/gym-chat.md) ·
+[full action coverage and limits](docs/upgrade-17-checklist.md).
+
 ## What’s new in Build 16
 
 The gym-start flow now makes the **saved workout** explicit. If your coach says

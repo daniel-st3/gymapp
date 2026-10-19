@@ -481,6 +481,7 @@ public struct PhoneState: Codable, Equatable, Sendable {
     public var importedHistory: [HistoricalWorkout]?
     public var reviewJobs: [ReviewJob]?
     public var coachConnectionCheck: CoachConnectionCheck?
+    public var chatHandoff: ChatHandoff?
     public var reviewNotificationsEnabled: Bool?
     public var selectedReviewSessionID: UUID?
     public var doubleTapEnabled: Bool?

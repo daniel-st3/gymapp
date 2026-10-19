@@ -6,6 +6,7 @@ struct TimePlanningView: View {
     @State private var minutes = 45
     @State private var finish = Date().addingTimeInterval(2700)
     @State private var saved = false
+    @State private var removed = false
     var body: some View {
         LiftForm {
             Section(L10n.s("Available time")) {
@@ -13,10 +14,12 @@ struct TimePlanningView: View {
                 if useFinishTime { DatePicker(L10n.s("Finish by"), selection: $finish, in: Date()...Date().addingTimeInterval(21600), displayedComponents: [.hourAndMinute]) }
                 else { Stepper(L10n.s("\(minutes) minutes"), value: $minutes, in: 5...360, step: 5) }
                 Button(saved ? L10n.s("Time saved and sent") : L10n.s("Apply to today’s workout")) {
-                    do { try store.setTimeBudget(TimeBudget(durationMinutes: useFinishTime ? nil : minutes, finishAt: useFinishTime ? finish : nil)); saved = true }
+                    do { try store.setTimeBudget(TimeBudget(durationMinutes: useFinishTime ? nil : minutes, finishAt: useFinishTime ? finish : nil)); saved = true; removed = false }
                     catch { store.error = error.localizedDescription }
                 }
-                Button(L10n.s("Remove time target")) { do { try store.setTimeBudget(nil); saved = false } catch { store.error = error.localizedDescription } }
+                Button(L10n.s("Remove time target")) { do { try store.setTimeBudget(nil); saved = false; removed = true } catch { store.error = error.localizedDescription } }
+                    .disabled(store.state.plan?.timeBudget == nil)
+                if removed { Text(L10n.s("Time target removed from the saved workout.")).font(.caption) }
             }
             if let plan = store.state.plan, let preview = try? WorkoutSession(plan: plan) {
                 Section(L10n.s("Estimated session")) {

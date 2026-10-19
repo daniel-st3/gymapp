@@ -1,5 +1,22 @@
 # Verification
 
+## Build 17 · explicit gym-chat handoff and controls · 19 October 2026
+
+167 Swift tests / 22 suites, 13 Python tests, both simulator SDK builds and the same
+free-signed device build passed. Native correlated paste/edit/accept, actual Watch
+values, rest extension/skip, undo, early finish, single delivery, duplicate replay,
+History report copying/sharing and relaunch were exercised on the existing paired
+phone and 46 mm Watch using backed-up isolated fixtures. The first-paste blank sheet
+was found in this pass, corrected and retested. Dynamic Type/Reduce Motion and actual
+screenshots were inspected. Both physical apps installed/launched; state and auxiliary
+files compared before/after. No new physical haptics or sensor claim.
+
+A new generic ChatGPT live run could not begin: Apple's temporary Shortcut signing
+returned NSURLErrorDomain 502 twice. A crafted response verified the app contract,
+not model compliance. Existing Shortcuts and the private chat were not modified.
+See [the exact coverage and limits](upgrade-17-checklist.md) and [user guide](gym-chat.md).
+
+
 ## Build 16: gym-start recovery and direct import, 19 October 2026
 
 Continued Build 15 in place. [Delivery checklist](upgrade-16-checklist.md).

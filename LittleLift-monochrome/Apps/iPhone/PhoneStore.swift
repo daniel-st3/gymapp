@@ -99,6 +99,15 @@ final class PhoneStore {
     func acceptImportedPlan(_ plan: WorkoutPlan) throws {
         try saveWorkout(plan, useToday: true)
     }
+    func prepareChatHandoff(request: String) throws -> ChatHandoff {
+        var next = state; let packet = try next.prepareChatHandoff(request: request)
+        try commit(next); return packet
+    }
+    func acceptChatReply(_ reply: ChatWorkoutReply, editedPlan: WorkoutPlan, useToday: Bool) throws {
+        var next = state; try next.acceptChatReply(reply, editedPlan: editedPlan, useToday: useToday)
+        try commit(next)
+        if useToday { sendToWatch() }
+    }
     func proposeImport(_ text: String) throws {
         var next = state
         try next.propose(TrainingReview(analysis: L10n.s("Review this imported workout and what it will collect before accepting."), plan: PlanImport.parse(text)))
@@ -122,7 +131,7 @@ final class PhoneStore {
     }
     func discardReview() throws { var next = state; next.discardReview(); try commit(next) }
     func stageUnlinkedReview(_ id: UUID) throws {
-        guard let saved = state.unlinkedCoachReviews?.first(where: { $0.id == id }) else { return }
+        guard let saved = state.unlinkedCoachReviews?.first(where: { $0.id == id }) else { throw WorkoutError.invalidState(L10n.s("This response is no longer available. Reopen workout reviews.")) }
         if let date = state.unlinkedCoachReviewsOutdatedAt, saved.savedAt <= date {
             throw WorkoutError.invalidState(L10n.s("Workout evidence changed. Share the updated report before using this older proposal."))
         }
@@ -198,8 +207,8 @@ final class PhoneStore {
     func deleteMotion(_ id: UUID) throws { try motionRepository.delete(id); loadMotion() }
     func setDoubleTap(_ enabled: Bool) throws { var next = state; next.doubleTapEnabled = enabled; try commit(next); sendToWatch() }
     func setTimeBudget(_ budget: TimeBudget?) throws {
-        guard var plan = state.plan else { return }
-        try budget?.validate(); plan.timeBudget = budget; plan.id = UUID(); try plan.validate()
+        guard var plan = state.plan else { throw WorkoutError.invalidState(L10n.s("Choose a workout first.")) }
+        try budget?.validate(); if plan.timeBudget == budget { return }; plan.timeBudget = budget; plan.id = UUID(); try plan.validate()
         var next = state; next.plan = plan; try commit(next); sendToWatch()
     }
     func saveRoutine(_ plan: WorkoutPlan, replacing id: UUID? = nil) throws {

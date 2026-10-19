@@ -4,13 +4,16 @@ import UniformTypeIdentifiers
 
 struct SmartImportView: View {
     let store: PhoneStore
-    init(store: PhoneStore, initialText: String = "") {
-        self.store = store
+    let useToday: Bool
+    init(store: PhoneStore, initialText: String = "", useToday: Bool = true) {
+        self.store = store; self.useToday = useToday
         _text = State(initialValue: initialText)
     }
     @Environment(\.dismiss) private var dismiss
     @State private var text = ""
     @State private var draft: WorkoutDraft?
+    @State private var chatReply: ChatWorkoutReply?
+    @State private var openedInitialText = false
     @State private var reviewing = false
     @State private var error: String?
     @State private var photo: PhotosPickerItem?
@@ -24,6 +27,9 @@ struct SmartImportView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 28) {
                     LiftPageHeading(title: L10n.s("What are you training?"), detail: L10n.s("Bring the workout your coach gave you. Little Lift does not read your chat automatically."))
+                    NavigationLink { ChatHandoffView(store: store) } label: {
+                        LiftSurface { LiftMenuRow(title: L10n.s("Ask my existing chat"), symbol: "bubble.left.and.text.bubble.right", detail: L10n.s("Copy a ready-to-use message with your app context")) }
+                    }
                     LiftSurface {
                         PhotosPicker(selection: $photo, matching: .images) {
                             LiftMenuRow(title: L10n.s("Use a screenshot"), symbol: "photo", detail: L10n.s("Choose the image. We’ll open the workout preview."))
@@ -37,7 +43,7 @@ struct SmartImportView: View {
                             Text(L10n.s("Copy the reply, then paste here")).font(.caption).foregroundStyle(.secondary)
                         }.padding(18)
                     }
-                    if !store.state.routineLibrary.isEmpty && text.isEmpty {
+                    if useToday && !store.state.routineLibrary.isEmpty && text.isEmpty {
                         NavigationLink { ImportRoutineChoices(store: store) { dismiss() } } label: {
                             LiftMenuRow(title: L10n.s("Choose a saved routine"), symbol: "square.stack")
                         }
@@ -75,11 +81,16 @@ struct SmartImportView: View {
                         .padding(.horizontal, 20).padding(.vertical, 10).background(.black)
                 }
                 .navigationDestination(isPresented: $reviewing) {
-                    if let draft { ImportWorkoutPreview(store: store, initial: draft) { dismiss() } }
+                    if let draft { ImportWorkoutPreview(store: store, initial: draft, useToday: useToday, chatReply: chatReply) { dismiss() } }
                 }
                 .navigationTitle(L10n.s("Import workout")).navigationBarTitleDisplayMode(.inline)
                 .toolbar { ToolbarItem(placement: .cancellationAction) { Button(L10n.s("Close")) { dismiss() } } }
-                .onChange(of: text) { if !reviewing { error = nil } }
+                .task {
+                    if !openedInitialText { openedInitialText = true; if !text.isEmpty { parse() } }
+                }
+                .alert(L10n.s("Import needs attention"), isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
+                    Button(L10n.s("OK")) { error = nil }
+                } message: { Text(error ?? "") }
                 .onChange(of: photo) { loadPhoto() }
                 .onDisappear { cancelExtraction() }
                 .fileImporter(isPresented: $importingFile, allowedContentTypes: [.json, .plainText, .image]) { result in
@@ -97,9 +108,15 @@ struct SmartImportView: View {
         }.tint(.white).presentationBackground(.black)
     }
     private func parse() {
-        do { present(try SmartWorkoutImport.extract(text)) } catch { self.error = error.localizedDescription }
+        do {
+            if let reply = try ChatWorkoutReply.parseIfPresent(text) {
+                try store.state.validateChatReply(reply.handoffID)
+                present(WorkoutDraft(plan: reply.review.plan), reply: reply)
+            } else { present(try SmartWorkoutImport.extract(text)) }
+        } catch { self.error = error.localizedDescription }
     }
-    private func present(_ value: WorkoutDraft) {
+    private func present(_ value: WorkoutDraft, reply: ChatWorkoutReply? = nil) {
+        chatReply = reply
         var prepared = value
         if prepared.title.isEmpty { prepared.title = L10n.s("My workout") }
         for i in prepared.exercises.indices where prepared.exercises[i].kind == .strength && prepared.exercises[i].weight.isEmpty && prepared.exercises[i].source.range(of: #"(?i)\b(?:kg|lbs?)\b"#, options: .regularExpression) == nil {
@@ -386,7 +403,7 @@ struct RoutineLibraryView: View {
                 Button { importing = true } label: { Label(L10n.s("Add a routine"), systemImage: "plus").padding(.vertical, 3) }
                     .buttonStyle(QuietButtonStyle(prominent: true)).padding(.horizontal, 24).padding(.vertical, 12).background(.black)
             }
-            .sheet(isPresented: $importing) { SmartImportView(store: store) }
+            .sheet(isPresented: $importing) { SmartImportView(store: store, useToday: false) }
     }
     private var scheduleDescription: String {
         let days = store.state.weeklySchedule.count
@@ -494,7 +511,7 @@ struct AlternativesEditorView: View {
                     let item = try alternative.exercise()
                     guard let comparisonID = item.comparisonID, let convention = item.loadConvention, let unit = WeightUnit(rawValue: alternative.unit) else { throw WorkoutError.invalidInput(L10n.s("An alternative requires units, a load convention and exact variation ID.")) }
                     var plan = store.state.routineLibrary.first(where: { $0.id == routine.id })?.plan ?? routine.plan
-                    guard let i = plan.exercises.firstIndex(where: { $0.id == exerciseID }) else { return }
+                    guard let i = plan.exercises.firstIndex(where: { $0.id == exerciseID }) else { throw WorkoutError.invalidState(L10n.s("This exercise changed. Reopen the routine before saving.")) }
                     guard comparisonID != plan.exercises[i].comparisonID else { throw WorkoutError.invalidInput(L10n.s("Use a different variation ID for a different machine or variation.")) }
                     var all = plan.exercises[i].alternatives ?? []
                     all.append(ExerciseAlternative(name: item.name, comparisonID: comparisonID, loadConvention: convention, unit: unit, reps: item.reps, weight: item.weight, restSeconds: item.restSeconds))

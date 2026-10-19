@@ -19187,6 +19187,678 @@
           }
         }
       }
+    },
+    "1 · Message for your chat": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 · Message for your chat"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 · Mensaje para tu chat"
+          }
+        }
+      }
+    },
+    "2 · Bring the reply back": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "2 · Bring the reply back"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "2 · Trae la respuesta"
+          }
+        }
+      }
+    },
+    "After your workout reaches iPhone History, return here and copy a fresh message. New records make the context status change; sending to the chat remains your choice.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "After your workout reaches iPhone History, return here and copy a fresh message. New records make the context status change; sending to the chat remains your choice."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuando el entreno llegue al Historial del iPhone, vuelve aquí y copia un mensaje nuevo. La app te avisa si hay datos nuevos; tú decides cuándo enviarlos al chat."
+          }
+        }
+      }
+    },
+    "Ask my existing chat": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask my existing chat"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pedirle a mi chat habitual"
+          }
+        }
+      }
+    },
+    "ChatGPT could not open. Open it yourself and paste the copied message in your gym chat.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ChatGPT could not open. Open it yourself and paste the copied message in your gym chat."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo abrir ChatGPT. Ábrelo y pega el mensaje copiado en tu chat del gym."
+          }
+        }
+      }
+    },
+    "Choose a workout first.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a workout first."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige un entrenamiento primero."
+          }
+        }
+      }
+    },
+    "Choose what to include": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose what to include"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elegir qué incluir"
+          }
+        }
+      }
+    },
+    "Choose your existing gym chat and paste the copied message there.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose your existing gym chat and paste the copied message there."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige tu chat habitual del gym y pega allí el mensaje copiado."
+          }
+        }
+      }
+    },
+    "Copied. Open your existing gym chat and paste this message.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied. Open your existing gym chat and paste this message."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiado. Abre tu chat habitual del gym y pega el mensaje."
+          }
+        }
+      }
+    },
+    "Copy ChatGPT’s whole code block. Paste below; review the exercises before accepting. This does not replace a workout automatically.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy ChatGPT’s whole code block. Paste below; review the exercises before accepting. This does not replace a workout automatically."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copia el bloque de código completo de ChatGPT. Pégalo aquí y revisa los ejercicios antes de aceptar. Tu entrenamiento no cambia automáticamente."
+          }
+        }
+      }
+    },
+    "Copy a ready-to-use message with your app context": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy a ready-to-use message with your app context"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un mensaje preparado con el contexto de tu app"
+          }
+        }
+      }
+    },
+    "Copy one message into your existing chat. Bring its reply back here to review and use the workout.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy one message into your existing chat. Bring its reply back here to review and use the workout."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copia un mensaje en tu chat habitual. Trae su respuesta para revisar y usar el entrenamiento."
+          }
+        }
+      }
+    },
+    "Copy the complete reply: handoffID, analysis and plan. Keep the request identifier unchanged.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy the complete reply: handoffID, analysis and plan. Keep the request identifier unchanged."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copia la respuesta completa: handoffID, analysis y plan. Conserva el identificador del pedido."
+          }
+        }
+      }
+    },
+    "Copy updated message": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy updated message"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiar mensaje actualizado"
+          }
+        }
+      }
+    },
+    "Copying is not sending. Little Lift cannot read the chat or confirm delivery to it.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copying is not sending. Little Lift cannot read the chat or confirm delivery to it."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiar no envía el mensaje. Little Lift no puede leer tu chat ni confirmar que llegó."
+          }
+        }
+      }
+    },
+    "Enable Motion test in iPhone Settings first.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enable Motion test in iPhone Settings first."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activa Prueba de movimiento en Ajustes del iPhone primero."
+          }
+        }
+      }
+    },
+    "Import needs attention": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import needs attention"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revisa la importación"
+          }
+        }
+      }
+    },
+    "Includes the saved plan, allowed recent history and the exact reply format. Profile and equipment follow your sharing preferences.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Includes the saved plan, allowed recent history and the exact reply format. Profile and equipment follow your sharing preferences."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Incluye el plan guardado, el historial reciente permitido y el formato de respuesta. Tu perfil y equipo siguen tus preferencias para compartir."
+          }
+        }
+      }
+    },
+    "Keep your gym chat up to date": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep your gym chat up to date"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu chat y tu entrenamiento"
+          }
+        }
+      }
+    },
+    "Keep your request below 1,000 characters.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep your request below 1,000 characters."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escribe tu pedido en menos de 1.000 caracteres."
+          }
+        }
+      }
+    },
+    "Message copied · waiting for a reply you paste": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Message copied · waiting for a reply you paste"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mensaje copiado · falta traer la respuesta"
+          }
+        }
+      }
+    },
+    "My gym chat": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "My gym chat"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mi chat del gym"
+          }
+        }
+      }
+    },
+    "New app data · copy an updated message": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New app data · copy an updated message"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hay datos nuevos · copia un mensaje actualizado"
+          }
+        }
+      }
+    },
+    "Open ChatGPT": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open ChatGPT"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir ChatGPT"
+          }
+        }
+      }
+    },
+    "Optional: today is legs, I have 45 minutes…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Optional: today is legs, I have 45 minutes…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcional: hoy toca pierna, tengo 45 minutos…"
+          }
+        }
+      }
+    },
+    "Paste this reply in My gym chat so the app can check its request before you accept it.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paste this reply in My gym chat so the app can check its request before you accept it."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pega esta respuesta en Mi chat del gym para comprobar a qué pedido corresponde antes de aceptarla."
+          }
+        }
+      }
+    },
+    "Ready to prepare your first message": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ready to prepare your first message"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listo para preparar tu primer mensaje"
+          }
+        }
+      }
+    },
+    "Refresh complete. Received replays are listed below.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh complete. Received replays are listed below."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualizado. Las capturas recibidas aparecen abajo."
+          }
+        }
+      }
+    },
+    "Reply accepted · workout saved in Little Lift": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reply accepted · workout saved in Little Lift"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Respuesta aceptada · entrenamiento guardado"
+          }
+        }
+      }
+    },
+    "Reply linked to your copied message": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reply linked to your copied message"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Respuesta vinculada al mensaje que copiaste"
+          }
+        }
+      }
+    },
+    "Saved on Watch.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved on Watch."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardado en el Watch."
+          }
+        }
+      }
+    },
+    "See the copied message": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See the copied message"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ver el mensaje copiado"
+          }
+        }
+      }
+    },
+    "This context is too large. Share fewer records in Coach context.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This context is too large. Share fewer records in Coach context."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este contexto es demasiado grande. Comparte menos datos desde Contexto para el coach."
+          }
+        }
+      }
+    },
+    "This exercise changed. Reopen the routine before saving.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This exercise changed. Reopen the routine before saving."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este ejercicio cambió. Abre la rutina de nuevo antes de guardar."
+          }
+        }
+      }
+    },
+    "This reply belongs to another request. Copy a fresh message from My gym chat and ask your chat to reply to that message.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This reply belongs to another request. Copy a fresh message from My gym chat and ask your chat to reply to that message."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta respuesta corresponde a otro pedido. Copia un mensaje nuevo desde Mi chat del gym y pide al chat que responda a ese mensaje."
+          }
+        }
+      }
+    },
+    "This reply was already used. Your saved workout is unchanged.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This reply was already used. Your saved workout is unchanged."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta respuesta ya se usó. Tu entrenamiento guardado sigue igual."
+          }
+        }
+      }
+    },
+    "This response is no longer available. Reopen workout reviews.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This response is no longer available. Reopen workout reviews."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta respuesta ya no está disponible. Abre de nuevo las revisiones."
+          }
+        }
+      }
+    },
+    "Time target removed from the saved workout.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time target removed from the saved workout."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se quitó la meta de tiempo del entrenamiento guardado."
+          }
+        }
+      }
+    },
+    "Update your chat · bring back its workout": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update your chat · bring back its workout"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualiza tu chat y trae su entrenamiento"
+          }
+        }
+      }
+    },
+    "Use text, screenshot or file": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use text, screenshot or file"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usar texto, captura o archivo"
+          }
+        }
+      }
+    },
+    "What to ask your coach": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What to ask your coach"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qué pedirle a tu coach"
+          }
+        }
+      }
+    },
+    "Your app data changed after this message was copied. Copy an updated message for your chat before accepting a new plan.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your app data changed after this message was copied. Copy an updated message for your chat before accepting a new plan."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los datos de la app cambiaron después de copiar ese mensaje. Copia uno actualizado para tu chat antes de aceptar otro plan."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -6,12 +6,13 @@ struct AdaptiveWorkoutView: View {
     @State private var future = false
     @State private var skipping = false
     @State private var alternative: ExerciseAlternative?
+    @State private var error: String?
     var body: some View {
         List {
             if let session = store.state.session {
                 if session.phase != .completed {
                     Section(L10n.s("Change exercise")) {
-                        Button(L10n.s("Machine busy · do later")) { store.perform { try store.deferExercise() } }.disabled(session.remainingExercises.count < 2)
+                        Button(L10n.s("Machine busy · do later")) { perform { try store.deferExercise() } }.disabled(session.remainingExercises.count < 2)
                         if let current = session.currentExercise,
                            let original = session.plan.exercises.first(where: { $0.id == session.originalID(for: current.id) }) {
                             ForEach(original.alternatives ?? []) { item in
@@ -27,7 +28,7 @@ struct AdaptiveWorkoutView: View {
                     }
                     Section(L10n.s("Choose next")) {
                         ForEach(session.remainingExercises) { exercise in
-                            Button(exercise.name) { store.perform { try store.chooseNext(session.originalID(for: exercise.id)) }; store.presentedSheet = nil }
+                            Button(exercise.name) { perform(close: true) { try store.chooseNext(session.originalID(for: exercise.id)) } }
                                 .disabled(session.activityTimer != nil || exercise.id == session.currentExercise?.id)
                         }
                         Text(L10n.s("Pending work stays in the workout.")).watchText(.caption).foregroundStyle(.secondary)
@@ -39,7 +40,7 @@ struct AdaptiveWorkoutView: View {
                             ForEach(candidates) { Text($0.name).watchText(.secondary) }
                             Button(L10n.s("Review shorter workout")) { confirmingOmissions = true }
                         }
-                        Button(L10n.s("Undo adjustment")) { store.perform { try store.reverseAdjustment() } }
+                        Button(L10n.s("Undo adjustment")) { perform { try store.reverseAdjustment() } }
                             .disabled(session.previousConfiguration == nil || session.adjustmentEntryCount != session.loggedWorkCount)
                         Text(L10n.s("Undo before your next set.")).watchText(.secondary).foregroundStyle(.secondary)
                     }
@@ -54,13 +55,16 @@ struct AdaptiveWorkoutView: View {
                 if let changes = session.adjustments, let last = changes.last { Section(L10n.s("Latest change")) { Text(last.detail).watchText(.caption) } }
             }
         }.navigationTitle(L10n.s("Adjust"))
+            .alert(L10n.s("Couldn’t save"), isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
+                Button(L10n.s("OK")) { error = nil }
+            } message: { Text(error ?? "") }
             .confirmationDialog(L10n.s("Omit approved optional work?"), isPresented: $confirmingOmissions, titleVisibility: .visible) {
                 Button(L10n.s("Omit listed exercises")) {
-                    if let session = store.state.session { store.perform { try store.omitOptional(optional(session).map { session.originalID(for: $0.id) }) } }
+                    if let session = store.state.session { perform { try store.omitOptional(optional(session).map { session.originalID(for: $0.id) }) } }
                 }
             } message: { Text(L10n.s("Only the listed unstarted optional work is removed. No load, rep or required rest changes. Reverse before the next Log tap.")) }
             .confirmationDialog(L10n.s("Skip the remaining work? Logged sets stay saved."), isPresented: $skipping, titleVisibility: .visible) {
-                Button(L10n.s("Skip exercise")) { store.perform { try store.skipExercise() }; store.presentedSheet = nil }
+                Button(L10n.s("Skip exercise")) { perform(close: true) { try store.skipExercise() } }
             }
             .sheet(item: $alternative) { item in
                 WatchPage {
@@ -76,9 +80,15 @@ struct AdaptiveWorkoutView: View {
                         Text(L10n.s("Logged sets and current rest stay unchanged. Observations stay with the original machine.")).watchText(.secondary).foregroundStyle(.secondary)
                     } }
                 } actions: {
-                    Button(L10n.s("Use alternative")) { store.perform { try store.substitute(item.id, future: future) }; alternative = nil }.buttonStyle(QuietButtonStyle())
+                    Button(L10n.s("Use alternative")) { perform { try store.substitute(item.id, future: future); alternative = nil } }.buttonStyle(QuietButtonStyle())
                 }
             }
+    }
+    private func perform(close: Bool = false, _ operation: () throws -> Void) {
+        do {
+            try operation()
+            if close { store.presentedSheet = nil }
+        } catch { self.error = error.localizedDescription }
     }
     private func optional(_ session: WorkoutSession) -> [ExercisePlan] {
         WorkoutPace.shorterProposal(session, history: store.state.recent)
