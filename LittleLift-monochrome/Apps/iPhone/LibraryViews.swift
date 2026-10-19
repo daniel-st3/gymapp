@@ -23,41 +23,40 @@ struct SmartImportView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 28) {
-                    LiftPageHeading(title: L10n.s("Bring your workout"), detail: L10n.s("Paste text, read a screenshot or start from scratch. Review everything before saving."))
-                    LiftSection(title: L10n.s("Paste a workout")) {
+                    LiftPageHeading(title: L10n.s("What are you training?"), detail: L10n.s("Bring the workout your coach gave you. Little Lift does not read your chat automatically."))
+                    LiftSurface {
+                        PhotosPicker(selection: $photo, matching: .images) {
+                            LiftMenuRow(title: L10n.s("Use a screenshot"), symbol: "photo", detail: L10n.s("Choose the image. We’ll open the workout preview."))
+                        }
+                        Divider().padding(.horizontal, 18)
+                        HStack {
+                            PasteButton(payloadType: String.self) { values in
+                                text = values.joined(separator: "\n"); parse()
+                            }.labelStyle(.titleAndIcon).buttonBorderShape(.capsule)
+                            Spacer()
+                            Text(L10n.s("Copy the reply, then paste here")).font(.caption).foregroundStyle(.secondary)
+                        }.padding(18)
+                    }
+                    if !store.state.routineLibrary.isEmpty && text.isEmpty {
+                        NavigationLink { ImportRoutineChoices(store: store) { dismiss() } } label: {
+                            LiftMenuRow(title: L10n.s("Choose a saved routine"), symbol: "square.stack")
+                        }
+                    }
+                    LiftSection(title: L10n.s("Or write / paste text")) {
                         LiftSurface {
                             ZStack(alignment: .topLeading) {
                                 if text.isEmpty {
-                                    Text(L10n.s("Bench press · 3 × 8 · 40 kg\nRest 90 seconds"))
-                                        .font(.callout).foregroundStyle(.tertiary).padding(.horizontal, 5).padding(.top, 8)
-                                        .accessibilityHidden(true)
+                                    Text(L10n.s("Leg day\nLeg press 3 × 10\nSeated leg curl 3 × 12"))
+                                        .font(.callout).foregroundStyle(.tertiary).padding(.horizontal, 5).padding(.top, 8).accessibilityHidden(true)
                                 }
-                                TextEditor(text: $text).font(.callout).frame(minHeight: 130).scrollContentBackground(.hidden)
+                                TextEditor(text: $text).font(.callout).frame(minHeight: 120).scrollContentBackground(.hidden)
                                     .scrollDismissesKeyboard(.interactively).accessibilityLabel(L10n.s("Workout source text"))
                             }.padding(14)
-                            Divider().padding(.horizontal, 18)
-                            HStack {
-                                PasteButton(payloadType: String.self) { text = $0.joined(separator: "\n") }
-                                    .labelStyle(.iconOnly).buttonBorderShape(.capsule).accessibilityLabel(L10n.s("Paste workout"))
-                                Spacer()
-                                Text(L10n.s("Text or JSON")).font(.caption).foregroundStyle(.secondary)
-                            }.padding(14)
-                        }
-                    }
-                    LiftSection(title: L10n.s("Or choose a source")) {
-                        LiftSurface {
-                            PhotosPicker(selection: $photo, matching: .images) {
-                                LiftMenuRow(title: L10n.s("Read a screenshot"), symbol: "photo", detail: L10n.s("Text recognition on this device"))
-                            }
-                            Divider().padding(.horizontal, 18)
-                            Button { importingFile = true } label: { LiftMenuRow(title: L10n.s("Choose a file"), symbol: "doc") }
-                            Divider().padding(.horizontal, 18)
-                            Button { draft = WorkoutDraft(); draft?.exercises = [DraftExercise()]; reviewing = true } label: {
-                                LiftMenuRow(title: L10n.s("Build a workout"), symbol: "square.and.pencil")
-                            }
                         }
                     }
                     DisclosureGroup(L10n.s("More import options")) {
+                        Button(L10n.s("Choose a file")) { importingFile = true }.frame(minHeight: 44)
+                        Button(L10n.s("Build a workout")) { var value = WorkoutDraft(); var row = DraftExercise(); row.kind = .strength; value.exercises = [row]; present(value) }.frame(minHeight: 44)
                         Button(L10n.s("Try Apple Intelligence")) { modelExtract() }.buttonStyle(QuietButtonStyle())
                             .disabled(text.isEmpty || busy || !LocalWorkoutExtraction.modelAvailable)
                         Text(LocalWorkoutExtraction.availability).font(.caption).foregroundStyle(.secondary)
@@ -76,11 +75,11 @@ struct SmartImportView: View {
                         .padding(.horizontal, 20).padding(.vertical, 10).background(.black)
                 }
                 .navigationDestination(isPresented: $reviewing) {
-                    if let draft { WorkoutEditorView(store: store, initial: draft, routineID: nil, useToday: true) { dismiss() } }
+                    if let draft { ImportWorkoutPreview(store: store, initial: draft) { dismiss() } }
                 }
                 .navigationTitle(L10n.s("Import workout")).navigationBarTitleDisplayMode(.inline)
                 .toolbar { ToolbarItem(placement: .cancellationAction) { Button(L10n.s("Close")) { dismiss() } } }
-                .onChange(of: text) { draft = nil; error = nil }
+                .onChange(of: text) { if !reviewing { error = nil } }
                 .onChange(of: photo) { loadPhoto() }
                 .onDisappear { cancelExtraction() }
                 .fileImporter(isPresented: $importingFile, allowedContentTypes: [.json, .plainText, .image]) { result in
@@ -92,12 +91,22 @@ struct SmartImportView: View {
                         let isImage = UTType(filenameExtension: url.pathExtension)?.conforms(to: .image) == true
                         let data = try InputBoundary.read(url, maximumBytes: isImage ? 20_000_000 : 64_000)
                         if isImage { recognize(data) }
-                        else { guard data.count <= 64_000, let value = String(data: data, encoding: .utf8) else { throw WorkoutError.invalidInput(L10n.s("Text imports must be UTF-8 and below 64 KB.")) }; text = value }
+                        else { guard data.count <= 64_000, let value = String(data: data, encoding: .utf8) else { throw WorkoutError.invalidInput(L10n.s("Text imports must be UTF-8 and below 64 KB.")) }; text = value; parse() }
                     } catch { self.error = error.localizedDescription }
                 }
         }.tint(.white).presentationBackground(.black)
     }
-    private func parse() { do { draft = try SmartWorkoutImport.extract(text); error = nil; reviewing = true } catch { self.error = error.localizedDescription } }
+    private func parse() {
+        do { present(try SmartWorkoutImport.extract(text)) } catch { self.error = error.localizedDescription }
+    }
+    private func present(_ value: WorkoutDraft) {
+        var prepared = value
+        if prepared.title.isEmpty { prepared.title = L10n.s("My workout") }
+        for i in prepared.exercises.indices where prepared.exercises[i].kind == .strength && prepared.exercises[i].weight.isEmpty && prepared.exercises[i].source.range(of: #"(?i)\b(?:kg|lbs?)\b"#, options: .regularExpression) == nil {
+            prepared.exercises[i].chooseLoadOnWatch = true
+        }
+        draft = prepared; error = nil; reviewing = true
+    }
     private enum ExtractionResult { case text(String), draft(WorkoutDraft) }
 
     private func cancelExtraction() {
@@ -125,8 +134,8 @@ struct SmartImportView: View {
                 try Task.checkCancellation()
                 guard extractionID == id else { return }
                 switch result {
-                case .text(let value): text = value
-                case .draft(let value): draft = value; reviewing = true
+                case .text(let value): text = value; parse()
+                case .draft(let value): present(value)
                 }
             } catch is CancellationError {
             } catch {
@@ -274,7 +283,7 @@ struct DraftExerciseSummary: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(exercise.name.isEmpty ? L10n.s("New exercise") : exercise.name).font(.body)
-            Text(exercise.kind != nil && exercise.kind != .strength ? ((try? exercise.exercise())?.activity?.summary ?? L10n.s("Complete activity details")) : L10n.s("\(exercise.sets.isEmpty ? "?" : exercise.sets) × \(exercise.reps.isEmpty ? "?" : exercise.reps) · \(exercise.weight.isEmpty ? "?" : exercise.weight) \(exercise.unit) · \(exercise.rest.isEmpty ? "?" : exercise.rest)s rest"))
+            Text(exercise.kind != nil && exercise.kind != .strength ? ((try? exercise.exercise())?.activity?.summary ?? L10n.s("Complete activity details")) : L10n.s("\(exercise.sets.isEmpty ? "?" : exercise.sets) × \(exercise.reps.isEmpty ? "?" : exercise.reps) · \(exercise.chooseLoadOnWatch ? L10n.s("Choose load on Watch") : (exercise.weight.isEmpty ? "?" : exercise.weight)) \(exercise.unit) · \(exercise.rest.isEmpty ? "?" : exercise.rest)s rest"))
                 .font(.caption).foregroundStyle(.secondary)
             if !exercise.fieldsToReview.isEmpty { Text(L10n.s("Review: \(exercise.fieldsToReview.joined(separator: " · "))")).font(.caption).foregroundStyle(.secondary) }
             if exercise.optionalWork { Text(L10n.s("Optional · priority \(exercise.priority)")).font(.caption).foregroundStyle(.secondary) }
@@ -292,7 +301,8 @@ struct DraftExerciseFields: View {
         }
         if exercise.kind == .strength || (exercise.kind == nil && !exercise.sets.isEmpty) {
         field(L10n.s("Sets"), value: $exercise.sets); field(L10n.s("Repetitions"), value: $exercise.reps)
-        field(L10n.s("Load"), value: $exercise.weight)
+        Toggle(L10n.s("Choose load on Watch"), isOn: $exercise.chooseLoadOnWatch)
+        if !exercise.chooseLoadOnWatch { field(L10n.s("Load"), value: $exercise.weight) }
         Picker(L10n.s("Unit"), selection: $exercise.unit) { Text(L10n.s("Choose")).tag(""); Text(L10n.s("kg")).tag("kg"); Text(L10n.s("lb")).tag("lb") }
         field(L10n.s("Rest · seconds"), value: $exercise.rest)
         } else if exercise.kind != nil {
@@ -314,7 +324,7 @@ struct DraftExerciseFields: View {
                 ForEach(LoadConvention.allCases, id: \.self) { Text($0.label).tag($0.rawValue) }
             }
             TextField(L10n.s("Variation key"), text: $exercise.comparisonID).textInputAutocapitalization(.never).autocorrectionDisabled().accessibilityLabel(L10n.s("Variation key"))
-            Text(L10n.s("Use the same key only for the same machine and variation. Convention and key go together; leave both blank if unknown.")).font(.caption).foregroundStyle(.secondary)
+            Text(L10n.s("A variation key is optional. Use the same key only for the exact same machine and variation; comparisons need a key and a load convention.")).font(.caption).foregroundStyle(.secondary)
             }
             Toggle(L10n.s("Optional work"), isOn: $exercise.optionalWork)
             Picker(L10n.s("Priority"), selection: $exercise.priority) { ForEach(1...5, id: \.self) { Text(L10n.s("\($0)\($0 == 1 ? " · highest" : "")")).tag($0) } }

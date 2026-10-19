@@ -18405,6 +18405,788 @@
           }
         }
       }
+    },
+    "What are you training?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What are you training?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Qué vas a entrenar?"
+          }
+        }
+      }
+    },
+    "Bring the workout your coach gave you. Little Lift does not read your chat automatically.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bring the workout your coach gave you. Little Lift does not read your chat automatically."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trae el entrenamiento que te dio tu coach. Little Lift no lee tu chat automáticamente."
+          }
+        }
+      }
+    },
+    "Use a screenshot": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use a screenshot"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usar una captura"
+          }
+        }
+      }
+    },
+    "Choose the image. We’ll open the workout preview.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose the image. We’ll open the workout preview."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige la imagen y abriremos el entrenamiento para revisarlo."
+          }
+        }
+      }
+    },
+    "From your chat": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From your chat"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De tu chat"
+          }
+        }
+      }
+    },
+    "Or write / paste text": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Or write / paste text"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O escribe / pega el texto"
+          }
+        }
+      }
+    },
+    "Leg day\nLeg press 3 × 10\nSeated leg curl 3 × 12": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leg day\nLeg press 3 × 10\nSeated leg curl 3 × 12"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pierna\nPrensa de piernas 3 × 10\nCurl femoral sentado 3 × 12"
+          }
+        }
+      }
+    },
+    "My workout": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "My workout"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mi entrenamiento"
+          }
+        }
+      }
+    },
+    "Saved workout": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved workout"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrenamiento guardado"
+          }
+        }
+      }
+    },
+    "Did your coach choose something else? Bring that workout here before starting.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Did your coach choose something else? Bring that workout here before starting."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Tu coach te indicó otro? Cámbialo aquí antes de empezar."
+          }
+        }
+      }
+    },
+    "Check Watch": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check Watch"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verificar Watch"
+          }
+        }
+      }
+    },
+    "Check the exercises against your chat. Nothing changes until you use this workout.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check the exercises against your chat. Nothing changes until you use this workout."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compara los ejercicios con tu chat. Nada cambia hasta que aceptes este entrenamiento."
+          }
+        }
+      }
+    },
+    "Not in the message? Choose once.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not in the message? Choose once."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Si no estaba en el mensaje, elige aquí."
+          }
+        }
+      }
+    },
+    "Rest for exercises without a rest target": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rest for exercises without a rest target"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descanso para los ejercicios que no lo indicaban"
+          }
+        }
+      }
+    },
+    "Your coach gave a range. Choose today’s target:": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your coach gave a range. Choose today’s target:"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu coach indicó un rango. Elige el objetivo de hoy:"
+          }
+        }
+      }
+    },
+    "Choose the actual load on Watch": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose the actual load on Watch"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige el peso real en el Watch"
+          }
+        }
+      }
+    },
+    "Choose load on Watch": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose load on Watch"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elegir peso en el Watch"
+          }
+        }
+      }
+    },
+    "Choose an activity type and its details.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose an activity type and its details."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige el tipo de actividad y sus detalles."
+          }
+        }
+      }
+    },
+    "Edit details or remove": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit details or remove"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar detalles o quitar"
+          }
+        }
+      }
+    },
+    "See original text": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See original text"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ver texto original"
+          }
+        }
+      }
+    },
+    "Check your workout": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check your workout"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revisa tu entrenamiento"
+          }
+        }
+      }
+    },
+    "Complete the empty fields above to continue.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Complete the empty fields above to continue."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completa los campos pendientes para continuar."
+          }
+        }
+      }
+    },
+    "Use this workout · send to Watch": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use this workout · send to Watch"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usar entrenamiento y enviar al Watch"
+          }
+        }
+      }
+    },
+    "Exercise blocks were grouped from the message. Compare this list with your chat before continuing.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exercise blocks were grouped from the message. Compare this list with your chat before continuing."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agrupamos los ejercicios del mensaje. Compara esta lista con tu chat antes de continuar."
+          }
+        }
+      }
+    },
+    "Choose rest from 0 to 1800 seconds.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose rest from 0 to 1800 seconds."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige un descanso entre 0 y 1800 segundos."
+          }
+        }
+      }
+    },
+    "Recorded work stays with its original workout.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recorded work stays with its original workout."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El trabajo registrado conserva su entrenamiento original."
+          }
+        }
+      }
+    },
+    "New workout from iPhone": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New workout from iPhone"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuevo entrenamiento del iPhone"
+          }
+        }
+      }
+    },
+    "No sets logged yet. Switch before starting?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No sets logged yet. Switch before starting?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún no registraste series. ¿Cambiar antes de empezar?"
+          }
+        }
+      }
+    },
+    "Use new workout": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use new workout"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usar el nuevo"
+          }
+        }
+      }
+    },
+    "Keep current workout": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep current workout"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seguir con el actual"
+          }
+        }
+      }
+    },
+    "Choose load": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose load"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elegir peso"
+          }
+        }
+      }
+    },
+    "Choose the actual load": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose the actual load"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige el peso real"
+          }
+        }
+      }
+    },
+    "Log without load · 0 kg/lb": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Log without load · 0 kg/lb"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registrar sin carga · 0 kg/lb"
+          }
+        }
+      }
+    },
+    "Adjust weight with + or Crown": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adjust weight with + or Crown"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajustar con + o con la Corona"
+          }
+        }
+      }
+    },
+    "Choose the actual load before logging.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose the actual load before logging."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige el peso real antes de registrar."
+          }
+        }
+      }
+    },
+    "An unspecified load needs schema 3 and no numeric load target.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An unspecified load needs schema 3 and no numeric load target."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una carga sin prescribir requiere el esquema 3 y ningún objetivo numérico de peso."
+          }
+        }
+      }
+    },
+    "{0} × {1} · choose load on Watch · {2}s rest": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{0} × {1} · choose load on Watch · {2}s rest"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{0} × {1} · peso a elegir en el Watch · {2}s de descanso"
+          }
+        }
+      }
+    },
+    "Prescribed: {0} reps. Load not prescribed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prescribed: {0} reps. Load not prescribed."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Objetivo: {0} repeticiones. Peso no prescrito."
+          }
+        }
+      }
+    },
+    "{0}\nUser-confirmed: {1} {2} × {3} reps. Load difference unavailable: no prescribed load.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{0}\nUser-confirmed: {1} {2} × {3} reps. Load difference unavailable: no prescribed load."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{0}\nConfirmado por el usuario: {1} {2} × {3} repeticiones. Diferencia de peso no disponible: no había peso prescrito."
+          }
+        }
+      }
+    },
+    "A variation key is optional. Use the same key only for the exact same machine and variation; comparisons need a key and a load convention.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A variation key is optional. Use the same key only for the exact same machine and variation; comparisons need a key and a load convention."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La clave de variante es opcional. Usa la misma solo para la misma máquina y variante; las comparaciones requieren clave y convención de carga."
+          }
+        }
+      }
+    },
+    "Open Little Lift on Watch and tap Start workout.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Little Lift on Watch and tap Start workout."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre Little Lift en el Watch y toca Iniciar entreno."
+          }
+        }
+      }
+    },
+    "If a different workout is already open without logged sets, Watch offers to switch. Recorded work always stays with its original plan.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "If a different workout is already open without logged sets, Watch offers to switch. Recorded work always stays with its original plan."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Si abriste otro entrenamiento sin registrar series, el Watch te ofrece cambiar. El trabajo registrado conserva siempre su plan original."
+          }
+        }
+      }
+    },
+    "Rest (s)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rest (s)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descanso (s)"
+          }
+        }
+      }
+    },
+    "New workout": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New workout"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuevo entrenamiento"
+          }
+        }
+      }
+    },
+    "No sets logged yet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No sets logged yet."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún no registraste series."
+          }
+        }
+      }
+    },
+    "Copy the reply, then paste here": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy the reply, then paste here"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copia la respuesta y pégala aquí"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -19,7 +19,7 @@ struct FeedbackTests {
         let p = try PlanImport.parse(text)
         #expect(p.id == id && p.exercises[0].kind == .walking)
         #expect(!p.exercises[0].prescription(unit: .lb).contains("lb"))
-        var changed = p; changed.schemaVersion = 3
+        var changed = p; changed.schemaVersion = 99
         #expect(throws: (any Error).self) { try changed.validate() }
         let again = try FileRepository<WorkoutPlan>.decoder().decode(WorkoutPlan.self, from: FileRepository<WorkoutPlan>.encoder().encode(p))
         #expect(again == p)

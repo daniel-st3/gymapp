@@ -10,14 +10,14 @@ struct TodayDeliveryView: View {
                       systemImage: store.state.todayReceivedOnWatch ? "checkmark.circle" : "iphone")
                     .font(.subheadline).accessibilityIdentifier("today.delivery")
                     .contentTransition(.opacity)
-                if store.state.todayReceivedOnWatch, let receipt = store.state.lastWatchReceipt {
-                    Text(L10n.s("Receipt confirmed: \(receipt.receivedAt.formatted(.dateTime.day().month(.abbreviated).year().hour().minute().locale(Locale(identifier: L10n.language))))")).font(.caption).foregroundStyle(.secondary)
-                    Text(L10n.s("Ready to start on Watch. An active workout keeps its original plan.")).font(.caption).foregroundStyle(.secondary)
-                } else {
-                    Text(L10n.s("Waiting for the Watch to confirm this workout. Your plan is safe on this iPhone.")).font(.caption).foregroundStyle(.secondary)
-                }
+                Text(store.state.todayReceivedOnWatch ? L10n.s("Open Little Lift on Watch and tap Start workout.") : L10n.s("Waiting for the Watch to confirm this workout. Your plan is safe on this iPhone."))
+                    .font(.caption).foregroundStyle(.secondary)
                 DisclosureGroup(L10n.s("Connection & retry")) {
                     VStack(alignment: .leading, spacing: 8) {
+                        if let receipt = store.state.lastWatchReceipt, store.state.todayReceivedOnWatch {
+                            Text(receipt.receivedAt.formatted(date: .abbreviated, time: .shortened)).font(.caption)
+                        }
+                        Text(L10n.s("If a different workout is already open without logged sets, Watch offers to switch. Recorded work always stays with its original plan.")).font(.caption).foregroundStyle(.secondary)
                         Text(store.syncMessage).font(.caption).textSelection(.enabled)
                         Button(L10n.s("Check Watch delivery")) { store.sendToWatch() }
                             .disabled(store.isSyncing).frame(minHeight: 44)

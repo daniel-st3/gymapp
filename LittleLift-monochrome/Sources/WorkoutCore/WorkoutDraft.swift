@@ -13,6 +13,7 @@ public struct DraftExercise: Identifiable, Equatable, Sendable {
     public var name = ""
     public var sets = ""
     public var reps = ""
+    public var chooseLoadOnWatch = false
     public var weight = ""
     public var rest = ""
     public var unit = ""
@@ -32,7 +33,8 @@ public struct DraftExercise: Identifiable, Equatable, Sendable {
             incline = a.inclinePercent.map(String.init(describing:)) ?? ""; addedLoad = a.additionalLoad.map(String.init(describing:)) ?? ""
         }
         id = exercise.id; name = exercise.name; sets = String(exercise.sets); reps = String(exercise.reps)
-        weight = String(exercise.weight); rest = String(exercise.restSeconds); self.unit = unit.rawValue
+        chooseLoadOnWatch = exercise.loadIsUnspecified == true
+        weight = chooseLoadOnWatch ? "" : String(exercise.weight); rest = String(exercise.restSeconds); self.unit = unit.rawValue
         convention = exercise.loadConvention?.rawValue ?? ""; comparisonID = exercise.comparisonID ?? ""
         optionalWork = exercise.workPolicy?.optional ?? false; priority = exercise.workPolicy?.priority ?? 3; hasPolicy = exercise.workPolicy != nil
     }
@@ -46,7 +48,7 @@ public struct DraftExercise: Identifiable, Equatable, Sendable {
             if hasPolicy || optionalWork || priority != 3 { result.workPolicy = WorkPolicy(priority: priority, optional: optionalWork) }
             return result
         }
-        guard let sets = Int(sets), let reps = Int(reps), let weight = Double(weight.replacingOccurrences(of: ",", with: ".")),
+        guard let sets = Int(sets), let reps = Int(reps), let weight = chooseLoadOnWatch ? 0 : Double(weight.replacingOccurrences(of: ",", with: ".")),
               let rest = Int(rest), WeightUnit(rawValue: unit) != nil else {
             throw WorkoutError.invalidInput(L10n.s("Complete sets, repetitions, load, kg/lb and rest for \(name.isEmpty ? "each exercise" : name). Ranges need an explicit target; no missing values are assumed."))
         }
@@ -56,6 +58,7 @@ public struct DraftExercise: Identifiable, Equatable, Sendable {
         var result = ExercisePlan(id: id, name: name.trimmingCharacters(in: .whitespacesAndNewlines), sets: sets, reps: reps, weight: weight, restSeconds: rest,
             comparisonID: comparisonID.isEmpty ? nil : comparisonID, loadConvention: convention.isEmpty ? nil : LoadConvention(rawValue: convention))
         if hasPolicy || optionalWork || priority != 3 { result.workPolicy = WorkPolicy(priority: priority, optional: optionalWork) }
+        result.loadIsUnspecified = chooseLoadOnWatch ? true : nil
         return result
     }
     private static func optionalNumber(_ text: String) throws -> Double? {
@@ -94,13 +97,17 @@ public struct WorkoutDraft: Equatable, Sendable {
             exercise.alternatives = original?.exercises.first(where: { $0.id == draft.id })?.alternatives
             return exercise
         }
-        if plan.exercises.contains(where: { $0.activity != nil }) { plan.schemaVersion = 2 }
+        if plan.exercises.contains(where: { $0.loadIsUnspecified == true || ($0.loadConvention != nil && $0.comparisonID == nil) }) { plan.schemaVersion = 3 }
+        else if plan.exercises.contains(where: { $0.activity != nil }), plan.schemaVersion != 3 { plan.schemaVersion = 2 }
         try plan.validate(); return plan
     }
 }
 
 public enum SmartWorkoutImport {
     public static func extract(_ text: String) throws -> WorkoutDraft {
+        try extract(text, normalizeChat: true)
+    }
+    static func extract(_ text: String, normalizeChat: Bool) throws -> WorkoutDraft {
         guard text.utf8.count <= 64_000 else { throw WorkoutError.invalidInput(L10n.s("Import at most 64 KB at a time.")) }
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmed.hasPrefix("{") || trimmed.hasPrefix("```") {
@@ -108,6 +115,12 @@ public enum SmartWorkoutImport {
         }
         if let table = TabularWorkoutImport.extract(trimmed) {
             guard table.exercises.count <= 50 else { throw WorkoutError.invalidInput(L10n.s("Import at most 50 exercise lines.")) }; return table
+        }
+        if normalizeChat, let chat = ConversationalWorkoutImport.normalized(text) {
+            var result = try extract(chat, normalizeChat: false)
+            result.source = text
+            result.notes.append(L10n.s("Exercise blocks were grouped from the message. Compare this list with your chat before continuing."))
+            return result
         }
         var draft = WorkoutDraft(); draft.source = text
         draft.notes = [L10n.s("Check every extracted field against the source. Missing values and ranges require your decision. A load convention and exact variation ID enable later comparisons; leave both blank when unknown.")]
@@ -168,6 +181,7 @@ public enum SmartWorkoutImport {
             // A displayed convention without an explicit variation ID remains a
             // draft question. It is never converted into an invented identity.
             row.convention = explicitConvention(in: line)
+            if row.convention == "bodyweight", row.weight.isEmpty { row.weight = "0" }
             if draft.title.isEmpty && row.sets.isEmpty && draft.exercises.isEmpty && !line.contains(where: \.isNumber) {
                 draft.title = line
             } else { draft.exercises.append(row) }

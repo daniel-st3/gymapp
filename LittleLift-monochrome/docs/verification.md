@@ -1,5 +1,74 @@
 # Verification
 
+## Build 16: gym-start recovery and direct import, 19 October 2026
+
+Continued Build 15 in place. [Delivery checklist](upgrade-16-checklist.md).
+
+- **161 Swift tests / 21 suites and 13 Python tests passed**, plus project/resource
+  checks and both simulator builds (`BuildLogs/upgrade16-release-verification.log`).
+  Latest free-signed iPhone, embedded Watch and launcher build passed
+  (`upgrade16-final-signed.log`); strict signature verification passed.
+- Today explicitly labels the saved workout; Screenshot/Paste/file extraction
+  opens a compact editable acceptance screen. A conversational parser groups
+  explicit exercise blocks while retaining source text. Missing units/rest and
+  ranges remain choices. Schema 3 represents an unspecified load without treating
+  zero as a target; known conventions no longer require an invented variation ID.
+  Exact historical matching requirements remain intact.
+- New tests exercise multiline/labelled chat, decimal loads, missing fields,
+  non-overwriting choices, schema/legacy compatibility, unknown-load evidence,
+  undo, duplicate delivery, relaunch, previous-plan archiving and explicit Watch
+  replacement only before any work is logged.
+
+### Observed simulator flow
+
+Fresh backups preceded isolated Spanish fixtures on the existing paired iPhone
+and 46 mm Watch. The iPhone photo picker selected a generated chat-like image;
+actual on-device Vision opened the preview directly with **Pierna**, two exercise
+names, 3 sets/10–12 reps/90 s and 2 sets/12 reps/missing rest. kg, 10 reps and
+60 s were explicitly selected; the prescribed 90 s remained. Today stayed Torso
+until acceptance. The exact schema-3 plan then arrived on Watch. Its old unlogged
+Torso session changed only after tapping **Use new workout**; Torso was retained
+in the phone routine library.
+
+At zero load, tapping the main Watch button opened confirmation and recorded
+nothing. After native adjustment, three sets of 2 kg × 9 and two of 3 kg × 12
+were logged, with rest skips. Relaunch during rest retained the first set; final
+relaunch of both apps retained all five entries and exactly one phone History
+record. Summary/Done remained visible. Core tests separately exercised undo,
+report accuracy and identical session replay. Native Paste also opened preview
+directly; leaving it unaccepted did not replace Today. Standalone Vision over the
+same generic image and final parser passed (`vision.log`).
+
+Actual screenshots inspected: Today, source choices, review/range/rest selection,
+Watch switch, set logging, zero-load confirmation, rest and summary. A clipped
+switch explanation was shortened; the duplicated paste icon and uneven rest
+labels were removed. Phone accessibility-large uses stacked editable fields;
+Watch XXXL keeps both switch actions fixed and scrolls secondary content. Reduce
+Motion was enabled/read back in both runtimes, then restored. This is layout and
+state evidence, not physical animation/haptic measurement.
+
+Original simulator app files/preferences were restored and compared. Phone state
+matched; Watch only differed in the expected snapshot date; older checkpoint and
+motion files matched byte for byte. Phone size Large and Reduce Motion off were
+restored. The added generic image was removed from Photos (six original library
+images remained); the copied fixture text was cleared. Pairing was untouched and
+latest apps were relaunched.
+
+### Physical delivery and limits
+
+After the user's unlock, a retry obtained the Watch backup. Whole app-support
+backups of both devices preceded in-place installation. Apple confirmed both
+launches and installed bundle version **16**. Readback showed unchanged iPhone
+state, only the Watch snapshot date changed, and four iPhone / three Watch
+additional checkpoint/motion files were byte-identical. Private receipts and
+hash comparisons live in `.verification/upgrade-16/`, never in Git.
+
+The user's exact failed screenshot was not supplied. Generic OCR success does
+not establish arbitrary screenshot reliability or Foundation Models quality.
+The app still cannot read an existing private ChatGPT conversation automatically.
+No new live ChatGPT, physical double-tap/haptic, wrist-down, sensor accuracy or
+battery claims are made. Earlier platform limitations remain in the F01–F27 matrix.
+
 ## Build 15: partial machine changes, conservative imports and connection checks, 17 October 2026
 
 Continued the current local Build 14. The existing free signing, bundle IDs,

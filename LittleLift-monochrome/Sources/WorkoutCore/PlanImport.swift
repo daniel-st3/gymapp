@@ -22,6 +22,7 @@ public enum PlanImport {
             let activity: ActivityPrescription?
             let sets: Int?
             let reps: Int?
+            let loadIsUnspecified: Bool?
             let weight: Double?
             let restSeconds: Int?
         }
@@ -30,8 +31,8 @@ public enum PlanImport {
             var result = WorkoutPlan(id: id ?? UUID(), title: title.trimmingCharacters(in: .whitespacesAndNewlines), unit: unit ?? .kg,
                         exercises: exercises.map { input in
                             var result = ExercisePlan(id: input.id ?? UUID(), name: input.name.trimmingCharacters(in: .whitespacesAndNewlines),
-                            sets: input.sets ?? (input.activity == nil ? 0 : 1), reps: input.reps ?? (input.activity == nil ? 0 : 1), weight: input.weight ?? (input.activity == nil ? -1 : 0), restSeconds: input.restSeconds ?? (input.activity == nil ? -1 : 0), comparisonID: input.comparisonID, loadConvention: input.loadConvention)
-                            result.activity = input.activity; result.workPolicy = input.workPolicy; result.alternatives = input.alternatives; return result
+                            sets: input.sets ?? (input.activity == nil ? 0 : 1), reps: input.reps ?? (input.activity == nil ? 0 : 1), weight: input.weight ?? (input.loadIsUnspecified == true || input.activity != nil ? 0 : -1), restSeconds: input.restSeconds ?? (input.activity == nil ? -1 : 0), comparisonID: input.comparisonID, loadConvention: input.loadConvention)
+                            result.loadIsUnspecified = input.loadIsUnspecified; result.activity = input.activity; result.workPolicy = input.workPolicy; result.alternatives = input.alternatives; return result
                         },
                         observations: observations, observationSchemaVersion: observationSchemaVersion)
             result.schemaVersion = schemaVersion; result.transitionSeconds = transitionSeconds; result.practice = practice; result.timeBudget = timeBudget; return result

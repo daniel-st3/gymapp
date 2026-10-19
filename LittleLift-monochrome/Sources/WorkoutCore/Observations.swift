@@ -150,8 +150,10 @@ extension WorkoutSession {
                 let detail: String
                 switch request.kind {
                 case .performance:
-                    let target = L10n.s("Prescribed: \(Self.number(exercise.weight)) \(plan.unit.rawValue) × \(exercise.reps) reps.")
-                    if let entry {
+                    let target = exercise.loadIsUnspecified == true ? L10n.s("Prescribed: \(exercise.reps) reps. Load not prescribed.") : L10n.s("Prescribed: \(Self.number(exercise.weight)) \(plan.unit.rawValue) × \(exercise.reps) reps.")
+                    if let entry, exercise.loadIsUnspecified == true {
+                        detail = L10n.s("\(target)\nUser-confirmed: \(Self.number(entry.weight)) \(plan.unit.rawValue) × \(entry.reps) reps. Load difference unavailable: no prescribed load.")
+                    } else if let entry {
                         detail = L10n.s("\(target)\nUser-confirmed: \(Self.number(entry.weight)) \(plan.unit.rawValue) × \(entry.reps) reps. Difference: \(Self.number(entry.weight - exercise.weight)) \(plan.unit.rawValue), \(entry.reps - exercise.reps) reps.")
                     } else { detail = L10n.s("\(target)\nUnavailable: set not logged; no actual values inferred.") }
                 case .loggingInterval:

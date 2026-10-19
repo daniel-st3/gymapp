@@ -90,7 +90,8 @@ struct LibraryTests {
         let draft = try SmartWorkoutImport.extract("Workout: Test\nCurl 3 x 8 @ 5 kg per dumbbell rest 60 sec")
         #expect(draft.exercises[0].convention == "perDumbbell")
         #expect(draft.exercises[0].comparisonID.isEmpty)
-        #expect(throws: (any Error).self) { try draft.validated() }
+        #expect(try draft.validated().exercises[0].comparisonID == nil)
+        #expect(try draft.validated().schemaVersion == 3)
         #expect(SmartWorkoutImport.explicitConvention(in: "per dumbbell or total load unclear").isEmpty)
     }
 

@@ -1,4 +1,4 @@
-# Feedback F01–F27 · actualización Build 15
+# Feedback F01–F27 · actualización Build 16
 
 Continuación de los Builds 10 y 11 locales, sin reemplazarlos por un ZIP. Los adjuntos son requisitos adoptados por el usuario; sus afirmaciones técnicas se contrastan. Ningún resultado antiguo cuenta como una prueba nueva.
 
@@ -7,6 +7,8 @@ Estado de ejecución: **Build 13 corrige la conservación de respuestas del coac
 **Build 14 añade fiabilidad cotidiana:** copias de seguridad con restauración revisada, correcciones auditables de carga/repeticiones y confirmación de entrega en Hoy. No reclasifica como verificados los límites físicos o de plataforma de F02/F03/F10/F19/F21. [Checklist Build 14](reliability-14-checklist.md): 142 pruebas Swift, 12 Python y recorridos nativos nuevos; la matriz conserva la versión de su evidencia anterior.
 
 **Build 15:** sustitución después de series parciales, tablas/OCR conservadores, campos pendientes visibles y límites de seguridad adicionales. El usuario añadió y autorizó el Atajo genérico en el iPhone; la lectura posterior confirmó un recibo de respuesta válido sin cambios en su historial/plan. 153 pruebas Swift, 13 Python y actualización física de ambos dispositivos con archivos preservados. [Checklist Build 15](upgrade-15-checklist.md). No acredita automatización desatendida ni nuevas mediciones físicas.
+
+**Build 16 responde al fallo real de inicio en el gimnasio:** Hoy identifica el entrenamiento guardado; captura/Pegar abre una revisión compacta; faltantes y rangos se resuelven allí, y un peso no prescrito se elige en Watch. Cambio explícito de una sesión sin registros y conservación del plan anterior. Refuerza F05/F18/F24; no reclasifica los demás límites físicos o de plataforma. 161 pruebas Swift, 13 Python, Vision real y recorrido nativo hasta Historial, actualización física con datos preservados. [Checklist Build 16](upgrade-16-checklist.md).
 
 | ID | Requisito | Estado | Cambio | Archivos relevantes | Evidencia (versión indicada; Build 11 si se omite) | Coste / dependencia / limitación |
 |---|---|---|---|---|---|---|

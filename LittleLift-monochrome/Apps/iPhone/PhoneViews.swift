@@ -135,9 +135,9 @@ struct TodayView: View {
         .buttonStyle(.plain)
         .background(.black)
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            ViewThatFits(in: .horizontal) {
-                HStack(spacing: 10) { sendButton; importButton.fixedSize(horizontal: true, vertical: false) }
-                VStack(spacing: 8) { sendButton; importButton }
+            VStack(spacing: 8) {
+                if store.state.plan != nil && !store.state.todayReceivedOnWatch { sendButton }
+                importButton
             }.padding(.horizontal, 24).padding(.vertical, 12).background(.black)
         }
         .modifier(LiftRootChrome())
@@ -177,32 +177,32 @@ struct TodayView: View {
 
     private var sendButton: some View {
         Button { store.sendToWatch() } label: {
-            Label(store.isSyncing ? L10n.s("Sending…") : (store.state.todayReceivedOnWatch ? L10n.s("Send again") : L10n.s("Send to Watch")), systemImage: "applewatch")
+            Label(store.isSyncing ? L10n.s("Sending…") : (store.state.todayReceivedOnWatch ? L10n.s("Check Watch") : L10n.s("Send to Watch")), systemImage: "applewatch")
                 .padding(.horizontal, 10).padding(.vertical, 3)
         }.buttonStyle(QuietButtonStyle(prominent: true))
             .disabled(store.isSyncing || store.state.plan == nil)
     }
 
     private var importButton: some View {
-        Button { importing = true } label: { Label(L10n.s("Import"), systemImage: "plus").padding(.horizontal, 10).padding(.vertical, 3) }
-            .buttonStyle(QuietButtonStyle()).accessibilityLabel(L10n.s("Import workout"))
+        Button { importing = true } label: { Label(L10n.s("Change workout"), systemImage: "arrow.left.arrow.right").padding(.horizontal, 10).padding(.vertical, 3) }
+            .buttonStyle(QuietButtonStyle(prominent: store.state.todayReceivedOnWatch || store.state.plan == nil)).accessibilityLabel(L10n.s("Change workout"))
     }
 
     private func workoutHeader(_ plan: WorkoutPlan) -> some View {
         VStack(alignment: .leading, spacing: 20) {
-            LiftEyebrow(text: Date.now.formatted(.dateTime.weekday(.wide).month().day().locale(Locale(identifier: L10n.language))))
+            LiftEyebrow(text: L10n.s("Saved workout"))
             LiftPageHeading(title: plan.title)
+            Text(L10n.s("Did your coach choose something else? Bring that workout here before starting."))
+                .font(.subheadline).foregroundStyle(.secondary)
             HStack(spacing: 16) {
                 LiftStat(value: String(plan.exercises.count), label: L10n.s("Exercises"))
                 LiftStat(value: String(plan.totalSets), label: plan.exercises.contains { $0.kind != .strength } ? L10n.s("Sets / segments") : L10n.s("Sets"))
                 if plan.exercises.contains(where: { $0.kind == .strength || $0.activity?.additionalLoad != nil }) { LiftStat(value: plan.unit.rawValue, label: L10n.s("Load unit")) }
             }
-            let actionLayout = dynamicType.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: 10)) : AnyLayout(HStackLayout(spacing: 10))
-            actionLayout {
-                Button { choosing = true } label: { Label(L10n.s("Change workout"), systemImage: "arrow.left.arrow.right") }
-                    .buttonStyle(QuietButtonStyle())
-                Button { editing = plan } label: { Label(L10n.s("Edit"), systemImage: "pencil").padding(.horizontal, 12) }
-                    .buttonStyle(QuietButtonStyle()).fixedSize(horizontal: !dynamicType.isAccessibilitySize, vertical: false)
+            HStack {
+                Spacer()
+                Button { editing = plan } label: { Label(L10n.s("Edit"), systemImage: "pencil") }
+                    .font(.subheadline).frame(minHeight: 44)
             }
             TodayDeliveryView(store: store)
             if let slot = store.state.weeklySchedule.first(where: { $0.weekday == Calendar.current.component(.weekday, from: Date()) }),
@@ -464,7 +464,7 @@ struct ObservationDetailView: View {
             Section(evidence.title) { Text(evidence.detail).textSelection(.enabled) }
             if let exercise = session.plan.exercises.first(where: { $0.id == evidence.exerciseID }) {
                 Section(L10n.s("Set context")) {
-                    Text(L10n.s("Prescribed: \(WorkoutSession.number(exercise.weight)) \(session.plan.unit.rawValue) × \(exercise.reps) reps"))
+                    Text(exercise.prescription(unit: session.plan.unit))
                     Text(L10n.s("Load convention: \(exercise.loadConvention?.label ?? L10n.s("unspecified"))"))
                     if let entry = session.entries.first(where: { $0.id == evidence.setID }) {
                         Text(L10n.s("User-confirmed: \(WorkoutSession.number(entry.weight)) \(session.plan.unit.rawValue) × \(entry.reps) reps"))

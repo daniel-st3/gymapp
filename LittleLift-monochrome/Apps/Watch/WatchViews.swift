@@ -34,11 +34,23 @@ extension View {
 struct WatchRootView: View {
     @Bindable var store: WatchStore
     @Environment(\.scenePhase) private var scenePhase
+    @State private var keptPlan: WorkoutPlan?
 
     var body: some View {
         NavigationStack {
             Group {
-                if let session = store.state.session {
+                if store.state.canReplaceUnloggedWorkout, keptPlan != store.state.plan, let plan = store.state.plan {
+                    WatchPage {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(L10n.s("New workout")).watchText(.caption).foregroundStyle(.secondary)
+                            Text(plan.title).watchText(.title).lineLimit(2)
+                            Text(L10n.s("No sets logged yet.")).watchText(.secondary)
+                        }
+                    } actions: {
+                        Button(L10n.s("Use new workout")) { store.perform { try store.replaceUnloggedWorkout() } }.buttonStyle(QuietButtonStyle(prominent: true))
+                        Button(L10n.s("Keep current workout")) { keptPlan = plan }.buttonStyle(QuietTextButtonStyle())
+                    }
+                } else if let session = store.state.session {
                     switch session.phase {
                     case .active:
                         if let exercise = session.currentExercise, exercise.kind != .strength { TimedActivityView(store: store, session: session, exercise: exercise) }
@@ -163,6 +175,7 @@ struct WatchTodayView: View {
 }
 
 struct SetView: View {
+    @State private var confirmingZero = false
     @Bindable var store: WatchStore
     let session: WorkoutSession
 
@@ -178,10 +191,14 @@ struct SetView: View {
         } actions: {
             TimelineView(.periodic(from: .now, by: 0.5)) { context in
                 let allowed = LogActionGuard.allows(session: session, presentedSheet: store.presentedSheet != nil, now: context.date)
-                Button { store.perform { try store.logSet() } } label: { Label(RhythmGuide.shared.active ? L10n.s("Done · log set") : L10n.s("Log set"), systemImage: "checkmark") }.buttonStyle(QuietButtonStyle(prominent: true))
+                Button { if store.needsLoadChoice { confirmingZero = true } else { store.perform { try store.logSet() } } } label: { Label(store.needsLoadChoice ? L10n.s("Choose load") : RhythmGuide.shared.active ? L10n.s("Done · log set") : L10n.s("Log set"), systemImage: "checkmark") }.buttonStyle(QuietButtonStyle(prominent: true))
                     .disabled(!allowed)
-                    .handGestureShortcut(.primaryAction, isEnabled: allowed && store.state.doubleTapEnabled == true)
+                    .handGestureShortcut(.primaryAction, isEnabled: allowed && !store.needsLoadChoice && store.state.doubleTapEnabled == true)
             }
+        }
+        .confirmationDialog(L10n.s("Choose the actual load"), isPresented: $confirmingZero, titleVisibility: .visible) {
+            Button(L10n.s("Log without load · 0 kg/lb")) { store.perform { try store.logSet(confirmZeroLoad: true) } }
+            Button(L10n.s("Adjust weight with + or Crown"), role: .cancel) { }
         }
         .id(session.currentExercise?.id)
         .onDisappear { RhythmGuide.shared.stop() }

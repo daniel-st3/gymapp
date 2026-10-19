@@ -23,6 +23,31 @@ No backend. No ads. No API keys. No paid inference or runtime dependencies.
 | Explore History, Progress and factual reports | Undo, finish early and recover after relaunch |
 | Share context with your existing coach chat | Keep logging offline; deliver completed workouts later |
 
+## What’s new in Build 16
+
+The gym-start flow now makes the **saved workout** explicit. If your coach says
+“legs” and the app still holds “upper body”, **Change workout → Screenshot or
+Paste → Review → Use workout** brings the coach’s message into Today and sends
+it to Watch. Little Lift does not read or synchronize a private chat automatically.
+
+- Screenshots and Paste open a compact editable preview directly. Multiline,
+  numbered Spanish/English exercise blocks keep names and explicit targets.
+- Choose missing units/rest once; resolve repetition ranges in place. An absent
+  load can be chosen during ordinary Watch logging, without inventing a zero
+  target or requiring technical variation identifiers.
+- A new plan offers an explicit switch from a Watch session with no recorded
+  work. Logged work stays attached to its original plan. Previous Today remains
+  available as a routine.
+
+**Verified:** 161 engine tests / 21 suites, 13 script tests, both simulator builds,
+free-signed device build, real Vision on a generic chat image, and native import →
+accept → Watch logging → single History delivery → relaunch. Phone accessibility
+text and 46 mm Watch layouts were inspected. Build 16 is installed and opened on
+both physical devices; backed-up workout/checkpoint/motion data was preserved.
+The exact failed gym screenshot was not supplied; arbitrary screenshots and
+physical haptics/background behavior are not certified by these tests.
+[Build 16 checklist](docs/upgrade-16-checklist.md) · [verification](docs/verification.md).
+
 ## What’s new in Build 15
 
 - Switch the **remaining sets** to a previously approved machine after starting an exercise. Keep the original sets, rest and prescription; separate variation history, undo and recovery stay intact.

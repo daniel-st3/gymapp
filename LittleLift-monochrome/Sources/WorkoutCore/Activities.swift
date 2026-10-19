@@ -99,6 +99,7 @@ extension ExercisePlan {
     public var kind: ActivityKind { activity?.kind ?? .strength }
     public func prescription(unit: WeightUnit) -> String {
         if let activity { return activity.summary + (activity.additionalLoad.map { " · +\(WorkoutSession.number($0)) \(unit.rawValue)" } ?? "") }
+        if loadIsUnspecified == true { return L10n.s("\(sets) × \(reps) · choose load on Watch · \(restSeconds)s rest") }
         return L10n.s("\(sets) × \(reps) · \(WorkoutSession.number(weight)) \(unit.rawValue) · \(restSeconds)s rest")
     }
 }

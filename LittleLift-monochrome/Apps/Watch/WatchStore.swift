@@ -68,7 +68,17 @@ final class WatchStore {
         }
     }
 
-    func logSet() throws {
+    func replaceUnloggedWorkout() throws {
+        var next = state; try next.replaceUnloggedWorkout()
+        try commit(next); RhythmGuide.shared.stop(); notifications.cancel(); WorkoutRuntime.shared.finish(); prefill()
+        Task { @MainActor in if let session = state.session { await WorkoutRuntime.shared.start(for: session) } }
+    }
+    var needsLoadChoice: Bool {
+        guard let session = state.session, let exercise = session.currentExercise else { return false }
+        return exercise.loadIsUnspecified == true && draftWeight == 0 && !session.entries.contains { $0.exerciseID == exercise.id }
+    }
+    func logSet(confirmZeroLoad: Bool = false) throws {
+        guard !needsLoadChoice || confirmZeroLoad else { throw WorkoutError.invalidInput(L10n.s("Choose the actual load before logging.")) }
         guard LogActionGuard.allows(session: state.session, presentedSheet: presentedSheet != nil) else { return }
         var next = state
         guard var session = next.session else { return }

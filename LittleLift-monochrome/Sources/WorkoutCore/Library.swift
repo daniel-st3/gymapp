@@ -102,6 +102,10 @@ extension PhoneState {
     /// leave a library edit half-saved or add a second copy of that revision.
     public mutating func saveWorkout(_ plan: WorkoutPlan, replacing id: UUID? = nil, useToday: Bool) throws {
         var next = self
+        if useToday, let previous = next.plan, previous != plan,
+           !next.routineLibrary.contains(where: { $0.plan == previous || $0.previousVersions.contains(previous) }) {
+            _ = try next.saveRoutine(previous)
+        }
         let saved = try next.saveRoutine(plan, replacing: id)
         if useToday { next.plan = saved }
         self = next

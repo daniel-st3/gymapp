@@ -1,5 +1,42 @@
 # Import examples and decisions
 
+## The shorter gym flow (Build 16)
+
+Today → **Change workout** → **Use a screenshot** or **Paste** → **Check your workout**.
+Image reading and Paste now open review directly. Review shows names, sets,
+repetitions and rest together; details and the original message remain available.
+Use the explicit bottom action to save and send. Until then, Today is unchanged.
+An older saved plan is retained in routines; completed records are never rewritten.
+
+A generic chat-format fixture, not a training recommendation:
+
+```text
+## Pierna
+1. Prensa de piernas
+3 series de 10–12 repeticiones
+Descanso: 90 segundos
+2. Curl femoral sentado
+2 x 12
+```
+
+Here, choose a repetition target from the range, choose kg/lb, and choose the
+missing rest for the second exercise. The first exercise retains its prescribed
+90 seconds. The preview explicitly offers **Choose the actual load on Watch**;
+the first zero-load Log requires confirmation. Positive load uses ordinary input
+and Log. No extra mandatory logging action is added when a load is already chosen.
+
+The saved plan uses `schemaVersion: 3` and optional `loadIsUnspecified: true` for
+an absent strength-load target. Its internal numeric sentinel is zero; reports
+say the load was not prescribed and never calculate a delta against zero.
+Schema 3 also permits a known load convention without an invented variation ID;
+historical matching still requires exact variation ID, units and convention.
+Legacy plans/sessions keep their original meaning. Older apps reject schema 3
+rather than silently interpreting the unknown load as a prescription: update both.
+
+Screenshot quality and message structure can still prevent full extraction.
+Unknown values/ranges remain visible; edit the same preview or use manual text.
+The app cannot infer a workout from just “legs” or read an existing ChatGPT thread.
+
 Paste ordinary text, a labelled table, a screenshot, or existing Little Lift JSON.
 Every route leads to an editable preview. Saving a proposal is always explicit.
 For example:

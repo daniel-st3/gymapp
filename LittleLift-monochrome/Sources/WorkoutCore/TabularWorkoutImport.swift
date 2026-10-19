@@ -103,10 +103,10 @@ extension DraftExercise {
         }
         if Int(sets).map({ (1...20).contains($0) }) != true { fields.append(L10n.s("Sets")) }
         if Int(reps).map({ (1...200).contains($0) }) != true { fields.append(L10n.s("Repetitions")) }
-        if Double(weight.replacingOccurrences(of: ",", with: ".")).map({ $0.isFinite && (0...1000).contains($0) }) != true { fields.append(L10n.s("Load")) }
+        if !chooseLoadOnWatch, Double(weight.replacingOccurrences(of: ",", with: ".")).map({ $0.isFinite && (0...1000).contains($0) }) != true { fields.append(L10n.s("Load")) }
         if WeightUnit(rawValue: unit) == nil { fields.append(L10n.s("Unit")) }
         if Int(rest).map({ (0...1800).contains($0) }) != true { fields.append(L10n.s("Rest · seconds")) }
-        if comparisonID.isEmpty != convention.isEmpty || (!comparisonID.isEmpty && !WorkoutPlan.validIdentifier(comparisonID)) || (!convention.isEmpty && LoadConvention(rawValue: convention) == nil) { fields.append(L10n.s("Load convention")) }
+        if (!comparisonID.isEmpty && convention.isEmpty) || (!comparisonID.isEmpty && !WorkoutPlan.validIdentifier(comparisonID)) || (!convention.isEmpty && LoadConvention(rawValue: convention) == nil) { fields.append(L10n.s("Load convention")) }
         return fields
     }
 }

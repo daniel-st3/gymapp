@@ -14,6 +14,8 @@ public struct ExercisePlan: Codable, Equatable, Identifiable, Sendable {
     public var workPolicy: WorkPolicy?
     public var alternatives: [ExerciseAlternative]?
     public var activity: ActivityPrescription?
+    /// Schema 3: numeric storage stays compatible; zero is not a prescribed load.
+    public var loadIsUnspecified: Bool?
 
     public init(id: UUID = UUID(), name: String, sets: Int, reps: Int, weight: Double, restSeconds: Int = 90, comparisonID: String? = nil, loadConvention: LoadConvention? = nil) {
         self.id = id; self.name = name; self.sets = sets; self.reps = reps
@@ -50,9 +52,12 @@ public struct WorkoutPlan: Codable, Equatable, Identifiable, Sendable {
         guard Set(exercises.map(\.id)).count == exercises.count else {
             throw WorkoutError.invalidPlan(L10n.s("Exercise identifiers must be unique."))
         }
-        guard schemaVersion == nil || schemaVersion == 1 || schemaVersion == 2,
+        guard schemaVersion == nil || schemaVersion == 1 || schemaVersion == 2 || schemaVersion == 3,
               transitionSeconds.map({ (0...300).contains($0) }) ?? true else { throw WorkoutError.invalidPlan(L10n.s("Unsupported workout schema or transition time.")) }
         for exercise in exercises {
+            guard exercise.loadIsUnspecified != true || (schemaVersion == 3 && exercise.activity == nil && exercise.weight == 0 && exercise.loadConvention != .bodyweight) else {
+                throw WorkoutError.invalidPlan(L10n.s("An unspecified load needs schema 3 and no numeric load target."))
+            }
             try exercise.activity?.validate()
             if exercise.activity != nil {
                 guard exercise.sets == 1, exercise.reps == 1, exercise.weight == 0, exercise.comparisonID == nil, exercise.loadConvention == nil, exercise.alternatives?.isEmpty ?? true else {
@@ -61,7 +66,7 @@ public struct WorkoutPlan: Codable, Equatable, Identifiable, Sendable {
             }
             try exercise.validateFlexibility()
             guard exercise.comparisonID.map(Self.validIdentifier) ?? true,
-                  (exercise.comparisonID == nil) == (exercise.loadConvention == nil),
+                  ((exercise.comparisonID == nil) == (exercise.loadConvention == nil) || (schemaVersion == 3 && exercise.comparisonID == nil)),
                   exercise.loadConvention != .bodyweight || exercise.weight == 0 else {
                 throw WorkoutError.invalidPlan(L10n.s("Provide comparisonID and loadConvention together. Use a 1–64 character identifier for the exact variation. Bodyweight targets must have weight 0."))
             }
