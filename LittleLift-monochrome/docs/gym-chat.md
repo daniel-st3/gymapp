@@ -1,60 +1,35 @@
-# Usar el chat del gimnasio que ya tienes
+# Tu entrenamiento del chat al Watch
 
-Para traer una rutina que tu chat ya te dio, entra en **Entrenar → Traer entrenamiento del chat** y elige **Usar una captura** o **Pegar**. Si no se puede leer completa, **Copiar mensaje para mi chat**, que aparece junto a la explicación del problema, pide un formato sencillo, sin cambiar lo acordado.
+En **Entrenar**, toca **Pegar** después de copiar el entrenamiento de tu chat, o **Captura** para elegir una imagen. La app abre la revisión directamente. Comprueba los ejercicios y toca **Usar este entrenamiento**. Se envía al Watch; abre Little Lift allí y toca **Iniciar**.
 
-Para compartir contexto e historial, en **Ajustes → Mi chat del gym**, toca **Copiar mensaje actualizado**. Puedes escribir antes
-algo breve como «hoy acordamos pierna y tengo 45 minutos». Abre tu conversación habitual
-con ChatGPT y pega el mensaje. Incluye los datos que permitiste compartir y pide una
-respuesta que Little Lift pueda importar. No necesitas redactar JSON tú.
+No necesitas JSON. Este ejemplo ficticio muestra el formato sencillo que ahora pide la app:
 
-Copia el bloque completo que devuelva tu chat. Vuelve a **Mi chat del gym → Pegar**.
-Comprueba o edita los ejercicios y toca **Usar entrenamiento y enviar al Watch**.
-Hasta ese momento el plan guardado sigue igual. Desde Añadir rutina, el mismo editor
-guarda para otro día y conserva Hoy.
-
-Después de entrenar, espera a que el registro aparezca en Historial. Mi chat del gym
-mostrará que hay datos nuevos. Copia otro mensaje para llevar los resultados reales a
-esa conversación. El export incluye hasta ocho registros recientes de cada origen y
-explica que es parcial: el chat no debe eliminar registros antiguos ausentes.
-
-**Elegir qué incluir** permite revisar perfil, historial y equipo antes de copiar.
-Los cambios se guardan al pulsar **Vista previa del contexto**. El plan actual siempre
-se identifica como prescripción; no equivale a haber realizado el entrenamiento.
-
-## Formato de referencia
-
-Este ejemplo es ficticio, no una recomendación. El identificador debe ser exactamente
-el generado por la app para tu último mensaje; el de este ejemplo no sirve como recibo.
-
-```json
-{
-  "handoffID": "11111111-1111-4111-8111-111111111111",
-  "analysis": "Hoy acordamos pierna; el plan guardado de torso se revisa antes de cambiarlo.",
-  "plan": {
-    "schemaVersion": 3,
-    "title": "Pierna de ejemplo",
-    "unit": "kg",
-    "exercises": [
-      {"name": "Prensa de piernas", "sets": 2, "reps": 10, "weight": 20, "restSeconds": 60}
-    ]
-  }
-}
+```text
+Workout: Pierna de ejemplo
+Prensa de piernas — 2 x 10 — 20 kg — descanso 60 s
+Curl femoral sentado — 1 x 12 — 15 kg — descanso 60 s
 ```
 
-Una respuesta usada, de otro mensaje o basada en datos que cambiaron no reemplaza Hoy.
-Copia un mensaje actualizado y pide a tu chat que responda a ese mensaje. Los formatos
-anteriores de texto, imagen y JSON siguen disponibles con revisión explícita.
+Los bloques de texto de ChatGPT también se aceptan, incluso con una introducción o despedida alrededor. Una carga ausente se elige en el Watch. Si faltan unidad o descanso, se confirman en la revisión; los rangos necesitan un objetivo elegido. No se inventan datos ni se guarda nada antes de aceptar. Un título como «pierna» por sí solo no contiene una rutina.
 
-## Qué significa «mantener al día»
+## Mantener tu conversación al día
 
-La app prepara contexto y recibe el resultado que tú traes. No entra en tu conversación,
-no confirma que hayas pegado un mensaje y no envía sesiones automáticamente. Abrir
-ChatGPT abre su destino oficial; debes elegir tu chat. El atajo opcional de análisis
-sigue siendo otra vía y no hereda ni selecciona una conversación anterior.
+**Ajustes → Mi chat del gym → Copiar mensaje actualizado** prepara el contexto permitido: plan guardado, resultados reales, preferencias autorizadas y una solicitud de respuesta sencilla. Puedes añadir «hoy acordamos pierna». Abre tu conversación habitual y pega el mensaje. Después trae la respuesta con Pegar.
 
-Las fuentes oficiales consultadas explican que los enlaces personales compartidos
-son instantáneas y responder a ellos crea otra conversación, no un canal de sync:
-[conversaciones compartidas](https://help.openai.com/en/articles/7925741-sharing-conversations-and-scheduled-tasks-in-chatgpt).
-La [extensión de ChatGPT para Apple Intelligence](https://help.openai.com/en/articles/10269382-setting-up-chatgpt-with-apple-intelligence)
-no documenta seleccionar este hilo existente. Little Lift no introduce una API privada
-para suplir esa limitación.
+El botón **Abrir ChatGPT** usa el enlace oficial para la app, sin abrir automáticamente el navegador si iOS lo rechaza. Para dirigirte a un chat concreto puedes guardar su dirección privada en **… → Enlace a mi conversación**. Es opcional y se guarda solo en ese iPhone. Debe ser `https://chatgpt.com/c/...`, copiada de la barra de direcciones; no uses Compartir ni publiques el chat. Sin ese enlace, tú eliges la conversación dentro de ChatGPT. La app no puede adivinar cuál utilizas ni comprobar qué conversación quedó visible.
+
+Después del entrenamiento, cuando aparezca en Historial, copia otro mensaje actualizado para llevar los resultados al mismo chat. El contexto incluye hasta ocho registros recientes de cada origen y se identifica como parcial. Un plan guardado es una prescripción, no evidencia de trabajo realizado.
+
+**… → Elegir qué incluir** controla perfil, historial y equipo. Little Lift no lee la conversación ni confirma que hayas enviado el texto. No hay sincronización automática con ChatGPT.
+
+## Recuperación y compatibilidad
+
+El JSON anterior sigue admitido. Los datos básicos incompletos se abren como borrador editable. Las observaciones avanzadas, IDs y respuestas de Atajos mantienen su validación; no se descartan para forzar una importación.
+
+Una respuesta JSON vinculada a una solicitud antigua no sustituye el plan automáticamente. Puedes revisarla explícitamente como un entrenamiento independiente; ya no se presentará como respuesta a la solicitud actual. Si el texto está mal formado, se conserva para corregirlo y se ofrece un mensaje breve para pedir otro formato.
+
+La revisión mediante Atajos es una vía separada: no hereda ni selecciona tu conversación anterior.
+
+## Fuentes de la apertura de ChatGPT
+
+La configuración oficial de [enlaces de la app de ChatGPT](https://chatgpt.com/.well-known/apple-app-site-association) incluye `/open-app` y `/c/*` (consultada el 20 de octubre de 2026). Little Lift usa la opción de Apple [universalLinksOnly](https://developer.apple.com/documentation/uikit/uiapplication/openexternalurloptionskey/universallinksonly) para impedir una apertura silenciosa del navegador. Los [enlaces compartidos](https://help.openai.com/en/articles/7925741-sharing-conversations-and-scheduled-tasks-in-chatgpt) no son el enlace privado de una conversación.

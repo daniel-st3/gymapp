@@ -4571,7 +4571,6 @@
       }
     },
     "Bring your workout": {
-      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -4582,7 +4581,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Trae tu entrenamiento"
+            "value": "Añade tu entrenamiento"
           }
         }
       }
@@ -20791,6 +20790,470 @@
           "stringUnit": {
             "state": "translated",
             "value": "En el Watch: … → Preferencias → Prueba de movimiento → Iniciar. Acepta el permiso de Apple y toca Detener. La repetición se envía automáticamente al iPhone; Enviar permite reintentarlo. La prueba dura hasta 3 minutos."
+          }
+        }
+      }
+    },
+    "Copy one complete workout block. This message has incomplete or multiple code blocks.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy one complete workout block. This message has incomplete or multiple code blocks."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copia un solo bloque completo. Este mensaje contiene bloques incompletos o varios entrenamientos."
+          }
+        }
+      }
+    },
+    "Paste one workout with a title and an exercises list.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paste one workout with a title and an exercises list."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pega un entrenamiento con su nombre y lista de ejercicios."
+          }
+        }
+      }
+    },
+    "Some fields need your confirmation. Original values are kept below; nothing has been saved.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Some fields need your confirmation. Original values are kept below; nothing has been saved."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Falta confirmar algunos datos. Conservamos el texto original abajo; todavía no se ha guardado nada."
+          }
+        }
+      }
+    },
+    "Use the private chatgpt.com/c/… address of your conversation. A Share link is a public snapshot, not your existing chat.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use the private chatgpt.com/c/… address of your conversation. A Share link is a public snapshot, not your existing chat."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usa la dirección privada chatgpt.com/c/… de tu conversación. Un enlace de Compartir es una copia pública, no tu chat original."
+          }
+        }
+      }
+    },
+    "Let’s fix this workout": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Let’s fix this workout"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vamos a corregir este entrenamiento"
+          }
+        }
+      }
+    },
+    "Your saved workout is unchanged. Edit the text above or copy this short request into your chat.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your saved workout is unchanged. Edit the text above or copy this short request into your chat."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu entrenamiento guardado sigue intacto. Corrige el texto de arriba o copia esta solicitud breve en tu chat."
+          }
+        }
+      }
+    },
+    "Your workout, ready for your Watch.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your workout, ready for your Watch."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu entrenamiento, listo para el Watch."
+          }
+        }
+      }
+    },
+    "Different workout today?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Different workout today?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Hoy toca otro entrenamiento?"
+          }
+        }
+      }
+    },
+    "Screenshot": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Screenshot"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Captura"
+          }
+        }
+      }
+    },
+    "Other ways to add a workout": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other ways to add a workout"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otras formas de añadir un entrenamiento"
+          }
+        }
+      }
+    },
+    "My conversation link": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "My conversation link"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enlace a mi conversación"
+          }
+        }
+      }
+    },
+    "Chat options": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chat options"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opciones del chat"
+          }
+        }
+      }
+    },
+    "ChatGPT opened. Choose your gym chat and paste the copied message.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ChatGPT opened. Choose your gym chat and paste the copied message."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ChatGPT está abierto. Elige tu chat del gimnasio y pega el mensaje copiado."
+          }
+        }
+      }
+    },
+    "Your conversation link opened in ChatGPT. Paste the copied message there.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your conversation link opened in ChatGPT. Paste the copied message there."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El enlace se abrió en ChatGPT. Pega allí el mensaje copiado."
+          }
+        }
+      }
+    },
+    "iOS could not open the ChatGPT app. Your message is copied; open ChatGPT from its icon and choose your gym chat.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iOS could not open the ChatGPT app. Your message is copied; open ChatGPT from its icon and choose your gym chat."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iOS no pudo abrir la app de ChatGPT. El mensaje está copiado; abre ChatGPT desde su icono y elige tu chat del gimnasio."
+          }
+        }
+      }
+    },
+    "Optional: save the private address of your gym conversation once. Without it, ChatGPT opens and you choose the chat.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Optional: save the private address of your gym conversation once. Without it, ChatGPT opens and you choose the chat."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcional: guarda una vez la dirección privada de tu conversación del gimnasio. Sin ella, se abre ChatGPT y tú eliges el chat."
+          }
+        }
+      }
+    },
+    "Private conversation link": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Private conversation link"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enlace privado de la conversación"
+          }
+        }
+      }
+    },
+    "Copy its address from your browser, not Share. This stays on this iPhone and gives Little Lift no access to your messages.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy its address from your browser, not Share. This stays on this iPhone and gives Little Lift no access to your messages."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copia su dirección desde el navegador, no desde Compartir. Se guarda solo en este iPhone y no da acceso a tus mensajes."
+          }
+        }
+      }
+    },
+    "Use this workout": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use this workout"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usar este entrenamiento"
+          }
+        }
+      }
+    },
+    "Sends to Watch. Open Little Lift there and tap Start.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sends to Watch. Open Little Lift there and tap Start."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se envía al Watch. Abre Little Lift allí y toca Iniciar."
+          }
+        }
+      }
+    },
+    "You can still review its exercises as a separate import. It will not be marked as a reply to the current chat request.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can still review its exercises as a separate import. It will not be marked as a reply to the current chat request."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún puedes revisar sus ejercicios como una importación independiente. No se marcará como respuesta a la solicitud actual del chat."
+          }
+        }
+      }
+    },
+    "Review as a separate workout": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Review as a separate workout"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revisar como entrenamiento independiente"
+          }
+        }
+      }
+    },
+    "Paste": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paste"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pegar"
+          }
+        }
+      }
+    },
+    "Copy your chat’s workout, then paste it here.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy your chat’s workout, then paste it here."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copia el entrenamiento de tu chat y pégalo aquí."
+          }
+        }
+      }
+    },
+    "Workout from an earlier message": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workout from an earlier message"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrenamiento de otro mensaje"
+          }
+        }
+      }
+    },
+    "You can review these exercises as a separate workout. Nothing changes until you accept it.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can review these exercises as a separate workout. Nothing changes until you accept it."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Puedes revisar estos ejercicios como un entrenamiento independiente. Nada cambia hasta que lo aceptes."
+          }
+        }
+      }
+    },
+    "Your saved workout is unchanged. Correct the original text or ask your chat for the simple format.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your saved workout is unchanged. Correct the original text or ask your chat for the simple format."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu entrenamiento guardado sigue intacto. Corrige el texto original o pide el formato sencillo en tu chat."
+          }
+        }
+      }
+    },
+    "Review exercises": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Review exercises"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revisar ejercicios"
+          }
+        }
+      }
+    },
+    "This reply is incomplete or its format cannot be read. Copy the whole workout again, choose a screenshot, or use the simple format below.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This reply is incomplete or its format cannot be read. Copy the whole workout again, choose a screenshot, or use the simple format below."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La respuesta está incompleta o no podemos leer su formato. Copia el entrenamiento completo, elige una captura o usa el formato sencillo de abajo."
           }
         }
       }

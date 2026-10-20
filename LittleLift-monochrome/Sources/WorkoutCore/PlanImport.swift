@@ -42,15 +42,7 @@ public enum PlanImport {
 
     static func jsonData(_ text: String) throws -> Data {
         guard text.utf8.count <= 64_000 else { throw WorkoutError.invalidInput(L10n.s("This import is too large. Paste one workout at a time.")) }
-        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        let json: String
-        if trimmed.hasPrefix("```") {
-            let lines = trimmed.components(separatedBy: .newlines)
-            guard lines.count >= 3, lines.last?.trimmingCharacters(in: .whitespaces) == "```" else {
-                throw WorkoutError.invalidInput(L10n.s("The JSON code block is incomplete."))
-            }
-            json = lines.dropFirst().dropLast().joined(separator: "\n")
-        } else { json = trimmed }
+        let json = try WorkoutPaste.content(text)
         guard let data = json.data(using: .utf8), !data.isEmpty else { throw WorkoutError.invalidInput(L10n.s("Paste your workout JSON first.")) }
         try JSONBoundary.validate(data)
         return data

@@ -23,14 +23,14 @@ public struct ChatHandoff: Codable, Equatable, Sendable {
         \(context)
         END APP CONTEXT
 
-        OUTPUT CONTRACT
-        First resolve any essential ambiguity with me in this chat. Once the workout is agreed, return ONE JSON code block, without surrounding commentary, using this envelope:
-        {"handoffID":"\(id.uuidString)","analysis":"Brief explanation of the agreed workout and any differences from the app snapshot.","plan": {"schemaVersion":3,"title":"The agreed workout name","unit":"kg","exercises":[{"name":"An agreed exercise","sets":3,"reps":10,"loadIsUnspecified":true,"restSeconds":90}]}}
-        The example is a format only: never copy its exercise, sets, reps, rest or units as a recommendation. Use the workout we agreed. Keep handoffID exactly. Do not add reviewSessionID, reviewAttemptID or connectionCheckID. The user will review and accept the plan in Little Lift.
-        Use schemaVersion 3. Strength: name, sets (1–20), reps (1–200), restSeconds (0–1800), and either a known weight (0–1000) OR loadIsUnspecified:true with weight omitted. An unknown load is not a target of zero. Ask about missing rest, unit or rep/set targets; never invent them. Use one unit, kg or lb, consistently. Split warm-up/working sets into named entries if targets differ. Preserve names, machines and per-dumbbell/total/assistance conventions. Optional loadConvention: total, perDumbbell, machineStack, assistance, bodyweight. Bodyweight uses weight:0, never loadIsUnspecified. Preserve comparisonID only for the exact known variation; omit unknown IDs. No name-only historical comparison.
-        Timed work: name and activity with kind walking/running/mobility/other; optional durationSeconds, distanceMeters, speedKph, inclinePercent, additionalLoad, distanceUnit km/mi. Omit unknown values. Do not add strength fields to timed work. Up to 50 exercises and 200 total sets. Do not add substitutions or optional-work priorities unless I previously approved them.
+        OUTPUT FOR LITTLE LIFT
+        Use ordinary text, not JSON. Return the workout we most recently agreed on in this chat. Do not substitute the app's saved workout for today's choice.
+        Start with: Workout: [agreed name]
+        Then one line per exercise: [exact name / variation / load convention] — [sets] x [reps or range] — [load and kg/lb only when prescribed] — rest [seconds] s.
+        This is a format, not a workout recommendation. Preserve all agreed values and ranges. Omit unknown load, unit or rest; Little Lift will let me confirm missing values. Never invent a target to complete the format. For walking/running/mobility use the name and prescribed minutes, with speed, distance or incline only if prescribed. No table, analysis, warm-up additions or JSON is needed for ordinary logging.
+        If we explicitly agreed structured coach observations, use the existing Little Lift schema instead, preserving supported requests and exercise IDs. A correlated JSON reply may use handoffID "\(id.uuidString)", analysis and plan. In that schema an unknown load uses loadIsUnspecified:true, never a target of zero. Optional observation rules follow; do not add them to an ordinary workout:
         \(PlanImport.observationInstructions)
-        After training I will bring a fresh app message with confirmed logs. Update this conversation's evidence from that message and return the next agreed workout in the same format with its NEW handoffID. Never pretend to have received a future workout automatically.
+        After training I will bring a fresh app message with confirmed logs. Update this conversation's evidence from that message and return the next agreed workout in the same simple text format. Never pretend to have received a future workout automatically.
         """
     }
 }
@@ -42,9 +42,9 @@ public struct ChatWorkoutReply: Sendable {
     /// Ordinary imports remain compatible. A receipt-bearing reply must use the
     /// correlated path; it must not silently fall back to an unlinked plan.
     public static func parseIfPresent(_ text: String) throws -> ChatWorkoutReply? {
-        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard trimmed.hasPrefix("{") || trimmed.hasPrefix("```") else { return nil }
-        let data = try PlanImport.jsonData(text)
+        let trimmed = try WorkoutPaste.content(text)
+        guard trimmed.hasPrefix("{") else { return nil }
+        let data = try PlanImport.jsonData(trimmed)
         guard let object = try JSONSerialization.jsonObject(with: data) as? [String: Any], object["handoffID"] != nil else { return nil }
         guard Set(object.keys) == ["handoffID", "analysis", "plan"],
               let rawID = object["handoffID"] as? String, let id = UUID(uuidString: rawID),

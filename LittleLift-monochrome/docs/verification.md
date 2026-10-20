@@ -1,5 +1,20 @@
 # Verification
 
+## Build 20 · direct import and recovery · 20 October 2026
+
+178 Swift tests / 24 suites and 13 Python checks pass, plus both simulator SDK
+builds and the free Personal Team build. Native direct Paste and Screenshot open
+compact editable previews. Plain-text code blocks, incomplete JSON and an older
+correlated reply were exercised without silent replacement. Local Vision read the
+generic image; accepted Pierna reached the 46 mm Watch and started with one tap.
+Actual 40.5 kg / 11 repetitions persisted through relaunch; three completed sets
+arrived once in History and a duplicate replay added no extra record.
+
+Build 20 installed and launched on both physical devices after fresh backups.
+Stored data and auxiliary files were compared; only the Watch snapshot timestamp
+changed. The exact unavailable user reply and successful physical ChatGPT opening
+remain unverified. [Detailed checks, screenshots and limits](upgrade-20-checklist.md).
+
 ## Build 19 · simpler navigation and menus · 20 October 2026
 
 Three phone tabs; contextual Watch options; compact import and explicit chat handoff.

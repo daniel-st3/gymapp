@@ -118,9 +118,14 @@ public enum SmartWorkoutImport {
     }
     static func extract(_ text: String, normalizeChat: Bool) throws -> WorkoutDraft {
         guard text.utf8.count <= 64_000 else { throw WorkoutError.invalidInput(L10n.s("Import at most 64 KB at a time.")) }
-        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        if trimmed.hasPrefix("{") || trimmed.hasPrefix("```") {
-            return WorkoutDraft(plan: try PlanImport.parse(text))
+        let trimmed = try WorkoutPaste.content(text)
+        if trimmed.hasPrefix("{") {
+            return try EditableWorkoutJSON.extract(trimmed)
+        }
+        if trimmed != text.trimmingCharacters(in: .whitespacesAndNewlines) {
+            var draft = try extract(trimmed, normalizeChat: normalizeChat)
+            draft.source = text
+            return draft
         }
         if let table = TabularWorkoutImport.extract(trimmed) {
             guard table.exercises.count <= 50 else { throw WorkoutError.invalidInput(L10n.s("Import at most 50 exercise lines.")) }; return table

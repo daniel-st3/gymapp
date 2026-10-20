@@ -5,14 +5,17 @@ import UniformTypeIdentifiers
 struct SmartImportView: View {
     let store: PhoneStore
     let useToday: Bool
-    init(store: PhoneStore, initialText: String = "", useToday: Bool = true) {
+    let initialPhoto: PhotosPickerItem?
+    init(store: PhoneStore, initialText: String = "", initialPhoto: PhotosPickerItem? = nil, useToday: Bool = true) {
         self.store = store; self.useToday = useToday
+        self.initialPhoto = initialPhoto
         _text = State(initialValue: initialText)
     }
     @Environment(\.dismiss) private var dismiss
     @State private var text = ""
     @State private var draft: WorkoutDraft?
     @State private var chatReply: ChatWorkoutReply?
+    @State private var unlinkedReply: WorkoutDraft?
     @State private var openedInitialText = false
     @State private var reviewing = false
     @State private var showText = false
@@ -30,6 +33,20 @@ struct SmartImportView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 28) {
                     LiftPageHeading(title: L10n.s("Bring a workout"), detail: L10n.s("Paste a message or choose a screenshot. Review it before saving."))
+                    if let error {
+                        LiftSurface {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text(unlinkedReply == nil ? L10n.s("Let’s fix this workout") : L10n.s("Workout from an earlier message")).font(.subheadline)
+                                if unlinkedReply != nil {
+                                    Text(L10n.s("You can review these exercises as a separate workout. Nothing changes until you accept it.")).font(.subheadline).foregroundStyle(.secondary)
+                                } else {
+                                    Text(error).font(.subheadline).foregroundStyle(.secondary)
+                                    Text(L10n.s("Your saved workout is unchanged. Correct the original text or ask your chat for the simple format.")).font(.caption).foregroundStyle(.secondary)
+                                    formatPromptButton
+                                }
+                            }.padding(16)
+                        }.accessibilityIdentifier("import.recovery")
+                    }
                     if needsHelp {
                         LiftSurface {
                             VStack(alignment: .leading, spacing: 12) {
@@ -68,7 +85,7 @@ struct SmartImportView: View {
                     NavigationLink { ChatHandoffView(store: store) } label: {
                         LiftMenuRow(title: L10n.s("My gym chat"), symbol: "text.bubble", detail: L10n.s("Copy context and bring back a reply"))
                     }
-                    if let error { Text(error).font(.subheadline).foregroundStyle(.secondary).accessibilityLabel(L10n.s("Import needs attention. ") + error) }
+
                 }.disabled(busy).padding(24)
                 if busy {
                     HStack { ProgressView(L10n.s("Reading workout…")); Spacer(); Button(L10n.s("Cancel")) { cancelExtraction() }.frame(minHeight: 44) }
@@ -76,7 +93,11 @@ struct SmartImportView: View {
                 }
             }.scrollDismissesKeyboard(.interactively).buttonStyle(.plain).background(.black)
                 .safeAreaInset(edge: .bottom, spacing: 0) {
-                    if !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    if let unlinkedReply {
+                        Button(L10n.s("Review exercises")) { present(unlinkedReply) }
+                            .buttonStyle(QuietButtonStyle(prominent: true))
+                            .padding(.horizontal, 20).padding(.vertical, 10).background(.black)
+                    } else if !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                         Button { parse() } label: { Label(L10n.s("Preview workout"), systemImage: "list.bullet.rectangle") }.buttonStyle(QuietButtonStyle(prominent: true)).disabled(busy)
                             .padding(.horizontal, 20).padding(.vertical, 10).background(.black)
                     }
@@ -102,11 +123,12 @@ struct SmartImportView: View {
                     }
                 }
                 .task {
-                    if !openedInitialText { openedInitialText = true; if !text.isEmpty { parse() } }
+                    if !openedInitialText {
+                        openedInitialText = true
+                        if let initialPhoto { photo = initialPhoto }
+                        else if !text.isEmpty { parse() }
+                    }
                 }
-                .alert(L10n.s("Import needs attention"), isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
-                    Button(L10n.s("OK")) { error = nil }
-                } message: { Text(error ?? "") }
                 .onChange(of: photo) { loadPhoto() }
                 .onDisappear { cancelExtraction() }
                 .fileImporter(isPresented: $importingFile, allowedContentTypes: [.json, .plainText, .image]) { result in
@@ -124,9 +146,15 @@ struct SmartImportView: View {
         }.tint(.white).presentationBackground(.black)
     }
     private func parse() {
+        unlinkedReply = nil; needsHelp = false; error = nil
         do {
             if let reply = try ChatWorkoutReply.parseIfPresent(text) {
-                try store.state.validateChatReply(reply.handoffID)
+                do { try store.state.validateChatReply(reply.handoffID) }
+                catch {
+                    var recovered = WorkoutDraft(plan: reply.review.plan); recovered.source = text
+                    unlinkedReply = recovered; showText = false; self.error = error.localizedDescription
+                    return
+                }
                 present(WorkoutDraft(plan: reply.review.plan), reply: reply)
             } else {
                 let value = try SmartWorkoutImport.extract(text)
@@ -135,7 +163,12 @@ struct SmartImportView: View {
                 }
                 present(value)
             }
-        } catch { showText = true; self.error = error.localizedDescription }
+        } catch {
+            showText = true
+            self.error = error.localizedDescription == L10n.s("JSON must have unique field names and at most 32 nested levels. No saved data was changed.")
+                ? L10n.s("This reply is incomplete or its format cannot be read. Copy the whole workout again, choose a screenshot, or use the simple format below.")
+                : error.localizedDescription
+        }
     }
     private var formatPromptButton: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -148,6 +181,7 @@ struct SmartImportView: View {
     }
     private func present(_ value: WorkoutDraft, reply: ChatWorkoutReply? = nil) {
         needsHelp = false
+        unlinkedReply = nil
         chatReply = reply
         var prepared = value
         if prepared.title.isEmpty { prepared.title = L10n.s("My workout") }

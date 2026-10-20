@@ -7,12 +7,12 @@ A native SwiftUI workout logger for iPhone and Apple Watch. Start a routine, rec
 No backend. No ads. No API keys. No paid inference or runtime dependencies.
 
 <p>
-  <img src="docs/images/train-build19.png" width="260" alt="Build 19: Train with one import action and saved workout">
-  <img src="docs/images/settings-build19.png" width="260" alt="Build 19: Settings grouped into five destinations">
-  <img src="docs/images/watch-log-build19.png" width="190" alt="46 mm Watch with fixed actual load, repetitions and Log set controls">
+  <img src="docs/images/train-build20.png" width="260" alt="Build 20: Paste and Screenshot directly on Train">
+  <img src="docs/images/preview-build20.png" width="260" alt="Build 20: compact workout preview before acceptance">
+  <img src="docs/images/watch-log-build20.png" width="190" alt="46 mm Watch with fixed actual load, repetitions and Log set controls">
 </p>
 
-*Actual Build 19 simulator captures using generic test data.*
+*Actual Build 20 simulator captures using generic test data.*
 
 ## At a glance
 
@@ -23,6 +23,16 @@ No backend. No ads. No API keys. No paid inference or runtime dependencies.
 | Keep routines and a weekly schedule | Defer a busy exercise or choose an approved alternative |
 | Explore History, Progress and factual reports | Undo, finish early and recover after relaunch |
 | Share context with your existing coach chat | Keep logging offline; deliver completed workouts later |
+
+## What’s new in Build 20
+
+**Paste or Screenshot is now directly on Train.** A complete workout opens a compact review; tap **Use this workout**, then **Start** on Watch. Only missing fields need decisions. You can edit any exercise before accepting.
+
+Text inside ChatGPT code blocks is no longer mistaken for JSON. Incomplete ordinary JSON stays editable, and failures retain the source with a recovery action. The everyday coaching message now asks for ordinary workout text. Previous JSON, structured observations and the separate Shortcut review workflow remain supported.
+
+Open ChatGPT uses the official app link with no automatic browser fallback. An optional private conversation address can target your existing chat; the app cannot discover it or read that conversation.
+
+[Build 20 verification and limitations](docs/upgrade-20-checklist.md) · [Simple gym-chat guide](docs/gym-chat.md)
 
 ## What’s new in Build 19
 

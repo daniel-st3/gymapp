@@ -1,5 +1,12 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import PhotosUI
+
+private struct DirectWorkoutImport: Identifiable {
+    let id = UUID()
+    var text = ""
+    var photo: PhotosPickerItem?
+}
 
 private struct IncomingWorkoutFile: Identifiable {
     let id = UUID()
@@ -54,12 +61,13 @@ struct PhoneRootView: View {
 
 struct TodayView: View {
     let store: PhoneStore
-    @State private var importing = false
+    @State private var incoming: DirectWorkoutImport?
+    @State private var selectedPhoto: PhotosPickerItem?
     @State private var reviewing = false
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                LiftPageHeading(title: L10n.s("Train"), detail: L10n.s("Choose here. Log on your Watch."))
+                LiftPageHeading(title: L10n.s("Train"), detail: L10n.s("Your workout, ready for your Watch."))
                 if let plan = store.state.plan {
                     NavigationLink { TodayWorkoutDetailView(store: store) } label: {
                         LiftSurface {
@@ -75,7 +83,6 @@ struct TodayView: View {
                         }
                     }.accessibilityIdentifier("train.savedWorkout")
                     TodayDeliveryView(store: store)
-                    Text(L10n.s("Did your chat choose a different workout? Bring its reply below.")).font(.caption).foregroundStyle(.secondary)
                 } else {
                     ContentUnavailableView(L10n.s("Your first workout"), systemImage: "dumbbell",
                         description: Text(L10n.s("Bring a message or screenshot from your coach to get started.")))
@@ -102,12 +109,28 @@ struct TodayView: View {
             }.padding(24).modifier(LiftContentEntrance())
         }.buttonStyle(.plain).background(.black).modifier(LiftRootChrome())
             .safeAreaInset(edge: .bottom, spacing: 0) {
-                Button { importing = true } label: { Label(L10n.s("Bring workout from chat"), systemImage: "text.bubble") }
-                    .buttonStyle(QuietButtonStyle(prominent: true))
-                    .padding(.horizontal, 24).padding(.vertical, 12).background(.black)
-                    .accessibilityIdentifier("train.import")
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(store.state.plan == nil ? L10n.s("Bring your workout") : L10n.s("Different workout today?"))
+                        .font(.subheadline)
+                    Text(L10n.s("Copy your chat’s workout, then paste it here.")).font(.caption).foregroundStyle(.secondary)
+                    HStack(spacing: 12) {
+                        PasteButton(payloadType: String.self) { values in
+                            incoming = DirectWorkoutImport(text: values.joined(separator: "\n"))
+                        }.labelStyle(.titleAndIcon).buttonBorderShape(.capsule)
+                            .accessibilityIdentifier("train.paste")
+                        PhotosPicker(selection: $selectedPhoto, matching: .images) {
+                            Label(L10n.s("Screenshot"), systemImage: "photo").frame(maxWidth: .infinity, minHeight: 44)
+                        }.buttonStyle(QuietButtonStyle()).accessibilityIdentifier("train.screenshot")
+                        Button { incoming = DirectWorkoutImport() } label: {
+                            Image(systemName: "ellipsis").frame(width: 44, height: 44)
+                        }.accessibilityLabel(L10n.s("Other ways to add a workout"))
+                    }
+                }.padding(.horizontal, 24).padding(.vertical, 12).background(.black)
             }
-            .sheet(isPresented: $importing) { SmartImportView(store: store) }
+            .sheet(item: $incoming) { source in SmartImportView(store: store, initialText: source.text, initialPhoto: source.photo) }
+            .onChange(of: selectedPhoto) {
+                if let selectedPhoto { incoming = DirectWorkoutImport(photo: selectedPhoto); self.selectedPhoto = nil }
+            }
             .sheet(isPresented: $reviewing) { ReviewView(store: store) }
     }
 }

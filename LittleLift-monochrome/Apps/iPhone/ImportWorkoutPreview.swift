@@ -8,11 +8,13 @@ struct ImportWorkoutPreview: View {
     let useToday: Bool
     let chatReply: ChatWorkoutReply?
     @State private var draft: WorkoutDraft
+    @State private var expandedRows: Set<UUID>
     @State private var error: String?
     @Environment(\.dynamicTypeSize) private var dynamicType
     init(store: PhoneStore, initial: WorkoutDraft, useToday: Bool = true, chatReply: ChatWorkoutReply? = nil, finished: @escaping () -> Void) {
         self.store = store; self.finished = finished; self.useToday = useToday; self.chatReply = chatReply
         _draft = State(initialValue: initial) // isolated, intentional review snapshot
+        _expandedRows = State(initialValue: Set(initial.exercises.filter { !$0.fieldsToReview.isEmpty }.map(\.id)))
     }
     private var plan: WorkoutPlan? { try? draft.validated() }
     private var validationError: String? {
@@ -57,6 +59,17 @@ struct ImportWorkoutPreview: View {
                 ForEach($draft.exercises) { $exercise in
                     LiftSurface {
                         VStack(alignment: .leading, spacing: 12) {
+                            if !expandedRows.contains(exercise.id), let item = try? exercise.exercise() {
+                                HStack(alignment: .top) {
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        Text(exercise.name).font(.body)
+                                        Text(item.prescription(unit: WeightUnit(rawValue: exercise.unit) ?? .kg))
+                                            .font(.subheadline).foregroundStyle(.secondary)
+                                    }
+                                    Spacer(minLength: 12)
+                                    Button(L10n.s("Edit")) { expandedRows.insert(exercise.id) }.frame(minWidth: 44, minHeight: 44)
+                                }
+                            } else {
                             TextField(L10n.s("Exercise name"), text: $exercise.name).font(.body).accessibilityLabel(L10n.s("Exercise name"))
                             if exercise.kind == nil {
                                 Picker(L10n.s("Activity type"), selection: $exercise.kind) {
@@ -97,6 +110,7 @@ struct ImportWorkoutPreview: View {
                             NavigationLink(L10n.s("Edit details or remove")) {
                                 DraftExerciseEditorView(exercise: $exercise) { draft.removeExercise(exercise.id) }
                             }.font(.caption).frame(minHeight: 44)
+                            }
                         }.padding(16)
                     }
                 }
@@ -132,7 +146,7 @@ struct ImportWorkoutPreview: View {
                         Text(validationError ?? L10n.s("Complete the empty fields above to continue."))
                             .font(.caption).foregroundStyle(.secondary).lineLimit(3)
                     }
-                    Button(useToday ? L10n.s("Use this workout · send to Watch") : L10n.s("Save routine")) {
+                    Button(useToday ? L10n.s("Use this workout") : L10n.s("Save routine")) {
                         do {
                             let plan = try draft.validated()
                             if let chatReply { try store.acceptChatReply(chatReply, editedPlan: plan, useToday: useToday) }
@@ -141,6 +155,7 @@ struct ImportWorkoutPreview: View {
                         }
                         catch { self.error = error.localizedDescription }
                     }.buttonStyle(QuietButtonStyle(prominent: true)).disabled(plan == nil)
+                    if useToday { Text(L10n.s("Sends to Watch. Open Little Lift there and tap Start.")).font(.caption).foregroundStyle(.secondary) }
                 }.padding(.horizontal, 20).padding(.vertical, 10).background(.black)
             }
     }

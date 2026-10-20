@@ -1,9 +1,9 @@
 # Import examples and decisions
 
-## The shorter gym flow (Build 18)
+## The direct gym flow (Build 20)
 
-Train → **Bring workout from chat** → **Use a screenshot** or **Paste** → **Check your workout**.
-Recognized image text and Paste open review directly. Unrecognized content stays editable on the import screen, with a formatting request for the existing chat. A title alone does not generate a workout. Review shows names, sets,
+Train → **Screenshot** or **Paste** → **Check your workout**.
+Recognized image text and Paste open review directly. Complete exercises appear as compact summaries with an Edit action. Plain-text code fences and a single block surrounded by commentary are supported. Incomplete ordinary JSON becomes an editable draft; unsupported advanced metadata is never discarded. Unrecognized content stays editable on the import screen, with a formatting request for the existing chat. A title alone does not generate a workout. Review shows names, sets,
 repetitions and rest together; details and the original message remain available.
 Use the explicit bottom action to save and send. Until then, Today is unchanged.
 An older saved plan is retained in routines; completed records are never rewritten.
