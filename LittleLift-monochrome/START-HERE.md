@@ -1,10 +1,10 @@
 # Run Little Lift on your Mac
 
-**Latest local update: Build 18.** Open **Today → Bring workout from chat** and choose Screenshot or Paste. Review the workout and accept it to send it to Watch. The saved plan is clearly labelled; it does not tell you what your private chat chose today. If an image/message cannot be structured, its text stays editable and **Copy message for my chat** asks for an easier format. Both real apps were updated with the existing free signing and original data preserved. [Build 18 checklist](docs/upgrade-18-checklist.md), [chat guide](docs/gym-chat.md), [27-point matrix](docs/feedback-27.md).
+**Latest local update: Build 19.** Three tabs: **Train, History and Settings**. Open **Train → Bring workout from chat**, choose Screenshot or Paste, review, then accept. Tap the saved workout for exercises, editing and available time. Routines live inside Train; Progress lives inside History. Setup is grouped under Settings. [Build 19 checklist](docs/upgrade-19-checklist.md), [chat guide](docs/gym-chat.md), [27-point matrix](docs/feedback-27.md).
 
-Your completed workout review appears automatically after the phone saves it. Open **Today → Your latest workout review**, or **History → a workout → Automatic review**. No account or model setup is required. ChatGPT remains a separate optional route. Original data, free signing and icon are preserved; **do not uninstall**.
+Your completed workout review appears automatically after the phone saves it. Open **Train → Last workout**, or **History → a workout → Automatic review**. No account or model setup is required. ChatGPT remains a separate optional route. Original data, free signing and icon are preserved; **do not uninstall**.
 
-For a nontechnical walkthrough, use **Settings → Start here** inside the phone app, or open the [local Spanish guide](docs/onboarding/index.html). The existing explicit-chat workflow and optional independent Shortcut remain separate. The historical Build 4 notes below are not new verification.
+For a nontechnical walkthrough, use **Settings → Help → Start here** inside the phone app, or open the [local Spanish guide](docs/onboarding/index.html). The existing explicit-chat workflow and optional independent Shortcut remain separate. The historical Build 4 notes below are not new verification.
 
 ## Easiest way to run it
 
@@ -34,6 +34,6 @@ bash scripts/verify-mac.sh
 
 Build 4 was built and exercised on this Mac with Xcode 27, the existing iPhone 18 Pro Max, and its paired 46 mm Apple Watch Series 12 simulators. Both Apple SDK builds, 25 engine tests, 10 launcher tests, and project/icon checks passed. Actual UI logging, rest extension/skip/expiry, undo, early and full completion, History delivery, duplicate replay, relaunch recovery, long names, large text, and system Reduce Motion were exercised. Original workout data and simulator pairing were preserved. See `docs/verification.md` for observed results and hardware limitations.
 
-In the iPhone app, **Use example workout** is a quick way to populate the logger. For your actual training, use **Import workout** and the coaching prompt for your existing ChatGPT chat. Optional analysis setup is available under **Settings → Coach connection → Set up review Shortcut**.
+In the iPhone app, **Use example workout** is a quick way to populate the logger. For your actual training, use **Import workout** and the coaching prompt for your existing ChatGPT chat. Optional analysis setup is available under **Settings → Optional tools → Review with Shortcuts → Set up review Shortcut**.
 
 The project has no server, OpenAI API keys, advertising, or runtime package downloads. Your personal workout data is not included in this source bundle.

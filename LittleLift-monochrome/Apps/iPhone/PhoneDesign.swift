@@ -25,10 +25,10 @@ struct LiftList<Content: View>: View {
 struct LiftPageHeading: View {
     let title: String
     var detail: String? = nil
-    @ScaledMetric(relativeTo: .title) private var size: CGFloat = 32
+    @ScaledMetric(relativeTo: .title) private var size: CGFloat = 28
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title).font(.system(size: size, weight: .regular, design: .default))
+            Text(title).font(.system(size: size, weight: .regular, design: .rounded))
                 .fixedSize(horizontal: false, vertical: true).accessibilityAddTraits(.isHeader)
             if let detail { Text(detail).font(.subheadline).foregroundStyle(.secondary) }
         }.frame(maxWidth: .infinity, alignment: .leading)
@@ -48,8 +48,8 @@ struct LiftSurface<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) { content }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(LiftStyle.surface, in: .rect(cornerRadius: 20))
-            .overlay { RoundedRectangle(cornerRadius: 20).strokeBorder(.white.opacity(0.07), lineWidth: 0.5) }
+            .background(LiftStyle.surface, in: .rect(cornerRadius: 16))
+            .overlay { RoundedRectangle(cornerRadius: 16).strokeBorder(.white.opacity(0.07), lineWidth: 0.5) }
     }
 }
 
@@ -68,7 +68,7 @@ struct LiftMenuRow: View {
                 if let detail { Text(detail).font(.caption).foregroundStyle(.secondary) }
             }.frame(maxWidth: .infinity, alignment: .leading)
             if disclosure { Image(systemName: "chevron.right").font(.caption2).foregroundStyle(.secondary).accessibilityHidden(true) }
-        }.padding(18).frame(minHeight: 60).contentShape(.rect)
+        }.padding(16).frame(minHeight: 54).contentShape(.rect)
     }
 }
 

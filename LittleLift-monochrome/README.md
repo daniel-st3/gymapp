@@ -7,11 +7,12 @@ A native SwiftUI workout logger for iPhone and Apple Watch. Start a routine, rec
 No backend. No ads. No API keys. No paid inference or runtime dependencies.
 
 <p>
-  <img src="docs/images/progress.png" width="280" alt="Little Lift Progress with generic recorded workouts">
-  <img src="docs/images/watch-logging.png" width="210" alt="Watch logging with fixed weight, repetitions and Log set controls">
+  <img src="docs/images/train-build19.png" width="260" alt="Build 19: Train with one import action and saved workout">
+  <img src="docs/images/settings-build19.png" width="260" alt="Build 19: Settings grouped into five destinations">
+  <img src="docs/images/watch-log-build19.png" width="190" alt="46 mm Watch with fixed actual load, repetitions and Log set controls">
 </p>
 
-*Actual simulator captures from Build 10 using generic demonstration data. Current verification is documented below.*
+*Actual Build 19 simulator captures using generic test data.*
 
 ## At a glance
 
@@ -22,6 +23,22 @@ No backend. No ads. No API keys. No paid inference or runtime dependencies.
 | Keep routines and a weekly schedule | Defer a busy exercise or choose an approved alternative |
 | Explore History, Progress and factual reports | Undo, finish early and recover after relaunch |
 | Share context with your existing coach chat | Keep logging offline; deliver completed workouts later |
+
+## What’s new in Build 19
+
+Three tabs replace five: **Train, History and Settings**.
+
+- **Train:** the saved workout, Watch delivery and My routines. One primary action brings a workout from your chat. Tap the workout to edit or set available time.
+- **History:** records, factual reviews and Progress. Correct a set using the pencil in its record.
+- **Settings:** My gym chat, Preferences, My data, Help and Optional tools. Shortcuts and experimental motion stay outside everyday logging.
+
+Imports put Screenshot and Paste first, with file/manual entry in the options menu.
+The chat handoff is two explicit steps: copy context, then bring back a reviewed reply.
+Watch options focus on the current workout; connection and optional motion are in Preferences.
+Headings, spacing and rows are consistent, with native navigation and Reduce Motion support.
+
+Verification and device delivery: [Build 19 checklist](docs/upgrade-19-checklist.md).
+The workout engine, durable storage, identifiers, icon and personal signing are preserved.
 
 ## What’s new in Build 18
 

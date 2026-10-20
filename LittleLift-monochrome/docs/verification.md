@@ -1,5 +1,24 @@
 # Verification
 
+## Build 19 · simpler navigation and menus · 20 October 2026
+
+Three phone tabs; contextual Watch options; compact import and explicit chat handoff.
+171 Swift tests / 23 suites and 13 script tests pass. Both simulator SDK builds and
+the Personal Team build pass. Native route interaction and actual screenshots cover
+Train, saved-plan detail/edit, delivery, routines, History, Progress, correction,
+settings groups and their destinations, import options and chat copy. Generic paste
+opens a preview without changing the saved plan; acceptance reaches Watch.
+
+46 mm Watch start, actual 20.5 kg / 11 reps, undo, rest +30/skip, relaunch, full and
+early finish were exercised against stored-state assertions. Reports copy actual
+values. System photo/file pickers and share sheet open without external delivery.
+Large text and Reduce Motion were exercised; the normal-size record toolbar title
+clipping was fixed and recaptured. Exact evidence, preservation and device-delivery
+status are in the [Build 19 checklist](upgrade-19-checklist.md).
+
+This UI pass does not newly verify real wrist haptics, background sensor capture,
+live ChatGPT responses or unattended Shortcut automation.
+
 ## Build 18 · simpler gym start and screenshot recovery · 20 October 2026
 
 171 Swift tests / 23 suites and 13 Python tests pass, with both simulator builds

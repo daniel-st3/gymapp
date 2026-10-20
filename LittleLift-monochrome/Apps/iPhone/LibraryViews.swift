@@ -29,7 +29,7 @@ struct SmartImportView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 28) {
-                    LiftPageHeading(title: L10n.s("Bring your chat’s workout"), detail: L10n.s("Copy the workout message or choose a screenshot showing its exercises and sets."))
+                    LiftPageHeading(title: L10n.s("Bring a workout"), detail: L10n.s("Paste a message or choose a screenshot. Review it before saving."))
                     if needsHelp {
                         LiftSurface {
                             VStack(alignment: .leading, spacing: 12) {
@@ -53,11 +53,6 @@ struct SmartImportView: View {
                             Text(L10n.s("Copy the reply, then paste here")).font(.caption).foregroundStyle(.secondary)
                         }.padding(18)
                     }
-                    if useToday && !store.state.routineLibrary.isEmpty && text.isEmpty {
-                        NavigationLink { ImportRoutineChoices(store: store) { dismiss() } } label: {
-                            LiftMenuRow(title: L10n.s("Choose a saved routine"), symbol: "square.stack")
-                        }
-                    }
                     DisclosureGroup(L10n.s("View or edit workout text"), isExpanded: $showText) {
                         LiftSurface {
                             ZStack(alignment: .topLeading) {
@@ -70,21 +65,8 @@ struct SmartImportView: View {
                             }.padding(14)
                         }
                     }
-                    DisclosureGroup(L10n.s("Need help bringing it over?")) {
-                        Text(L10n.s("Paste this message into the same chat that gave you the workout. Bring its answer back with Paste.")).font(.subheadline).foregroundStyle(.secondary)
-                        formatPromptButton
-                        NavigationLink { ChatHandoffView(store: store) } label: {
-                            LiftMenuRow(title: L10n.s("My gym chat"), symbol: "bubble.left.and.text.bubble.right", detail: L10n.s("Update your chat · bring back its workout"))
-                        }
-                    }
-                    DisclosureGroup(L10n.s("More import options")) {
-                        Button(L10n.s("Choose a file")) { importingFile = true }.frame(minHeight: 44)
-                        Button(L10n.s("Build a workout")) { var value = WorkoutDraft(); var row = DraftExercise(); row.kind = .strength; value.exercises = [row]; present(value) }.frame(minHeight: 44)
-                        Button(L10n.s("Try Apple Intelligence")) { modelExtract() }.buttonStyle(QuietButtonStyle())
-                            .disabled(text.isEmpty || busy || !LocalWorkoutExtraction.modelAvailable)
-                        Text(LocalWorkoutExtraction.availability).font(.caption).foregroundStyle(.secondary)
-                        ShareLink(item: PlanImport.coachingPrompt) { Label(L10n.s("Share coaching prompt"), systemImage: "square.and.arrow.up") }
-                            .font(.subheadline).frame(minHeight: 44)
+                    NavigationLink { ChatHandoffView(store: store) } label: {
+                        LiftMenuRow(title: L10n.s("My gym chat"), symbol: "text.bubble", detail: L10n.s("Copy context and bring back a reply"))
                     }
                     if let error { Text(error).font(.subheadline).foregroundStyle(.secondary).accessibilityLabel(L10n.s("Import needs attention. ") + error) }
                 }.disabled(busy).padding(24)
@@ -103,7 +85,22 @@ struct SmartImportView: View {
                     if let draft { ImportWorkoutPreview(store: store, initial: draft, useToday: useToday, chatReply: chatReply) { dismiss() } }
                 }
                 .navigationTitle(L10n.s("Import workout")).navigationBarTitleDisplayMode(.inline)
-                .toolbar { ToolbarItem(placement: .cancellationAction) { Button(L10n.s("Close")) { dismiss() } } }
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) { Button(L10n.s("Close")) { dismiss() } }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Menu {
+                            Button(L10n.s("Choose a file"), systemImage: "doc") { importingFile = true }
+                            Button(L10n.s("Build a workout"), systemImage: "plus") {
+                                var value = WorkoutDraft(); var row = DraftExercise(); row.kind = .strength
+                                value.exercises = [row]; present(value)
+                            }
+                            if !text.isEmpty && LocalWorkoutExtraction.modelAvailable {
+                                Button(L10n.s("Try Apple Intelligence"), systemImage: "apple.intelligence") { modelExtract() }
+                            }
+                        } label: { Image(systemName: "ellipsis").frame(minWidth: 44, minHeight: 44) }
+                            .accessibilityLabel(L10n.s("More import options")).disabled(busy)
+                    }
+                }
                 .task {
                     if !openedInitialText { openedInitialText = true; if !text.isEmpty { parse() } }
                 }
@@ -395,7 +392,7 @@ struct RoutineLibraryView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 28) {
-                LiftPageHeading(title: L10n.s("Your routines"), detail: L10n.s("Choose a workout. Make it today’s plan."))
+                LiftPageHeading(title: L10n.s("My routines"))
                 LiftSurface {
                     NavigationLink { ScheduleView(store: store) } label: {
                         LiftMenuRow(title: L10n.s("Weekly schedule"), symbol: "calendar", detail: scheduleDescription)
@@ -433,7 +430,7 @@ struct RoutineLibraryView: View {
                     }
                 }
             }.padding(24).modifier(LiftContentEntrance())
-        }.buttonStyle(.plain).background(.black).modifier(LiftRootChrome())
+        }.buttonStyle(.plain).background(.black).navigationTitle(L10n.s("My routines")).navigationBarTitleDisplayMode(.inline)
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 Button { importing = true } label: { Label(L10n.s("Add a routine"), systemImage: "plus").padding(.vertical, 3) }
                     .buttonStyle(QuietButtonStyle(prominent: true)).padding(.horizontal, 24).padding(.vertical, 12).background(.black)
@@ -466,7 +463,7 @@ struct RoutineDetailView: View {
                             }
                         }
                     }
-                    DisclosureGroup(L10n.s("Coach observations")) { ObservationCollectionView(plan: routine.plan) }
+                    if !routine.plan.observationRequests.isEmpty { DisclosureGroup(L10n.s("Coach observations")) { ObservationCollectionView(plan: routine.plan) } }
                     if !routine.previousVersions.isEmpty {
                         DisclosureGroup(L10n.s("Previous prescriptions")) {
                             ForEach(routine.previousVersions) { Text(L10n.s("\($0.title) · \($0.totalSets) prescribed sets")).font(.caption).foregroundStyle(.secondary) }
@@ -484,19 +481,31 @@ struct RoutineDetailView: View {
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 if let routine = store.state.routineLibrary.first(where: { $0.id == routineID }) {
-                    Button(store.state.plan == routine.plan ? L10n.s("Selected for Today") : L10n.s("Use today & send to Watch")) {
-                        do { try store.chooseRoutine(routine) } catch { store.error = error.localizedDescription }
-                    }.buttonStyle(QuietButtonStyle(prominent: true)).disabled(store.state.plan == routine.plan)
-                        .padding(.horizontal, 24).padding(.vertical, 12).background(.black)
+                    Group {
+                        if store.state.plan == routine.plan {
+                            Label(L10n.s("Selected for Today"), systemImage: "checkmark.circle").font(.subheadline).frame(minHeight: 46)
+                        } else {
+                            Button(L10n.s("Use today & send to Watch")) {
+                                do { try store.chooseRoutine(routine) } catch { store.error = error.localizedDescription }
+                            }.buttonStyle(QuietButtonStyle(prominent: true))
+                        }
+                    }.frame(maxWidth: .infinity).padding(.horizontal, 24).padding(.vertical, 12).background(.black)
                 }
             }
     }
 }
 struct ScheduleView: View {
     let store: PhoneStore
+    @Environment(\.locale) private var locale
+    private var calendar: Calendar {
+        var value = Calendar(identifier: .gregorian)
+        value.locale = locale
+        return value
+    }
     var body: some View {
-        LiftForm { ForEach(1...7, id: \.self) { day in
-            Picker(Calendar.current.weekdaySymbols[day - 1], selection: Binding<UUID?>(get: { store.state.weeklySchedule.first { $0.weekday == day }?.routineID }, set: { id in do { try store.scheduleRoutine(id, weekday: day) } catch { store.error = error.localizedDescription } })) {
+        // Match the Monday–Sunday training week without changing persisted weekday IDs.
+        LiftForm { ForEach([2, 3, 4, 5, 6, 7, 1], id: \.self) { day in
+            Picker(calendar.weekdaySymbols[day - 1].capitalized(with: locale), selection: Binding<UUID?>(get: { store.state.weeklySchedule.first { $0.weekday == day }?.routineID }, set: { id in do { try store.scheduleRoutine(id, weekday: day) } catch { store.error = error.localizedDescription } })) {
                 Text(L10n.s("No routine")).tag(nil as UUID?)
                 ForEach(store.state.routineLibrary) { Text($0.plan.title).tag(Optional($0.id)) }
             }

@@ -1,9 +1,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-private struct SavedWorkoutReviewRoute: Hashable {
-    let sessionID: UUID
-}
 private struct IncomingWorkoutFile: Identifiable {
     let id = UUID()
     let text: String?
@@ -16,10 +13,8 @@ struct PhoneRootView: View {
     @State private var incomingFile: IncomingWorkoutFile?
     var body: some View {
         TabView {
-            Tab(L10n.s("Today"), systemImage: "dumbbell") { NavigationStack { TodayView(store: store) } }
+            Tab(L10n.s("Train"), systemImage: "dumbbell") { NavigationStack { TodayView(store: store) } }
             Tab(L10n.s("History"), systemImage: "list.bullet.rectangle") { NavigationStack { HistoryView(store: store) } }
-            Tab(L10n.s("Progress"), systemImage: "chart.bar.xaxis") { NavigationStack { TrainingProgressView(store: store) } }
-            Tab(L10n.s("Routines"), systemImage: "square.stack") { NavigationStack { RoutineLibraryView(store: store) } }
             Tab(L10n.s("Settings"), systemImage: "slider.horizontal.3") { NavigationStack { SettingsView(store: store) } }
         }
         .sheet(isPresented: $store.showingReviewQueue, onDismiss: { store.openedReviewSessionID = nil }) {
@@ -59,179 +54,61 @@ struct PhoneRootView: View {
 
 struct TodayView: View {
     let store: PhoneStore
-    @Environment(\.dynamicTypeSize) private var dynamicType
     @State private var importing = false
-    @State private var choosing = false
-    @State private var editing: WorkoutPlan?
     @State private var reviewing = false
-    @State private var shortcutNotice: String?
-    @Environment(\.openURL) private var openURL
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 28) {
-                LiftPageHeading(title: L10n.s("What are you training today?"), detail: L10n.s("Use the workout your chat chose. Bring its reply here, then start on Watch."))
+            VStack(alignment: .leading, spacing: 24) {
+                LiftPageHeading(title: L10n.s("Train"), detail: L10n.s("Choose here. Log on your Watch."))
                 if let plan = store.state.plan {
-                    workoutHeader(plan)
-                    DisclosureGroup(L10n.s("See saved exercises")) {
+                    NavigationLink { TodayWorkoutDetailView(store: store) } label: {
                         LiftSurface {
-                            ForEach(plan.exercises) { exercise in
-                                VStack(alignment: .leading, spacing: 0) {
-                                    LiftExerciseRow(exercise: exercise, unit: plan.unit,
-                                                    number: (plan.exercises.firstIndex(where: { $0.id == exercise.id }) ?? 0) + 1)
-                                        .padding(18)
-                                    if let previous = Progression.lastResult(for: exercise, unit: plan.unit, sessions: store.state.effectiveSessions) {
-                                        NavigationLink { SessionDetailView(session: previous.session) } label: {
-                                            HStack(spacing: 8) {
-                                                Text(L10n.s("Last: \(WorkoutSession.number(previous.entry.weight)) \(plan.unit.rawValue) × \(previous.entry.reps)"))
-                                                Spacer(minLength: 8)
-                                                Text(L10n.s("View set")); LiftChevron()
-                                            }.font(.caption).foregroundStyle(.secondary)
-                                                .padding(.horizontal, 18).frame(minHeight: 44)
-                                        }.accessibilityLabel(L10n.s("Last matching final set, \(WorkoutSession.number(previous.entry.weight)) \(plan.unit.rawValue), \(previous.entry.reps) repetitions. View workout record."))
-                                    }
-                                    if exercise.id != plan.exercises.last?.id { Divider().padding(.horizontal, 18) }
+                            VStack(alignment: .leading, spacing: 14) {
+                                LiftEyebrow(text: L10n.s("Saved workout"))
+                                HStack(alignment: .top) {
+                                    Text(plan.title).font(.system(.title2, design: .rounded, weight: .regular))
+                                    Spacer(minLength: 12); LiftChevron().padding(.top, 7)
                                 }
-                            }
+                                Text(LiftCopy.workoutSummary(plan)).font(.subheadline).foregroundStyle(.secondary)
+                                Text(L10n.s("View exercises and edit")).font(.caption).foregroundStyle(.secondary)
+                            }.padding(20)
                         }
-                    }
-                    LiftSurface {
-                        NavigationLink { TimePlanningView(store: store) } label: {
-                            LiftMenuRow(title: L10n.s("Fit your available time"), symbol: "clock")
-                        }
-                        Divider().padding(.horizontal, 18)
-                        DisclosureGroup {
-                            VStack(alignment: .leading, spacing: 20) {
-                                connectionActions
-                                ObservationCollectionView(plan: plan)
-                            }.padding(.horizontal, 18).padding(.bottom, 12)
-                        } label: {
-                            LiftMenuRow(title: L10n.s("Coach & sharing"), symbol: "bubble.left.and.text.bubble.right", disclosure: false)
-                        }.padding(.trailing, 18)
-                    }
-                    reviewStatus
+                    }.accessibilityIdentifier("train.savedWorkout")
+                    TodayDeliveryView(store: store)
+                    Text(L10n.s("Did your chat choose a different workout? Bring its reply below.")).font(.caption).foregroundStyle(.secondary)
                 } else {
-                    LiftSurface {
-                        Button { importing = true } label: { LiftMenuRow(title: L10n.s("Import a workout"), symbol: "square.and.arrow.down", detail: L10n.s("Review and edit before saving")) }
-                        if !store.state.routineLibrary.isEmpty {
-                            Divider().padding(.horizontal, 18)
-                            Button { choosing = true } label: { LiftMenuRow(title: L10n.s("Choose a saved routine"), symbol: "square.stack") }
-                        }
+                    ContentUnavailableView(L10n.s("Your first workout"), systemImage: "dumbbell",
+                        description: Text(L10n.s("Bring a message or screenshot from your coach to get started.")))
+                }
+                NavigationLink { RoutineLibraryView(store: store) } label: {
+                    LiftSurface { LiftMenuRow(title: L10n.s("My routines"), symbol: "square.stack", detail: L10n.s("Saved workouts and weekly schedule")) }
+                }.accessibilityIdentifier("train.routines")
+                if store.state.review != nil {
+                    Button { reviewing = true } label: {
+                        LiftSurface { LiftMenuRow(title: L10n.s("A new workout to review"), symbol: "text.bubble", detail: L10n.s("Changes need your acceptance")) }
                     }
-                    Button(L10n.s("Try a generic example")) {
-                        do { var example = try PlanImport.parse(PlanImport.example); example.practice = true; try store.acceptImportedPlan(example) } catch { store.error = error.localizedDescription }
-                    }.font(.subheadline).frame(minHeight: 44)
-                    NavigationLink(L10n.s("Start here")) { GettingStartedView(store: store) }.frame(minHeight: 44)
-                    connectionActions
-                    reviewStatus
                 }
-                NavigationLink { ReviewQueueView(store: store) } label: {
-                    HStack { Text(L10n.s("Workout reviews")).font(.subheadline); Spacer(); LiftChevron() }.frame(minHeight: 44)
+                if let latest = store.state.effectiveSessions.first {
+                    NavigationLink { WorkoutEvidenceReviewView(session: latest, store: store) } label: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(L10n.s("Last workout")).font(.caption).foregroundStyle(.secondary)
+                                Text(latest.plan.title).font(.subheadline)
+                            }
+                            Spacer(); LiftChevron()
+                        }.frame(minHeight: 52)
+                    }.accessibilityIdentifier("today.latestReview")
                 }
-            }.padding(.horizontal, 24).padding(.top, 18).padding(.bottom, 20)
-                .modifier(LiftContentEntrance())
-        }
-        .buttonStyle(.plain)
-        .background(.black)
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            VStack(spacing: 8) {
-                if store.state.plan != nil && !store.state.todayReceivedOnWatch { sendButton }
-                importButton
-            }.padding(.horizontal, 24).padding(.vertical, 12).background(.black)
-        }
-        .modifier(LiftRootChrome())
-        .navigationDestination(for: SavedWorkoutReviewRoute.self) { route in
-            if let session = store.state.effectiveSessions.first(where: { $0.id == route.sessionID }) {
-                WorkoutEvidenceReviewView(session: session, store: store)
+            }.padding(24).modifier(LiftContentEntrance())
+        }.buttonStyle(.plain).background(.black).modifier(LiftRootChrome())
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                Button { importing = true } label: { Label(L10n.s("Bring workout from chat"), systemImage: "text.bubble") }
+                    .buttonStyle(QuietButtonStyle(prominent: true))
+                    .padding(.horizontal, 24).padding(.vertical, 12).background(.black)
+                    .accessibilityIdentifier("train.import")
             }
-        }
-        .sheet(isPresented: $choosing) { WorkoutChooserView(store: store) }
-        .sheet(item: $editing) { plan in
-            NavigationStack {
-                WorkoutEditorView(store: store, initial: WorkoutDraft(plan: plan), routineID: store.state.routineLibrary.first(where: { $0.plan == plan })?.id, useToday: true) { editing = nil }
-                    .toolbar { ToolbarItem(placement: .cancellationAction) { Button(L10n.s("Cancel")) { editing = nil } } }
-            }.tint(.white).presentationBackground(.black)
-        }
-        .sheet(isPresented: $importing) { SmartImportView(store: store) }
-        .sheet(isPresented: $reviewing) { ReviewView(store: store) }
-    }
-
-    @ViewBuilder private var reviewStatus: some View {
-        if store.state.review != nil {
-            Button { reviewing = true } label: {
-                LiftSurface { LiftMenuRow(title: L10n.s("A new workout to review"), symbol: "text.bubble", detail: L10n.s("Changes need your acceptance")) }
-            }
-        }
-        if let latest = store.state.effectiveSessions.first {
-            let job = store.state.reviewQueue.first { $0.id == latest.id }
-            NavigationLink(value: SavedWorkoutReviewRoute(sessionID: latest.id)) {
-                LiftSurface {
-                    LiftMenuRow(title: job?.result != nil && job?.outdatedAt == nil ? L10n.s("Coach response ready") : L10n.s("Workout saved · review ready"),
-                        symbol: "checkmark.circle", detail: latest.plan.title + " · " + latest.startedAt.formatted(date: .abbreviated, time: .omitted))
-                }
-            }.accessibilityIdentifier("today.latestReview")
-        }
-    }
-
-    private var sendButton: some View {
-        Button { store.sendToWatch() } label: {
-            Label(store.isSyncing ? L10n.s("Sending…") : (store.state.todayReceivedOnWatch ? L10n.s("Check Watch") : L10n.s("Send to Watch")), systemImage: "applewatch")
-                .padding(.horizontal, 10).padding(.vertical, 3)
-        }.buttonStyle(QuietButtonStyle(prominent: false))
-            .disabled(store.isSyncing || store.state.plan == nil)
-    }
-
-    private var importButton: some View {
-        Button { importing = true } label: { Label(L10n.s("Bring workout from chat"), systemImage: "text.bubble").padding(.horizontal, 10).padding(.vertical, 3) }
-            .buttonStyle(QuietButtonStyle(prominent: true)).accessibilityLabel(L10n.s("Bring workout from chat"))
-    }
-
-    private func workoutHeader(_ plan: WorkoutPlan) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
-            LiftSurface {
-                VStack(alignment: .leading, spacing: 12) {
-                    LiftEyebrow(text: L10n.s("Previously saved"))
-                    Text(plan.title).font(.title2.weight(.regular))
-                    Text(L10n.s("This is saved in Little Lift. It is not a new recommendation from your chat."))
-                        .font(.caption).foregroundStyle(.secondary)
-                    Text(LiftCopy.workoutSummary(plan)).font(.subheadline).foregroundStyle(.secondary)
-                    HStack {
-                        Button { editing = plan } label: { Label(L10n.s("Edit"), systemImage: "pencil") }
-                        Spacer()
-                        Button { choosing = true } label: { Label(L10n.s("Saved workouts"), systemImage: "square.stack") }
-                    }.font(.subheadline).frame(minHeight: 44)
-                }.padding(18)
-            }
-            TodayDeliveryView(store: store)
-            if let slot = store.state.weeklySchedule.first(where: { $0.weekday == Calendar.current.component(.weekday, from: Date()) }),
-               let routine = store.state.routineLibrary.first(where: { $0.id == slot.routineID }), routine.plan.id != plan.id {
-                Button { choosing = true } label: {
-                    Label(L10n.s("Scheduled: \(routine.plan.title)"), systemImage: "calendar").font(.caption).frame(minHeight: 44)
-                }
-            }
-        }
-    }
-
-    @ViewBuilder private var connectionActions: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(store.state.mode.title).font(.callout.weight(.medium))
-            if store.state.mode == .existingChat {
-                NavigationLink { ChatHandoffView(store: store) } label: {
-                    Label(L10n.s("My gym chat"), systemImage: "bubble.left.and.text.bubble.right")
-                }.buttonStyle(QuietButtonStyle())
-            } else {
-                Button(L10n.s("Run review Shortcut")) {
-                    var parts = URLComponents(); parts.scheme = "shortcuts"; parts.host = "run-shortcut"
-                    parts.queryItems = [URLQueryItem(name: "name", value: "Little Lift Review")]
-                    if let url = parts.url { openURL(url) { accepted in
-                        shortcutNotice = accepted ? L10n.s("Opened Shortcuts to continue. Analysis is confirmed only when a result returns.") : L10n.s("Shortcuts could not open. Check setup and retry.")
-                    } }
-                }.buttonStyle(QuietButtonStyle())
-                if let shortcutNotice { Text(shortcutNotice).font(.caption) }
-                NavigationLink(L10n.s("Set up the Shortcut")) { ShortcutHelpView() }.font(.subheadline)
-            }
-        }.padding(.top, 8)
+            .sheet(isPresented: $importing) { SmartImportView(store: store) }
+            .sheet(isPresented: $reviewing) { ReviewView(store: store) }
     }
 }
 
@@ -302,7 +179,10 @@ struct HistoryView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 28) {
-                LiftPageHeading(title: L10n.s("Your training"), detail: L10n.s("Every set, kept in one place."))
+                LiftPageHeading(title: L10n.s("History"))
+                NavigationLink { TrainingProgressView(store: store) } label: {
+                    LiftSurface { LiftMenuRow(title: L10n.s("Progress"), symbol: "chart.bar.xaxis", detail: L10n.s("Your weeks and exercise records")) }
+                }.accessibilityIdentifier("history.progress")
                 if !store.state.effectiveSessions.isEmpty {
                     HStack {
                         LiftStat(value: String(store.state.effectiveSessions.count), label: L10n.s("Recorded workouts"))
@@ -350,9 +230,6 @@ struct HistoryView: View {
                         Text(L10n.s("Finish a workout on Watch. Your logged sets will appear here when your devices connect.")).font(.subheadline).foregroundStyle(.secondary)
                     }.padding(24) }
                 }
-                NavigationLink { HistoryImportView(store: store) } label: {
-                    LiftSurface { LiftMenuRow(title: L10n.s("Import previous workouts"), symbol: "square.and.arrow.down", detail: L10n.s("Kept separate from app recordings")) }
-                }
             }.padding(24).modifier(LiftContentEntrance())
         }.buttonStyle(.plain).background(.black).modifier(LiftRootChrome())
     }
@@ -377,11 +254,6 @@ struct SessionDetailView: View {
                 }
                 NavigationLink { WorkoutEvidenceReviewView(session: session, store: PhoneStore.shared) } label: {
                     LiftSurface { LiftMenuRow(title: L10n.s("Automatic review"), symbol: "checkmark.circle", detail: L10n.s("Targets, actual values and comparable earlier sets")) }
-                }
-                if !session.entries.isEmpty {
-                    NavigationLink { WorkoutCorrectionView(store: store, sessionID: session.id) } label: {
-                        LiftSurface { LiftMenuRow(title: L10n.s("Correct record"), symbol: "pencil", detail: L10n.s("Original values are preserved")) }
-                    }
                 }
                 if let corrections = session.correctionSummary {
                     DisclosureGroup(L10n.s("Original values & corrections")) { Text(corrections).font(.caption).textSelection(.enabled) }
@@ -433,6 +305,15 @@ struct SessionDetailView: View {
                 }
             }.padding(24).modifier(LiftContentEntrance())
         }.buttonStyle(.plain).background(.black).navigationTitle(L10n.s("Workout record")).navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                if !session.entries.isEmpty {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        NavigationLink { WorkoutCorrectionView(store: store, sessionID: session.id) } label: {
+                            Image(systemName: "square.and.pencil").frame(minWidth: 44, minHeight: 44)
+                        }.accessibilityLabel(L10n.s("Correct record"))
+                    }
+                }
+            }
             .sensoryFeedback(trigger: copies) { _, _ in PhoneStore.shared.state.comfort?.haptics == false ? nil : .success }
     }
 }
@@ -514,42 +395,19 @@ struct SettingsView: View {
     let store: PhoneStore
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 28) {
-                LiftPageHeading(title: L10n.s("Preferences"), detail: L10n.s("Training, coaching and Watch controls."))
-                LiftSection(title: L10n.s("Training & coach")) {
-                    LiftSurface {
-                        NavigationLink { ChatHandoffView(store: store) } label: { LiftMenuRow(title: L10n.s("My gym chat"), symbol: "bubble.left.and.text.bubble.right") }
-                        Divider().padding(.horizontal, 18)
-                        NavigationLink { TrainingProfileView(store: store) } label: { LiftMenuRow(title: L10n.s("Training profile"), symbol: "person.crop.circle") }
-                        Divider().padding(.horizontal, 18)
-                        NavigationLink { CoachingSettingsView(store: store) } label: {
-                            LiftMenuRow(title: L10n.s("Coach connection"), symbol: "bubble.left.and.text.bubble.right", detail: store.state.mode.title)
-                        }
-                        Divider().padding(.horizontal, 18)
-                        NavigationLink { CoachContextView(store: store) } label: { LiftMenuRow(title: L10n.s("Review coach context"), symbol: "square.and.arrow.up") }
-                    }
+            VStack(alignment: .leading, spacing: 24) {
+                LiftPageHeading(title: L10n.s("Settings"))
+                LiftSurface {
+                    NavigationLink { ChatHandoffView(store: store) } label: { LiftMenuRow(title: L10n.s("My gym chat"), symbol: "bubble.left.and.text.bubble.right", detail: L10n.s("Share context and bring back a workout")) }
+                    Divider().padding(.horizontal, 16)
+                    NavigationLink { TrainingPreferencesHub(store: store) } label: { LiftMenuRow(title: L10n.s("Preferences"), symbol: "slider.horizontal.3", detail: L10n.s("Language, haptics, profile and Watch")) }
+                    Divider().padding(.horizontal, 16)
+                    NavigationLink { TrainingDataHub(store: store) } label: { LiftMenuRow(title: L10n.s("My data"), symbol: "externaldrive", detail: L10n.s("Backups and imported history")) }
                 }
-                LiftSection(title: L10n.s("Help & preferences")) {
-                    LiftSurface {
-                        NavigationLink { GettingStartedView(store: store) } label: { LiftMenuRow(title: L10n.s("Start here"), symbol: "checklist") }
-                        NavigationLink { ExerciseHelpView() } label: { LiftMenuRow(title: L10n.s("Exercise help"), symbol: "questionmark.circle") }
-                        NavigationLink { ComfortSettingsView(store: store) } label: { LiftMenuRow(title: L10n.s("Training preferences"), symbol: "slider.horizontal.3") }
-                        NavigationLink { WeeklyHabitView(store: store) } label: { LiftMenuRow(title: L10n.s("Weekly goal"), symbol: "calendar") }
-                    }
-                }
-                LiftSection(title: L10n.s("Your Watch")) {
-                    LiftSurface {
-                        NavigationLink { WatchPreferencesView(store: store) } label: { LiftMenuRow(title: L10n.s("Watch controls"), symbol: "applewatch", detail: L10n.s("Double tap, quick launch & reminders")) }
-                    }
-                }
-                LiftSection(title: L10n.s("More")) {
-                    LiftSurface {
-                        NavigationLink { MotionLibraryView(store: store) } label: { LiftMenuRow(title: L10n.s("Motion test"), symbol: "waveform.path", detail: L10n.s("Optional experiment")) }
-                        Divider().padding(.horizontal, 18)
-                        NavigationLink { WorkoutBackupView(store: store) } label: { LiftMenuRow(title: L10n.s("Backups"), symbol: "externaldrive", detail: L10n.s("Export or restore your training records")) }
-                        Divider().padding(.horizontal, 18)
-                        NavigationLink { DataInformationView(store: store) } label: { LiftMenuRow(title: L10n.s("Data & connection"), symbol: "internaldrive") }
-                    }
+                LiftSurface {
+                    NavigationLink { TrainingHelpHub(store: store) } label: { LiftMenuRow(title: L10n.s("Help"), symbol: "questionmark.circle") }
+                    Divider().padding(.horizontal, 16)
+                    NavigationLink { TrainingExtrasHub(store: store) } label: { LiftMenuRow(title: L10n.s("Optional tools"), symbol: "square.stack.3d.up", detail: L10n.s("Shortcuts and motion experiment")) }
                 }
             }.padding(24).modifier(LiftContentEntrance())
         }.buttonStyle(.plain).background(.black).modifier(LiftRootChrome())

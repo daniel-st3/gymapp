@@ -2,7 +2,7 @@
 
 ## The shorter gym flow (Build 18)
 
-Today → **Bring workout from chat** → **Use a screenshot** or **Paste** → **Check your workout**.
+Train → **Bring workout from chat** → **Use a screenshot** or **Paste** → **Check your workout**.
 Recognized image text and Paste open review directly. Unrecognized content stays editable on the import screen, with a formatting request for the existing chat. A title alone does not generate a workout. Review shows names, sets,
 repetitions and rest together; details and the original message remain available.
 Use the explicit bottom action to save and send. Until then, Today is unchanged.
@@ -82,7 +82,7 @@ must return through Save Workout Review; they cannot bypass correlation by
 being pasted as a fresh workout. Duplicate JSON field names (including escaped
 aliases), deep nesting and oversize payloads are rejected before typed decoding.
 
-Generic connection test: Settings → Coach connection → Set up review Shortcut.
+Generic connection test: Settings → Optional tools → Review with Shortcuts → Set up review Shortcut.
 Add the prepared test Shortcut once, allow Apple's actions, then run it. A
 successful return displays **Response received · history unchanged**. This is
 separate from the production review Shortcut and sends no saved personal data.

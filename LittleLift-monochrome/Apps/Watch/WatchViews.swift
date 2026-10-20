@@ -531,18 +531,11 @@ struct WatchOptionsView: View {
                 if let session = store.state.session, session.phase != .completed {
                     Section { Button { confirmingEnd = true } label: { LiftLabel(L10n.s("Finish early…"), "stop.circle") } }
                 }
-                Section(L10n.s("Sync")) {
-                    if !store.syncNote.isEmpty { Text(store.syncNote).watchText(.caption).foregroundStyle(.secondary) }
-                    Button(store.isSyncing ? L10n.s("Syncing…") : L10n.s("Sync with iPhone")) { store.retrySync() }.disabled(store.isSyncing)
-                    if !store.state.outbox.isEmpty {
-                        Text(L10n.s("\(store.state.outbox.count) saved workout(s) waiting to sync")).watchText(.caption).foregroundStyle(.secondary)
-                    }
-                }
                 Section {
-                    NavigationLink { WatchSettingsView(store: store) } label: { LiftLabel(L10n.s("Preferences"), "slider.horizontal.3") }
-                    if store.state.motionOptIn == true {
-                        NavigationLink { MotionCaptureView(store: store) } label: { LiftLabel(L10n.s("Motion test"), "waveform.path") }
+                    if !store.state.outbox.isEmpty {
+                        NavigationLink { WatchConnectionView(store: store) } label: { LiftLabel(L10n.s("Send saved workouts"), "arrow.triangle.2.circlepath") }
                     }
+                    NavigationLink { WatchSettingsView(store: store) } label: { LiftLabel(L10n.s("Preferences"), "slider.horizontal.3") }
                 }
             }
             .watchText(.body)
@@ -580,9 +573,9 @@ struct WatchSettingsView: View {
             Section(L10n.s("Feedback")) {
                 Toggle(L10n.s("Wrist haptics"), isOn: Binding(get: { store.state.haptics }, set: { value in store.perform { try store.setHaptics(value) } }))
             }
-            Section(L10n.s("Workout runtime")) {
-                Text(WorkoutRuntime.shared.status).watchText(.caption)
-                if let session = store.state.session, session.phase != .completed, !WorkoutRuntime.shared.running {
+            if let session = store.state.session, session.phase != .completed, !WorkoutRuntime.shared.running {
+                Section(L10n.s("Workout runtime")) {
+                    Text(WorkoutRuntime.shared.status).watchText(.caption)
                     Button(L10n.s("Enable workout runtime")) { Task { await WorkoutRuntime.shared.start(for: session) } }.disabled(WorkoutRuntime.shared.starting)
                 }
             }
@@ -593,13 +586,28 @@ struct WatchSettingsView: View {
                 }
             }
             Section {
-                NavigationLink { ScrollView {
-                    Text(store.connectionDetails).font(.caption2.monospaced())
-                        .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal)
-                }.navigationTitle(L10n.s("Connection")) } label: { LiftLabel(L10n.s("Connection"), "antenna.radiowaves.left.and.right") }
+                NavigationLink { WatchConnectionView(store: store) } label: { LiftLabel(L10n.s("Connection"), "antenna.radiowaves.left.and.right") }
+                if store.state.motionOptIn == true {
+                    NavigationLink { MotionCaptureView(store: store) } label: { LiftLabel(L10n.s("Motion test"), "waveform.path") }
+                }
             }
         }.watchText(.body).navigationTitle(L10n.s("Preferences"))
             .task { await store.refreshNotificationStatus() }
+    }
+}
+
+struct WatchConnectionView: View {
+    let store: WatchStore
+    var body: some View {
+        List {
+            if !store.syncNote.isEmpty { Text(store.syncNote).watchText(.caption).foregroundStyle(.secondary) }
+            Button(store.isSyncing ? L10n.s("Syncing…") : L10n.s("Sync with iPhone")) { store.retrySync() }.disabled(store.isSyncing)
+            if !store.state.outbox.isEmpty { Text(L10n.s("\(store.state.outbox.count) saved workout(s) waiting to sync")).watchText(.caption) }
+            NavigationLink(L10n.s("Connection details")) {
+                ScrollView { Text(store.connectionDetails).font(.caption2.monospaced()).frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal) }
+                    .navigationTitle(L10n.s("Details"))
+            }
+        }.watchText(.body).navigationTitle(L10n.s("Connection"))
     }
 }
 

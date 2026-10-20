@@ -166,10 +166,12 @@ struct GettingStartedView: View {
             Section(L10n.s("1 · Choose a workout")) {
                 Button(L10n.s("Import text, screenshot or JSON")) { importing = true }
                     .sheet(isPresented: $importing) { SmartImportView(store: store) }
-                Button(L10n.s("Use a practice workout")) {
-                    do { var plan = try PlanImport.parse(PlanImport.example); plan.title = L10n.s("Practice · upper body"); plan.practice = true; try store.acceptImportedPlan(plan); try store.completeOnboarding("plan") }
-                    catch { store.error = error.localizedDescription }
-                }.disabled(store.state.plan != nil)
+                if store.state.plan == nil {
+                    Button(L10n.s("Use a practice workout")) {
+                        do { var plan = try PlanImport.parse(PlanImport.example); plan.title = L10n.s("Practice · upper body"); plan.practice = true; try store.acceptImportedPlan(plan); try store.completeOnboarding("plan") }
+                        catch { store.error = error.localizedDescription }
+                    }
+                }
                 Text(L10n.s("Practice is excluded from weekly goals. Import always opens an editable preview before saving.")).font(.caption)
             }
             Section(L10n.s("2 · Connect your Watch")) {

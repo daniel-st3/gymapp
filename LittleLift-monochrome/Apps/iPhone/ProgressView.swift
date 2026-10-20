@@ -65,7 +65,7 @@ struct TrainingProgressView: View {
                         }.padding(18)
                     }
                 }.padding(24)
-            }.background(.black).buttonStyle(.plain).modifier(LiftRootChrome())
+            }.background(.black).buttonStyle(.plain).navigationTitle(L10n.s("Progress")).navigationBarTitleDisplayMode(.inline)
                 .animation(reduceMotion ? nil : LiftMotion.content, value: weeks)
         }
     }

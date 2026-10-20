@@ -17,8 +17,9 @@ struct TimePlanningView: View {
                     do { try store.setTimeBudget(TimeBudget(durationMinutes: useFinishTime ? nil : minutes, finishAt: useFinishTime ? finish : nil)); saved = true; removed = false }
                     catch { store.error = error.localizedDescription }
                 }
-                Button(L10n.s("Remove time target")) { do { try store.setTimeBudget(nil); saved = false; removed = true } catch { store.error = error.localizedDescription } }
-                    .disabled(store.state.plan?.timeBudget == nil)
+                if store.state.plan?.timeBudget != nil {
+                    Button(L10n.s("Remove time target")) { do { try store.setTimeBudget(nil); saved = false; removed = true } catch { store.error = error.localizedDescription } }
+                }
                 if removed { Text(L10n.s("Time target removed from the saved workout.")).font(.caption) }
             }
             if let plan = store.state.plan, let preview = try? WorkoutSession(plan: plan) {

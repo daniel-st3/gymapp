@@ -11,7 +11,7 @@ struct MotionLibraryView: View {
                     ForEach(MotionExercise.allCases, id: \.self) { Text($0.label).tag($0) }
                 }
             } header: { Text(L10n.s("Experimental")) } footer: {
-                Text(L10n.s("On Watch: … → Motion test → Start. Allow Apple’s permission request, then tap Stop. The saved replay transfers to iPhone automatically; Send on Watch retries if needed. A test lasts up to 3 minutes."))
+                Text(L10n.s("On Watch: … → Preferences → Motion test → Start. Allow Apple’s permission request, then tap Stop. The saved replay transfers to iPhone automatically; Send on Watch retries if needed. A test lasts up to 3 minutes."))
                     .font(.footnote)
             }
             Section {
