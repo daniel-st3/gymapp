@@ -1,6 +1,6 @@
 # Run Little Lift on your Mac
 
-**Latest local update: Build 17.** Open **Today → My gym chat → Copy updated message** to prepare the message for your existing gym conversation. Bring its reply back with Paste, review/edit and accept. Copying does not send anything automatically. Add routine now preserves Today; import errors and retries give visible feedback. Both real apps received the free-signed update with original data preserved. [Chat guide](docs/gym-chat.md), [Build 17 checklist](docs/upgrade-17-checklist.md), [27-point matrix](docs/feedback-27.md).
+**Latest local update: Build 18.** Open **Today → Bring workout from chat** and choose Screenshot or Paste. Review the workout and accept it to send it to Watch. The saved plan is clearly labelled; it does not tell you what your private chat chose today. If an image/message cannot be structured, its text stays editable and **Copy message for my chat** asks for an easier format. Both real apps were updated with the existing free signing and original data preserved. [Build 18 checklist](docs/upgrade-18-checklist.md), [chat guide](docs/gym-chat.md), [27-point matrix](docs/feedback-27.md).
 
 Your completed workout review appears automatically after the phone saves it. Open **Today → Your latest workout review**, or **History → a workout → Automatic review**. No account or model setup is required. ChatGPT remains a separate optional route. Original data, free signing and icon are preserved; **do not uninstall**.
 

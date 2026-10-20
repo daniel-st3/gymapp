@@ -64,7 +64,6 @@ struct TodayView: View {
     @State private var choosing = false
     @State private var editing: WorkoutPlan?
     @State private var reviewing = false
-    @State private var copies = 0
     @State private var shortcutNotice: String?
     @Environment(\.openURL) private var openURL
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -72,13 +71,10 @@ struct TodayView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 28) {
+                LiftPageHeading(title: L10n.s("What are you training today?"), detail: L10n.s("Use the workout your chat chose. Bring its reply here, then start on Watch."))
                 if let plan = store.state.plan {
                     workoutHeader(plan)
-                    NavigationLink { ChatHandoffView(store: store) } label: {
-                        LiftSurface { LiftMenuRow(title: L10n.s("My gym chat"), symbol: "bubble.left.and.text.bubble.right", detail: L10n.s("Update your chat · bring back its workout")) }
-                    }
-                    reviewStatus
-                    LiftSection(title: L10n.s("Your exercises")) {
+                    DisclosureGroup(L10n.s("See saved exercises")) {
                         LiftSurface {
                             ForEach(plan.exercises) { exercise in
                                 VStack(alignment: .leading, spacing: 0) {
@@ -114,8 +110,8 @@ struct TodayView: View {
                             LiftMenuRow(title: L10n.s("Coach & sharing"), symbol: "bubble.left.and.text.bubble.right", disclosure: false)
                         }.padding(.trailing, 18)
                     }
+                    reviewStatus
                 } else {
-                    LiftPageHeading(title: L10n.s("Your next workout"), detail: L10n.s("Bring a workout from your coach, a screenshot or your own notes."))
                     LiftSurface {
                         Button { importing = true } label: { LiftMenuRow(title: L10n.s("Import a workout"), symbol: "square.and.arrow.down", detail: L10n.s("Review and edit before saving")) }
                         if !store.state.routineLibrary.isEmpty {
@@ -159,7 +155,6 @@ struct TodayView: View {
         }
         .sheet(isPresented: $importing) { SmartImportView(store: store) }
         .sheet(isPresented: $reviewing) { ReviewView(store: store) }
-        .sensoryFeedback(trigger: copies) { _, _ in PhoneStore.shared.state.comfort?.haptics == false ? nil : .success }
     }
 
     @ViewBuilder private var reviewStatus: some View {
@@ -183,30 +178,30 @@ struct TodayView: View {
         Button { store.sendToWatch() } label: {
             Label(store.isSyncing ? L10n.s("Sending…") : (store.state.todayReceivedOnWatch ? L10n.s("Check Watch") : L10n.s("Send to Watch")), systemImage: "applewatch")
                 .padding(.horizontal, 10).padding(.vertical, 3)
-        }.buttonStyle(QuietButtonStyle(prominent: true))
+        }.buttonStyle(QuietButtonStyle(prominent: false))
             .disabled(store.isSyncing || store.state.plan == nil)
     }
 
     private var importButton: some View {
-        Button { importing = true } label: { Label(L10n.s("Change workout"), systemImage: "arrow.left.arrow.right").padding(.horizontal, 10).padding(.vertical, 3) }
-            .buttonStyle(QuietButtonStyle(prominent: store.state.todayReceivedOnWatch || store.state.plan == nil)).accessibilityLabel(L10n.s("Change workout"))
+        Button { importing = true } label: { Label(L10n.s("Bring workout from chat"), systemImage: "text.bubble").padding(.horizontal, 10).padding(.vertical, 3) }
+            .buttonStyle(QuietButtonStyle(prominent: true)).accessibilityLabel(L10n.s("Bring workout from chat"))
     }
 
     private func workoutHeader(_ plan: WorkoutPlan) -> some View {
-        VStack(alignment: .leading, spacing: 20) {
-            LiftEyebrow(text: L10n.s("Saved workout"))
-            LiftPageHeading(title: plan.title)
-            Text(L10n.s("Did your coach choose something else? Bring that workout here before starting."))
-                .font(.subheadline).foregroundStyle(.secondary)
-            HStack(spacing: 16) {
-                LiftStat(value: String(plan.exercises.count), label: L10n.s("Exercises"))
-                LiftStat(value: String(plan.totalSets), label: plan.exercises.contains { $0.kind != .strength } ? L10n.s("Sets / segments") : L10n.s("Sets"))
-                if plan.exercises.contains(where: { $0.kind == .strength || $0.activity?.additionalLoad != nil }) { LiftStat(value: plan.unit.rawValue, label: L10n.s("Load unit")) }
-            }
-            HStack {
-                Spacer()
-                Button { editing = plan } label: { Label(L10n.s("Edit"), systemImage: "pencil") }
-                    .font(.subheadline).frame(minHeight: 44)
+        VStack(alignment: .leading, spacing: 16) {
+            LiftSurface {
+                VStack(alignment: .leading, spacing: 12) {
+                    LiftEyebrow(text: L10n.s("Previously saved"))
+                    Text(plan.title).font(.title2.weight(.regular))
+                    Text(L10n.s("This is saved in Little Lift. It is not a new recommendation from your chat."))
+                        .font(.caption).foregroundStyle(.secondary)
+                    Text(LiftCopy.workoutSummary(plan)).font(.subheadline).foregroundStyle(.secondary)
+                    HStack {
+                        Button { editing = plan } label: { Label(L10n.s("Edit"), systemImage: "pencil") }
+                        Spacer()
+                        Button { choosing = true } label: { Label(L10n.s("Saved workouts"), systemImage: "square.stack") }
+                    }.font(.subheadline).frame(minHeight: 44)
+                }.padding(18)
             }
             TodayDeliveryView(store: store)
             if let slot = store.state.weeklySchedule.first(where: { $0.weekday == Calendar.current.component(.weekday, from: Date()) }),

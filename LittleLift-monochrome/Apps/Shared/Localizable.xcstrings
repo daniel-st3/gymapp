@@ -19859,6 +19859,278 @@
           }
         }
       }
+    },
+    "What are you training today?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What are you training today?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Qué entrenas hoy?"
+          }
+        }
+      }
+    },
+    "Use the workout your chat chose. Bring its reply here, then start on Watch.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use the workout your chat chose. Bring its reply here, then start on Watch."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trae la rutina que eligió tu chat. Revísala aquí y empieza en el Watch."
+          }
+        }
+      }
+    },
+    "See saved exercises": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See saved exercises"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ver ejercicios guardados"
+          }
+        }
+      }
+    },
+    "Bring workout from chat": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bring workout from chat"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traer entrenamiento del chat"
+          }
+        }
+      }
+    },
+    "Previously saved": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previously saved"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardado anteriormente"
+          }
+        }
+      }
+    },
+    "This is saved in Little Lift. It is not a new recommendation from your chat.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This is saved in Little Lift. It is not a new recommendation from your chat."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este es el plan guardado en Little Lift, no una nueva recomendación de tu chat."
+          }
+        }
+      }
+    },
+    "Bring your chat’s workout": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bring your chat’s workout"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trae la rutina de tu chat"
+          }
+        }
+      }
+    },
+    "Copy the workout message or choose a screenshot showing its exercises and sets.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy the workout message or choose a screenshot showing its exercises and sets."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copia el mensaje con la rutina o elige una captura donde se vean los ejercicios y las series."
+          }
+        }
+      }
+    },
+    "We need the exercise details": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We need the exercise details"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Faltan los detalles de la rutina"
+          }
+        }
+      }
+    },
+    "A title like ‘legs’ is not enough. The text we read is kept below. Correct it, choose another screenshot or ask your chat for the easy format.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A title like ‘legs’ is not enough. The text we read is kept below. Correct it, choose another screenshot or ask your chat for the easy format."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo «pierna» no basta. Conservamos abajo el texto leído. Puedes corregirlo, elegir otra captura o pedirle a tu chat el formato sencillo."
+          }
+        }
+      }
+    },
+    "View or edit workout text": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View or edit workout text"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ver o editar el texto"
+          }
+        }
+      }
+    },
+    "Need help bringing it over?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Need help bringing it over?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿No logras traer la rutina?"
+          }
+        }
+      }
+    },
+    "Paste this message into the same chat that gave you the workout. Bring its answer back with Paste.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paste this message into the same chat that gave you the workout. Bring its answer back with Paste."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pega este mensaje en el mismo chat que te dio la rutina. Luego vuelve aquí y pega su respuesta."
+          }
+        }
+      }
+    },
+    "Copy message for my chat": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy message for my chat"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiar mensaje para mi chat"
+          }
+        }
+      }
+    },
+    "Copied. Paste it into your gym chat, then bring its answer back here.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied. Paste it into your gym chat, then bring its answer back here."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiado. Pégalo en tu chat del gym y trae su respuesta aquí."
+          }
+        }
+      }
+    },
+    "Reformat only the workout you just recommended for today, without changing it. Return plain text: Workout: [name], then one line per exercise: [name] — [sets] x [reps] — [load and kg/lb, only if prescribed] — rest [seconds] s. Keep ranges, exercise variations, load conventions and all prescribed values. Do not invent missing values; ask me if needed. For timed activities, write their name and prescribed minutes. No table, JSON or extra commentary.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reformat only the workout you just recommended for today, without changing it. Return plain text: Workout: [name], then one line per exercise: [name] — [sets] x [reps] — [load and kg/lb, only if prescribed] — rest [seconds] s. Keep ranges, exercise variations, load conventions and all prescribed values. Do not invent missing values; ask me if needed. For timed activities, write their name and prescribed minutes. No table, JSON or extra commentary."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reescribe solo la rutina que acabas de recomendarme para hoy, sin cambiarla. Devuelve texto sencillo: Entrenamiento: [nombre], y después una línea por ejercicio: [nombre] — [series] x [repeticiones] — [peso y kg/lb, solo si lo prescribiste] — descanso [segundos] s. Conserva rangos, variantes, convenciones de carga y todos los valores prescritos. No inventes datos que falten; pregúntame si hace falta. Para actividades por tiempo, escribe el nombre y los minutos prescritos. Sin tabla, JSON ni comentarios adicionales."
+          }
+        }
+      }
+    },
+    "This exercise was only partly read. Check its source and complete the missing targets.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This exercise was only partly read. Check its source and complete the missing targets."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este ejercicio se leyó parcialmente. Consulta el texto original y completa lo que falta."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

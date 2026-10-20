@@ -58,6 +58,14 @@ struct ImportWorkoutPreview: View {
                     LiftSurface {
                         VStack(alignment: .leading, spacing: 12) {
                             TextField(L10n.s("Exercise name"), text: $exercise.name).font(.body).accessibilityLabel(L10n.s("Exercise name"))
+                            if exercise.kind == nil {
+                                Picker(L10n.s("Activity type"), selection: $exercise.kind) {
+                                    Text(L10n.s("Choose type")).tag(ActivityKind?.none)
+                                    ForEach(ActivityKind.allCases, id: \.self) { Text($0.label).tag(Optional($0)) }
+                                }
+                                Text(L10n.s("This exercise was only partly read. Check its source and complete the missing targets."))
+                                    .font(.caption).foregroundStyle(.secondary)
+                            }
                             if exercise.kind == .strength {
                                 let fieldsLayout = dynamicType.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8)) : AnyLayout(HStackLayout(alignment: .top, spacing: 12))
                                 fieldsLayout {
@@ -121,7 +129,8 @@ struct ImportWorkoutPreview: View {
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 VStack(spacing: 6) {
                     if plan == nil {
-                        Text(L10n.s("Complete the empty fields above to continue.")).font(.caption).foregroundStyle(.secondary)
+                        Text(validationError ?? L10n.s("Complete the empty fields above to continue."))
+                            .font(.caption).foregroundStyle(.secondary).lineLimit(3)
                     }
                     Button(useToday ? L10n.s("Use this workout · send to Watch") : L10n.s("Save routine")) {
                         do {

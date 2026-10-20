@@ -145,6 +145,7 @@ struct WatchTodayView: View {
         WatchPage {
             VStack(alignment: .leading, spacing: 8) {
                 if let plan = store.state.plan {
+                    Text(L10n.s("Saved on iPhone")).watchText(.caption).foregroundStyle(.secondary)
                     Text(plan.title).font(.system(size: titleSize, weight: .regular, design: .default)).lineLimit(2)
                     Text(LiftCopy.workoutSummary(plan))
                         .watchText(.secondary).foregroundStyle(.secondary)

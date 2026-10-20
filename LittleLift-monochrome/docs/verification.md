@@ -1,5 +1,17 @@
 # Verification
 
+## Build 18 · simpler gym start and screenshot recovery · 20 October 2026
+
+171 Swift tests / 23 suites and 13 Python tests pass, with both simulator builds
+and the free-signed device build. Actual local Vision and native Photos selection
+opened a Pierna preview with explicit sets, reps, loads and rests. Acceptance, Watch
+start/logging/rest/undo, single History delivery, duplicate replay and relaunch were
+verified on isolated fixtures. Unrecognized text retained its source and offered
+a copied formatting request. Phone large text and 46 mm Watch layouts inspected.
+Original simulator/device app-owned data preserved; Build 18 installed/opened on
+both physical devices. Exact failed image and live formatting-prompt response remain
+unverified. [Detailed checklist and evidence limits](upgrade-18-checklist.md).
+
 ## Build 17 · explicit gym-chat handoff and controls · 19 October 2026
 
 167 Swift tests / 22 suites, 13 Python tests, both simulator SDK builds and the same

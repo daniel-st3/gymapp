@@ -15,6 +15,9 @@ struct SmartImportView: View {
     @State private var chatReply: ChatWorkoutReply?
     @State private var openedInitialText = false
     @State private var reviewing = false
+    @State private var showText = false
+    @State private var needsHelp = false
+    @State private var promptCopied = false
     @State private var error: String?
     @State private var photo: PhotosPickerItem?
     @State private var importingFile = false
@@ -26,9 +29,16 @@ struct SmartImportView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 28) {
-                    LiftPageHeading(title: L10n.s("What are you training?"), detail: L10n.s("Bring the workout your coach gave you. Little Lift does not read your chat automatically."))
-                    NavigationLink { ChatHandoffView(store: store) } label: {
-                        LiftSurface { LiftMenuRow(title: L10n.s("Ask my existing chat"), symbol: "bubble.left.and.text.bubble.right", detail: L10n.s("Copy a ready-to-use message with your app context")) }
+                    LiftPageHeading(title: L10n.s("Bring your chat’s workout"), detail: L10n.s("Copy the workout message or choose a screenshot showing its exercises and sets."))
+                    if needsHelp {
+                        LiftSurface {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Label(L10n.s("We need the exercise details"), systemImage: "text.magnifyingglass").font(.subheadline)
+                                Text(L10n.s("A title like ‘legs’ is not enough. The text we read is kept below. Correct it, choose another screenshot or ask your chat for the easy format."))
+                                    .font(.subheadline).foregroundStyle(.secondary)
+                                formatPromptButton
+                            }.padding(16)
+                        }
                     }
                     LiftSurface {
                         PhotosPicker(selection: $photo, matching: .images) {
@@ -48,7 +58,7 @@ struct SmartImportView: View {
                             LiftMenuRow(title: L10n.s("Choose a saved routine"), symbol: "square.stack")
                         }
                     }
-                    LiftSection(title: L10n.s("Or write / paste text")) {
+                    DisclosureGroup(L10n.s("View or edit workout text"), isExpanded: $showText) {
                         LiftSurface {
                             ZStack(alignment: .topLeading) {
                                 if text.isEmpty {
@@ -58,6 +68,13 @@ struct SmartImportView: View {
                                 TextEditor(text: $text).font(.callout).frame(minHeight: 120).scrollContentBackground(.hidden)
                                     .scrollDismissesKeyboard(.interactively).accessibilityLabel(L10n.s("Workout source text"))
                             }.padding(14)
+                        }
+                    }
+                    DisclosureGroup(L10n.s("Need help bringing it over?")) {
+                        Text(L10n.s("Paste this message into the same chat that gave you the workout. Bring its answer back with Paste.")).font(.subheadline).foregroundStyle(.secondary)
+                        formatPromptButton
+                        NavigationLink { ChatHandoffView(store: store) } label: {
+                            LiftMenuRow(title: L10n.s("My gym chat"), symbol: "bubble.left.and.text.bubble.right", detail: L10n.s("Update your chat · bring back its workout"))
                         }
                     }
                     DisclosureGroup(L10n.s("More import options")) {
@@ -75,10 +92,12 @@ struct SmartImportView: View {
                     HStack { ProgressView(L10n.s("Reading workout…")); Spacer(); Button(L10n.s("Cancel")) { cancelExtraction() }.frame(minHeight: 44) }
                         .padding(.horizontal, 24).padding(.bottom, 20)
                 }
-            }.buttonStyle(.plain).background(.black)
+            }.scrollDismissesKeyboard(.interactively).buttonStyle(.plain).background(.black)
                 .safeAreaInset(edge: .bottom, spacing: 0) {
-                    Button { parse() } label: { Label(L10n.s("Preview workout"), systemImage: "list.bullet.rectangle") }.buttonStyle(QuietButtonStyle(prominent: true)).disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || busy)
-                        .padding(.horizontal, 20).padding(.vertical, 10).background(.black)
+                    if !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        Button { parse() } label: { Label(L10n.s("Preview workout"), systemImage: "list.bullet.rectangle") }.buttonStyle(QuietButtonStyle(prominent: true)).disabled(busy)
+                            .padding(.horizontal, 20).padding(.vertical, 10).background(.black)
+                    }
                 }
                 .navigationDestination(isPresented: $reviewing) {
                     if let draft { ImportWorkoutPreview(store: store, initial: draft, useToday: useToday, chatReply: chatReply) { dismiss() } }
@@ -112,10 +131,26 @@ struct SmartImportView: View {
             if let reply = try ChatWorkoutReply.parseIfPresent(text) {
                 try store.state.validateChatReply(reply.handoffID)
                 present(WorkoutDraft(plan: reply.review.plan), reply: reply)
-            } else { present(try SmartWorkoutImport.extract(text)) }
-        } catch { self.error = error.localizedDescription }
+            } else {
+                let value = try SmartWorkoutImport.extract(text)
+                guard value.hasRecognizedPrescription else {
+                    needsHelp = true; showText = true; error = nil; return
+                }
+                present(value)
+            }
+        } catch { showText = true; self.error = error.localizedDescription }
+    }
+    private var formatPromptButton: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Button {
+                UIPasteboard.general.string = L10n.s("Reformat only the workout you just recommended for today, without changing it. Return plain text: Workout: [name], then one line per exercise: [name] — [sets] x [reps] — [load and kg/lb, only if prescribed] — rest [seconds] s. Keep ranges, exercise variations, load conventions and all prescribed values. Do not invent missing values; ask me if needed. For timed activities, write their name and prescribed minutes. No table, JSON or extra commentary.")
+                promptCopied = true
+            } label: { Label(L10n.s("Copy message for my chat"), systemImage: "doc.on.doc") }.buttonStyle(QuietButtonStyle())
+            if promptCopied { Text(L10n.s("Copied. Paste it into your gym chat, then bring its answer back here.")).font(.caption).foregroundStyle(.secondary) }
+        }
     }
     private func present(_ value: WorkoutDraft, reply: ChatWorkoutReply? = nil) {
+        needsHelp = false
         chatReply = reply
         var prepared = value
         if prepared.title.isEmpty { prepared.title = L10n.s("My workout") }

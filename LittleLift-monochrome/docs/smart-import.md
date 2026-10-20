@@ -1,9 +1,9 @@
 # Import examples and decisions
 
-## The shorter gym flow (Build 16)
+## The shorter gym flow (Build 18)
 
-Today → **Change workout** → **Use a screenshot** or **Paste** → **Check your workout**.
-Image reading and Paste now open review directly. Review shows names, sets,
+Today → **Bring workout from chat** → **Use a screenshot** or **Paste** → **Check your workout**.
+Recognized image text and Paste open review directly. Unrecognized content stays editable on the import screen, with a formatting request for the existing chat. A title alone does not generate a workout. Review shows names, sets,
 repetitions and rest together; details and the original message remain available.
 Use the explicit bottom action to save and send. Until then, Today is unchanged.
 An older saved plan is retained in routines; completed records are never rewritten.

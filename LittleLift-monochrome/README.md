@@ -23,6 +23,26 @@ No backend. No ads. No API keys. No paid inference or runtime dependencies.
 | Explore History, Progress and factual reports | Undo, finish early and recover after relaunch |
 | Share context with your existing coach chat | Keep logging offline; deliver completed workouts later |
 
+## What’s new in Build 18
+
+**Today → Bring workout from chat** puts Screenshot and Paste first. Today and
+Watch label the stored workout explicitly; an old upper-body plan is not presented
+as a new recommendation from a chat. Advanced setup stays below the import actions.
+
+Screenshot/text extraction now accepts `3 series × 10` and wrapped numbered names.
+Incomplete numbered exercises stay in review, including when there is no title.
+When the source contains only something like “today is legs”, the app keeps the
+text editable and offers a copyable request for a simpler response from the same
+chat. It does not invent the routine. Saving still requires review and acceptance.
+
+**Verified:** 171 engine tests / 23 suites, 13 script tests, both simulator builds
+and free-signed device builds. Actual local Vision and native photo selection →
+review → Watch start/log/rest/undo → single History delivery/relaunch passed with
+isolated data. Duplicate delivery, recovery feedback and large text were checked.
+Both real apps installed/opened with app-owned data preservation checked. The exact
+failed gym screenshot and a live response to the new formatting prompt remain
+unverified. [Build 18 evidence and limits](docs/upgrade-18-checklist.md).
+
 ## What’s new in Build 17
 
 **Today → My gym chat** prepares a context message for the gym conversation you already

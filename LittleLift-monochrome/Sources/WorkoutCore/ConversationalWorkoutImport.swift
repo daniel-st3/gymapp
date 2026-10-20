@@ -5,18 +5,26 @@ import Foundation
 /// the same bounded parser; the complete source remains available in preview.
 enum ConversationalWorkoutImport {
     static func normalized(_ text: String) -> String? {
-        let raw = text.components(separatedBy: .newlines)
-        guard raw.contains(where: { $0.contains("**") || matches(#"^\s*(?:\d+[.)]|#{1,4}\s|[-•]\s)|(?i:series|sets|repeticiones|repetitions)\s*:"#, $0) }) ||
+        // Normalize explicit notation, not quantities. Chat screenshots commonly
+        // wrap a numbered name and show "3 series x 10" on the next line.
+        let notation = text.replacingOccurrences(of: #"(?i)(\d+)\s+(?:series|sets)\s*[x×]\s*"#, with: "$1 x ", options: .regularExpression)
+        let raw = notation.components(separatedBy: .newlines)
+        guard notation != text || raw.contains(where: { $0.contains("**") || matches(#"^\s*(?:\d+[.)]|#{1,4}\s|[-•]\s)|(?i:series|sets|repeticiones|repetitions)\s*:"#, $0) }) ||
                 raw.contains(where: { matches(#"^\s*\d+\s*(?:x|×|series\s+de|sets\s+of)\s*\d"#, $0) }) else { return nil }
         var title = "", pending = "", records: [String] = []
         var active: String?, sets: String?, reps: String?
+        var activeHasQuantity = false
         var details: [String] = []
         func finish() {
             if var value = active {
                 if let sets, let reps { value += " \(sets) x \(reps)" }
+                else if sets != nil || reps != nil {
+                    // Keep partial labelled blocks visibly unresolved.
+                    details.append(sets.map { "Series: \($0)" } ?? "Reps: \(reps!)")
+                }
                 records.append(([value] + details).joined(separator: " · "))
             }
-            active = nil; sets = nil; reps = nil; details = []
+            active = nil; sets = nil; reps = nil; details = []; activeHasQuantity = false
         }
         for original in raw {
             let numbered = matches(#"^\s*\d+[.)]\s+"#, original)
@@ -25,7 +33,7 @@ enum ConversationalWorkoutImport {
                 .replacingOccurrences(of: #"^\s*(?:\d+[.)]\s+|#{1,4}\s+|[-•]\s+)"#, with: "", options: .regularExpression)
                 .trimmingCharacters(in: .whitespacesAndNewlines)
             guard !line.isEmpty, line != "---" else { continue }
-            if ["chatgpt", "message chatgpt", "pregunta lo que quieras"].contains(line.lowercased()) { continue }
+            if ["chatgpt", "message chatgpt", "pregunta lo que quieras", "ask anything", "envía un mensaje"].contains(line.lowercased()) { continue }
             if matches(#"(?i)^(?:workout|title|entrenamiento|rutina)\s*:"#, line) {
                 title = String(line.split(separator: ":", maxSplits: 1).last ?? "").trimmingCharacters(in: .whitespaces); continue
             }
@@ -39,9 +47,10 @@ enum ConversationalWorkoutImport {
             }
             if let range = line.range(of: #"(?i)\d+(?:\s*[-–]\s*\d+)?\s*(?:x|×|series\s*(?:de)?|sets\s*(?:of)?)\s*\d"#, options: .regularExpression) {
                 let name = line[..<range.lowerBound].trimmingCharacters(in: CharacterSet(charactersIn: " :—–-·"))
-                // An inline exercise or a quantity directly below a name.
-                if !name.isEmpty || !pending.isEmpty {
-                    finish(); active = name.isEmpty ? pending + " " + line : line; pending = ""
+                if name.isEmpty, active != nil, !activeHasQuantity, sets == nil, reps == nil {
+                    active! += " " + line; activeHasQuantity = true
+                } else if !name.isEmpty || !pending.isEmpty {
+                    finish(); active = name.isEmpty ? pending + " " + line : line; pending = ""; activeHasQuantity = true
                 }
                 continue
             }
@@ -51,7 +60,10 @@ enum ConversationalWorkoutImport {
             if matches(#"(?i)\b(?:caminadora|caminar|walking|treadmill|running|correr|movilidad|mobility)\b.*\d+\s*(?:min|minutes|minutos)\b"#, line) {
                 finish(); records.append(line); pending = ""; continue
             }
-            if numbered || heading {
+            if numbered {
+                finish(); active = line; pending = ""; continue
+            }
+            if heading {
                 finish()
                 if heading && title.isEmpty && records.isEmpty { title = line }
                 pending = line; continue
@@ -59,13 +71,18 @@ enum ConversationalWorkoutImport {
             // Short unnumbered names can precede quantity lines (Vision often
             // loses bullets). Prose stays in source, never becomes fake work.
             if !line.contains(where: \.isNumber), line.count <= 80, !line.hasSuffix("."), !line.hasSuffix("?") {
+                if active != nil, !activeHasQuantity, sets == nil, reps == nil, details.isEmpty {
+                    active! += " " + line; continue
+                }
                 if title.isEmpty && records.isEmpty && active == nil { title = line }
                 pending = line
             }
         }
         finish()
         guard !records.isEmpty else { return nil }
-        return (title.isEmpty ? [] : ["Workout: " + title]).joined(separator: "\n") + "\n" + records.joined(separator: "\n")
+        // Without a title marker the ordinary parser could mistake the first
+        // incomplete exercise for the workout's name and hide it from review.
+        return "Workout: " + (title.isEmpty ? L10n.s("My workout") : title) + "\n" + records.joined(separator: "\n")
     }
     private static func matches(_ pattern: String, _ value: String) -> Bool { value.range(of: pattern, options: .regularExpression) != nil }
     private static func capture(_ pattern: String, _ value: String) -> String? {

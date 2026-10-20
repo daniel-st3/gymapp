@@ -1,6 +1,8 @@
 # Usar el chat del gimnasio que ya tienes
 
-En **Hoy → Mi chat del gym**, toca **Copiar mensaje actualizado**. Puedes escribir antes
+Para traer una rutina que tu chat ya te dio, entra en **Hoy → Traer entrenamiento del chat** y elige **Usar una captura** o **Pegar**. Si no se puede leer completa, **¿No logras traer la rutina? → Copiar mensaje para mi chat** pide un formato sencillo, sin cambiar lo acordado.
+
+Para compartir contexto e historial, en **Ajustes → Mi chat del gym**, toca **Copiar mensaje actualizado**. Puedes escribir antes
 algo breve como «hoy acordamos pierna y tengo 45 minutos». Abre tu conversación habitual
 con ChatGPT y pega el mensaje. Incluye los datos que permitiste compartir y pide una
 respuesta que Little Lift pueda importar. No necesitas redactar JSON tú.

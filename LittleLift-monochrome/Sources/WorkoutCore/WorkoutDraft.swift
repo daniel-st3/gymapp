@@ -76,6 +76,15 @@ public struct WorkoutDraft: Equatable, Sendable {
     public var notes: [String] = []
     public var original: WorkoutPlan?
     public init() {}
+    /// A readable screenshot is not necessarily a workout. Keep unrecognized
+    /// source editable instead of navigating into a page of meaningless rows.
+    public var hasRecognizedPrescription: Bool {
+        exercises.contains {
+            !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+            (($0.kind == .strength && (!$0.sets.isEmpty || !$0.reps.isEmpty)) ||
+             ($0.kind != nil && $0.kind != .strength))
+        }
+    }
     public init(plan: WorkoutPlan) {
         original = plan; title = plan.title; exercises = plan.exercises.map { DraftExercise($0, unit: plan.unit) }
     }
