@@ -10,7 +10,11 @@ Prensa de piernas — 2 x 10 — 20 kg — descanso 60 s
 Curl femoral sentado — 1 x 12 — 15 kg — descanso 60 s
 ```
 
-Los bloques de texto de ChatGPT también se aceptan, incluso con una introducción o despedida alrededor. Una carga ausente se elige en el Watch. Si faltan unidad o descanso, se confirman en la revisión; los rangos necesitan un objetivo elegido. No se inventan datos ni se guarda nada antes de aceptar. Un título como «pierna» por sí solo no contiene una rutina.
+Los bloques de texto de ChatGPT también se aceptan, incluso con una introducción o despedida alrededor. Una carga ausente puede escribirse directamente en la revisión o elegirse en el Watch. Si faltan unidad o descanso, se confirman en la revisión; los rangos necesitan un objetivo elegido. No se inventan datos ni se guarda nada antes de aceptar. Un título como «pierna» por sí solo no contiene una rutina.
+
+Si falta algo, **Por completar** muestra el ejercicio y el dato pendiente. Toca ese elemento o **Revisar lo que falta** para llegar al campo. Al completarlo, el botón cambia a **Usar este entrenamiento**. `lb`, `lbs` y `libras` se conservan; si una captura confunde la unidad, confirma kg o lb una vez sin volver a escribir los números.
+
+No tienes que escribir la fecha. El mensaje que copias incluye la fecha local de hoy y pide todas las cargas y unidades ya acordadas. El registro del entrenamiento usa la fecha real al iniciar en el Watch. Si ChatGPT omite un peso que conoces, puedes añadirlo en la revisión; la app no puede recuperarlo de un chat que no lee.
 
 ## Mantener tu conversación al día
 

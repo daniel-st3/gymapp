@@ -1,6 +1,6 @@
 # Run Little Lift on your Mac
 
-**Latest local update: Build 19.** Three tabs: **Train, History and Settings**. Open **Train → Bring workout from chat**, choose Screenshot or Paste, review, then accept. Tap the saved workout for exercises, editing and available time. Routines live inside Train; Progress lives inside History. Setup is grouped under Settings. [Build 19 checklist](docs/upgrade-19-checklist.md), [chat guide](docs/gym-chat.md), [27-point matrix](docs/feedback-27.md).
+**Latest local update: Build 21.** In **Train**, tap **Paste** or **Screenshot**, review the workout, then **Use this workout**. The preview lists any missing decisions and takes you directly to them. Enter a missing load here or choose it on Watch. Date is automatic. Three tabs remain: **Train, History and Settings**. [Build 21 checklist](docs/upgrade-21-checklist.md), [chat guide](docs/gym-chat.md), [27-point matrix](docs/feedback-27.md).
 
 Your completed workout review appears automatically after the phone saves it. Open **Train → Last workout**, or **History → a workout → Automatic review**. No account or model setup is required. ChatGPT remains a separate optional route. Original data, free signing and icon are preserved; **do not uninstall**.
 

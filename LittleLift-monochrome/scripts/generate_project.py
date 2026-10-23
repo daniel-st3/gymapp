@@ -66,7 +66,7 @@ def main():
     widget_product = add('launcher:product', 'PBXFileReference', explicitFileType='wrapper.app-extension', includeInIndex=0, path='LittleLiftLauncher.appex', sourceTree='BUILT_PRODUCTS_DIR')
     products.append(widget_product)
     groups.append(add('launcher:group', 'PBXGroup', name='Watch launcher', children=[widget_ref, file_ref('Config/WatchLauncher-Info.plist', 'text.plist.xml')], sourceTree='<group>'))
-    widget_settings = dict(PRODUCT_NAME='LittleLiftLauncher', PRODUCT_BUNDLE_IDENTIFIER='$(LITTLELIFT_WATCH_BUNDLE_ID).launcher', SDKROOT='watchos', SUPPORTED_PLATFORMS='watchos watchsimulator', TARGETED_DEVICE_FAMILY='4', INFOPLIST_FILE='Config/WatchLauncher-Info.plist', GENERATE_INFOPLIST_FILE='NO', CODE_SIGN_STYLE='Automatic', SWIFT_VERSION='5.0', SWIFT_STRICT_CONCURRENCY='targeted', MARKETING_VERSION='0.1.0', CURRENT_PROJECT_VERSION='20', WATCHOS_DEPLOYMENT_TARGET='11.0', SKIP_INSTALL='YES', APPLICATION_EXTENSION_API_ONLY='YES')
+    widget_settings = dict(PRODUCT_NAME='LittleLiftLauncher', PRODUCT_BUNDLE_IDENTIFIER='$(LITTLELIFT_WATCH_BUNDLE_ID).launcher', SDKROOT='watchos', SUPPORTED_PLATFORMS='watchos watchsimulator', TARGETED_DEVICE_FAMILY='4', INFOPLIST_FILE='Config/WatchLauncher-Info.plist', GENERATE_INFOPLIST_FILE='NO', CODE_SIGN_STYLE='Automatic', SWIFT_VERSION='5.0', SWIFT_STRICT_CONCURRENCY='targeted', MARKETING_VERSION='0.1.0', CURRENT_PROJECT_VERSION='21', WATCHOS_DEPLOYMENT_TARGET='11.0', SKIP_INSTALL='YES', APPLICATION_EXTENSION_API_ONLY='YES')
     OBJECTS[widget] = dict(isa='PBXNativeTarget', buildConfigurationList=config_list('launcher', widget_settings), buildPhases=[widget_source, widget_frameworks, widget_resources], buildRules=[], dependencies=[], name='LittleLiftLauncher', productName='LittleLiftLauncher', productReference=widget_product, productType='com.apple.product-type.app-extension')
     target_ids.append(widget)
     for label, target, folder, name, bundle, sdk, family in [
@@ -96,7 +96,7 @@ def main():
                         SUPPORTED_PLATFORMS='iphoneos iphonesimulator' if label == 'phone' else 'watchos watchsimulator',
                         TARGETED_DEVICE_FAMILY=family, INFOPLIST_FILE=f'Config/{folder}-Info.plist',
                         GENERATE_INFOPLIST_FILE='NO', CODE_SIGN_STYLE='Automatic', SWIFT_VERSION='5.0',
-                        SWIFT_STRICT_CONCURRENCY='targeted', MARKETING_VERSION='0.1.0', CURRENT_PROJECT_VERSION='20',
+                        SWIFT_STRICT_CONCURRENCY='targeted', MARKETING_VERSION='0.1.0', CURRENT_PROJECT_VERSION='21',
                         ASSETCATALOG_COMPILER_APPICON_NAME='AppIcon', ENABLE_PREVIEWS='YES',
                         SUPPORTS_MACCATALYST='NO', SKIP_INSTALL='NO' if label == 'phone' else 'YES')
         settings['IPHONEOS_DEPLOYMENT_TARGET' if label == 'phone' else 'WATCHOS_DEPLOYMENT_TARGET'] = '18.0' if label == 'phone' else '11.0'

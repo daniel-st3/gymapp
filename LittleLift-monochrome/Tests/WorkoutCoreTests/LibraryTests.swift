@@ -20,7 +20,8 @@ struct LibraryTests {
         #expect(SmartWorkoutImport.cleanExtractedNumber("3 sets", kind: "sets") == "3")
         #expect(SmartWorkoutImport.cleanExtractedNumber("8–12", kind: "reps") == "8–12")
         let draft = try SmartWorkoutImport.extract("Workout: Test\nRow 2 x 8 @ -20 kg rest 60 s")
-        #expect(draft.exercises[0].weight.isEmpty)
+        #expect(draft.exercises[0].weight == "-20") // retain invalid source for correction, never silently omit it
+        #expect(draft.exercises[0].fieldsToReview.contains("Load"))
     }
     @Test func rangesAndMixedUnitsRequireExplicitResolution() throws {
         let range = try SmartWorkoutImport.extract("Workout: Test\nRow 3 x 8–12 @ 20 kg rest 1 min")

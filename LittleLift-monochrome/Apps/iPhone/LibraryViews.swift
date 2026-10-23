@@ -185,9 +185,7 @@ struct SmartImportView: View {
         chatReply = reply
         var prepared = value
         if prepared.title.isEmpty { prepared.title = L10n.s("My workout") }
-        for i in prepared.exercises.indices where prepared.exercises[i].kind == .strength && prepared.exercises[i].weight.isEmpty && prepared.exercises[i].source.range(of: #"(?i)\b(?:kg|lbs?)\b"#, options: .regularExpression) == nil {
-            prepared.exercises[i].chooseLoadOnWatch = true
-        }
+
         draft = prepared; error = nil; reviewing = true
     }
     private enum ExtractionResult { case text(String), draft(WorkoutDraft) }

@@ -32,7 +32,7 @@ enum ConversationalWorkoutImport {
             let line = original.replacingOccurrences(of: "**", with: "")
                 .replacingOccurrences(of: #"^\s*(?:\d+[.)]\s+|#{1,4}\s+|[-•]\s+)"#, with: "", options: .regularExpression)
                 .trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !line.isEmpty, line != "---" else { continue }
+            guard !line.isEmpty, line != "---", !SmartWorkoutImport.isDateMetadata(line) else { continue }
             if ["chatgpt", "message chatgpt", "pregunta lo que quieras", "ask anything", "envía un mensaje"].contains(line.lowercased()) { continue }
             if matches(#"(?i)^(?:workout|title|entrenamiento|rutina)\s*:"#, line) {
                 title = String(line.split(separator: ":", maxSplits: 1).last ?? "").trimmingCharacters(in: .whitespaces); continue

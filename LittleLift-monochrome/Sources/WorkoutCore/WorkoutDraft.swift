@@ -114,7 +114,11 @@ public struct WorkoutDraft: Equatable, Sendable {
 
 public enum SmartWorkoutImport {
     public static func extract(_ text: String) throws -> WorkoutDraft {
-        try extract(text, normalizeChat: true)
+        var draft = try extract(text, normalizeChat: true)
+        for i in draft.exercises.indices where draft.exercises[i].kind == .strength && draft.exercises[i].weight.isEmpty && draft.exercises[i].convention != "bodyweight" {
+            draft.exercises[i].chooseLoadOnWatch = true
+        }
+        return draft
     }
     static func extract(_ text: String, normalizeChat: Bool) throws -> WorkoutDraft {
         guard text.utf8.count <= 64_000 else { throw WorkoutError.invalidInput(L10n.s("Import at most 64 KB at a time.")) }
@@ -140,6 +144,9 @@ public enum SmartWorkoutImport {
         draft.notes = [L10n.s("Check every extracted field against the source. Missing values and ranges require your decision. A load convention and exact variation ID enable later comparisons; leave both blank when unknown.")]
         for raw in trimmed.components(separatedBy: .newlines).filter({ !$0.trimmingCharacters(in: .whitespaces).isEmpty }) {
             let line = raw.trimmingCharacters(in: .whitespaces)
+            // Scheduling metadata is retained in source, never an exercise or a
+            // fabricated completion date. Session dates come from actual Start.
+            if isDateMetadata(line) { continue }
             if line.lowercased().hasPrefix("workout:") || line.lowercased().hasPrefix("title:") || line.lowercased().hasPrefix("entrenamiento:") {
                 draft.title = String(line.split(separator: ":", maxSplits: 1).last ?? "").trimmingCharacters(in: .whitespaces); continue
             }
@@ -163,7 +170,7 @@ public enum SmartWorkoutImport {
                 if let speed = first(#"(?i)([-+]?\d+(?:[.,]\d+)?(?:\s*[-–]\s*\d+(?:[.,]\d+)?)?)\s*(km/h|kph|mph)\b"#, line) { row.speed = speed.1[0]; row.distanceUnit = speed.1[1].lowercased() == "mph" ? .mi : .km; speedUnit = row.distanceUnit }
                 if let distance = first(#"(?i)([-+]?\d+(?:[.,]\d+)?(?:\s*[-–]\s*\d+(?:[.,]\d+)?)?)\s*(km|mi)(?!/h)\b"#, line) { row.distance = distance.1[0]; row.distanceUnit = distance.1[1].lowercased() == "mi" ? .mi : .km; distanceUnit = row.distanceUnit }
                 if let incline = first(#"(-?\d+(?:[.,]\d+)?)\s*%"#, line) { row.incline = incline.1[0] }
-                if let load = first(#"(?i)([-+]?\d+(?:[.,]\d+)?(?:\s*[-–]\s*\d+(?:[.,]\d+)?)?)\s*(kg|lb)\b"#, line) { row.addedLoad = load.1[0]; row.unit = load.1[1].lowercased() }
+                if let load = extractedLoad(line) { row.addedLoad = load.value; row.unit = load.unit }
                 if let pace = first(#"(?i)(\d+):(\d{2})\s*(?:min)?/(km|mi)"#, line), let minutes = Double(pace.1[0]), let seconds = Double(pace.1[1]), seconds < 60, minutes * 60 + seconds > 0 {
                     row.speed = String(3600 / (minutes * 60 + seconds)); row.distanceUnit = pace.1[2].lowercased() == "mi" ? .mi : .km; speedUnit = row.distanceUnit
                 }
@@ -186,8 +193,8 @@ public enum SmartWorkoutImport {
                     row.reps = ""; draft.notes.append(L10n.s("A range in “\(row.name)” needs a single confirmed target."))
                 }
             } else { row.name = line }
-            if let load = first(#"(?i)([-+]?\d+(?:[.,]\d+)?(?:\s*[-–]\s*\d+(?:[.,]\d+)?)?)\s*(kg|lb)\b"#, line) {
-                row.weight = Double(load.1[0]).map({ $0 < 0 }) == true ? "" : load.1[0]; row.unit = load.1[1].lowercased()
+            if let load = extractedLoad(line) {
+                row.weight = load.value; row.unit = load.unit
             }
             if let rest = first(#"(?i)(?:rest|descanso)\s*[:=]?\s*(\d+)\s*(s|sec(?:onds?)?|seg(?:undos?)?|min(?:utes?|utos?)?)\b"#, line), let n = Int(rest.1[0]), n <= 1800 {
                 row.rest = String(n * (rest.1[1].lowercased().hasPrefix("min") ? 60 : 1))
@@ -204,6 +211,25 @@ public enum SmartWorkoutImport {
         guard draft.exercises.count <= 50 else { throw WorkoutError.invalidInput(L10n.s("Import at most 50 exercise lines.")) }
         return draft
     }
+    static func isDateMetadata(_ line: String) -> Bool {
+        line.range(of: #"(?i)^(?:(?:date|fecha|today|hoy)\s*:\s*.*|\d{4}-\d{2}-\d{2})$"#, options: .regularExpression) != nil
+    }
+    /// A bare number is a load only when labelled as such. Missing units remain
+    /// a decision; plural aliases do not change numeric values or conventions.
+    static func extractedLoad(_ line: String) -> (value: String, unit: String)? {
+        let number = #"([-+]?\d+(?:[.,]\d+)?(?:\s*[-–]\s*\d+(?:[.,]\d+)?)?)"#
+        let units = #"(kgs?|kilograms?|kilogramos?|lbs?|pounds?|libras?)\b"#
+        if let match = first("(?i)" + number + #"\s*"# + units, line) {
+            return (match.1[0], match.1[1].lowercased().hasPrefix("k") ? "kg" : "lb")
+        }
+        // Vision commonly reads the letter l in lbs as I or 1. Keep the
+        // numeric load, but require the user to confirm the ambiguous unit.
+        if let match = first(number + #"\s*[I1]bs?\b"#, line) { return (match.1[0], "") }
+        if let match = first(#"(?i)\b(?:load|weight|peso|carga)\s*[:=]\s*"# + number + #"(?=\s*(?:[·;—|]|$))"#, line) {
+            return (match.1[0], "")
+        }
+        return nil
+    }
     public static func explicitConvention(in text: String) -> String {
         let phrases: [(String, String)] = [("per dumbbell", "perDumbbell"), ("machine stack", "machineStack"), ("total load", "total"), ("total external load", "total"), ("assistance setting", "assistance"), ("bodyweight", "bodyweight"), ("por mancuerna", "perDumbbell"), ("pila de maquina", "machineStack"), ("carga total", "total"), ("asistencia", "assistance"), ("peso corporal", "bodyweight")]
         let found = Set(phrases.filter { text.localizedCaseInsensitiveContains($0.0) }.map(\.1))
@@ -214,12 +240,48 @@ public enum SmartWorkoutImport {
         if kind == "rest", let m = first(#"(?i)^(\d+)\s*(s|sec(?:onds?)?|seg(?:undos?)?|min(?:utes?|utos?)?)$"#, value), let n = Int(m.1[0]), n <= 1800 {
             return String(n * (m.1[1].lowercased().hasPrefix("min") ? 60 : 1))
         }
-        let suffix = kind == "weight" ? "(?:kg|lbs?)?" : "(?:sets?|series|reps?|repeticiones)?"
+        let suffix = kind == "weight" ? "(?:kgs?|kilograms?|kilogramos?|lbs?|pounds?|libras?)?" : "(?:sets?|series|reps?|repeticiones)?"
         if let m = first("(?i)^(\\d+(?:[.,]\\d+)?)\\s*" + suffix + "$", value) { return m.1[0] }
         return value // leave ranges and unsupported values visibly unresolved
     }
     private static func first(_ pattern: String, _ text: String) -> (Range<String.Index>, [String])? {
         guard let regex = try? NSRegularExpression(pattern: pattern), let m = regex.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)), let range = Range(m.range, in: text) else { return nil }
         return (range, (1..<m.numberOfRanges).map { Range(m.range(at: $0), in: text).map { String(text[$0]) } ?? "" })
+    }
+}
+
+/// All visible repair destinations, in the same order as preview. Validation
+/// remains authoritative: unexpected plan-level errors also get a visible item.
+public struct WorkoutDraftIssue: Identifiable, Equatable, Sendable {
+    public let id: String
+    public let exerciseID: UUID?
+    public let title: String
+    public let message: String
+}
+
+extension WorkoutDraft {
+    public var reviewIssues: [WorkoutDraftIssue] {
+        var result: [WorkoutDraftIssue] = []
+        if title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || title.utf8.count > 120 || title.unicodeScalars.contains(where: { CharacterSet.controlCharacters.contains($0) }) {
+            result.append(WorkoutDraftIssue(id: "title", exerciseID: nil, title: L10n.s("Workout name"), message: L10n.s("Give the workout a short title on a single line.")))
+        }
+        for row in exercises {
+            var message = row.fieldsToReview.joined(separator: " · ")
+            if message.isEmpty {
+                do {
+                    var plan = WorkoutPlan(title: "Review", unit: WeightUnit(rawValue: row.unit) ?? .kg, exercises: [try row.exercise()])
+                    plan.schemaVersion = 3
+                    try plan.validate()
+                } catch { message = error.localizedDescription }
+            }
+            if !message.isEmpty {
+                result.append(WorkoutDraftIssue(id: row.id.uuidString, exerciseID: row.id, title: row.name.isEmpty ? L10n.s("Exercise") : row.name, message: message))
+            }
+        }
+        if result.isEmpty {
+            do { _ = try validated() }
+            catch { result.append(WorkoutDraftIssue(id: "workout", exerciseID: nil, title: L10n.s("Workout"), message: error.localizedDescription)) }
+        }
+        return result
     }
 }

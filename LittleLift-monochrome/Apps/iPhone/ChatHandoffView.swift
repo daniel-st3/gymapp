@@ -16,6 +16,7 @@ struct ChatHandoffView: View {
             VStack(alignment: .leading, spacing: 22) {
                 Text(L10n.s("Two steps to keep your existing chat and Little Lift aligned.")).font(.subheadline).foregroundStyle(.secondary)
                 LiftSection(title: L10n.s("1 · Message for your chat")) {
+                    Text(L10n.s("Today’s date is included automatically.")).font(.caption).foregroundStyle(.secondary)
                     TextField(L10n.s("Optional: today is legs, I have 45 minutes…"), text: $request, axis: .vertical)
                         .lineLimit(2...4).padding(16).background(LiftStyle.surface, in: .rect(cornerRadius: 16))
                         .accessibilityLabel(L10n.s("What to ask your coach"))

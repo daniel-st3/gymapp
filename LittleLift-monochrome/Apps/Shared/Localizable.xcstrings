@@ -21257,6 +21257,134 @@
           }
         }
       }
+    },
+    "The workout date is recorded automatically when you start on Watch.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The workout date is recorded automatically when you start on Watch."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La fecha se registra automáticamente al iniciar en el Watch."
+          }
+        }
+      }
+    },
+    "Today’s date is included automatically.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Today’s date is included automatically."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La fecha de hoy se incluye automáticamente."
+          }
+        }
+      }
+    },
+    "To finish · {0}": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To finish · {0}"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Por completar · {0}"
+          }
+        }
+      }
+    },
+    "Review what’s missing": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Review what’s missing"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revisar lo que falta"
+          }
+        }
+      }
+    },
+    "No load target. Enter it here, or choose the actual load on Watch.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No load target. Enter it here, or choose the actual load on Watch."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin peso indicado. Escríbelo aquí o elige el peso real en el Watch."
+          }
+        }
+      }
+    },
+    "Choose load on Watch instead": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose load on Watch instead"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elegir el peso en el Watch"
+          }
+        }
+      }
+    },
+    "On Watch": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On Watch"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En el Watch"
+          }
+        }
+      }
+    },
+    "Bodyweight must use zero external load": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bodyweight must use zero external load"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El peso corporal debe tener carga externa cero"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -59,6 +59,9 @@ public enum EditableWorkoutJSON {
                 row.weight = SmartWorkoutImport.cleanExtractedNumber(scalar(value["weight"]), kind: "weight")
                 row.unit = scalar(plan["unit"]).lowercased()
                 if row.unit == "lbs" { row.unit = "lb" }
+                if let load = SmartWorkoutImport.extractedLoad(scalar(value["weight"])) {
+                    row.unit = row.unit.isEmpty || row.unit == load.unit ? load.unit : ""
+                }
                 row.convention = scalar(value["loadConvention"]); row.comparisonID = scalar(value["comparisonID"])
                 if let flag = value["loadIsUnspecified"] {
                     guard scalar(flag) == "true" || scalar(flag) == "false" else { throw error }

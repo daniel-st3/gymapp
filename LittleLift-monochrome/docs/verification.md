@@ -1,5 +1,23 @@
 # Verification
 
+## Build 21 · pounds, actionable import and automatic dates · 23 October 2026
+
+188 Swift tests / 25 suites and 13 Python tests pass (201 total), with both simulator
+builds and both free Personal Team device builds. Plural pounds, explicit unlabelled-unit
+loads, OCR `Ibs`/`1bs`, incomplete JSON, ranges, invalid targets and date metadata have
+regression coverage. The acceptance screen lists all pending rows and navigates to
+repair; it does not change the saved plan before acceptance. Unknown loads remain
+explicitly unspecified, while known numbers are retained.
+
+Actual iPhone Paste and Photos → Vision → preview → accept were exercised with generic
+fixtures. Native 46 mm Watch logging recorded 81 lb × 11 against an 80 lb × 12 target;
+rest extension/skip, relaunch and full completion passed. History contained the three
+sets once after a deliberate duplicate delivery and another relaunch. Large text stacks
+inputs; the fixed action remains reachable. System Reduce Motion was enabled/read back
+and the repair navigation exercised, then restored. Original simulator app files and
+preferences were restored, six original Photos retained, fixture clipboard cleared and
+pairing preserved. See [Build 21 checklist](upgrade-21-checklist.md) for delivery and limits.
+
 ## Build 20 · direct import and recovery · 20 October 2026
 
 178 Swift tests / 24 suites and 13 Python checks pass, plus both simulator SDK

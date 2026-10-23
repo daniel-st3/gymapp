@@ -7,12 +7,12 @@ A native SwiftUI workout logger for iPhone and Apple Watch. Start a routine, rec
 No backend. No ads. No API keys. No paid inference or runtime dependencies.
 
 <p>
-  <img src="docs/images/train-build20.png" width="260" alt="Build 20: Paste and Screenshot directly on Train">
-  <img src="docs/images/preview-build20.png" width="260" alt="Build 20: compact workout preview before acceptance">
-  <img src="docs/images/watch-log-build20.png" width="190" alt="46 mm Watch with fixed actual load, repetitions and Log set controls">
+  <img src="docs/images/import-missing-build21.png" width="260" alt="Build 21: missing fields listed with direct repair actions">
+  <img src="docs/images/import-ready-build21.png" width="260" alt="Build 21: screenshot loads retained in editable preview">
+  <img src="docs/images/watch-log-build21.png" width="190" alt="46 mm Watch with fixed actual load, repetitions and Log set controls">
 </p>
 
-*Actual Build 20 simulator captures using generic test data.*
+*Actual Build 21 simulator captures using generic test data.*
 
 ## At a glance
 
@@ -23,6 +23,14 @@ No backend. No ads. No API keys. No paid inference or runtime dependencies.
 | Keep routines and a weekly schedule | Defer a busy exercise or choose an approved alternative |
 | Explore History, Progress and factual reports | Undo, finish early and recover after relaunch |
 | Share context with your existing coach chat | Keep logging offline; deliver completed workouts later |
+
+## What’s new in Build 21
+
+**Imports tell you exactly what is missing.** The review lists each exercise that needs a decision; **Review what’s missing** takes you to it. Once ready, **Use this workout** saves and sends the plan. Loads stay editable in this preview, including when the coach omitted one. An unknown load can also be chosen on Watch without inventing a prescribed value.
+
+`lb`, `lbs`, pounds, libras and decimal loads are preserved. If screenshot OCR reads `lbs` as `Ibs`, the number stays and you confirm the unit. The copied coach message includes today's local date and explicitly asks for every known load and unit. Ordinary workout dates are recorded when you start; no date entry is required.
+
+**Verified:** 188 Swift tests and 13 script tests, both simulator and free-signed device builds. Native paste and screenshot import → editable acceptance → 46 mm Watch logging → one History record, relaunch, rest controls and duplicate delivery were exercised with generic data. [Build 21 evidence and limits](docs/upgrade-21-checklist.md).
 
 ## What’s new in Build 20
 

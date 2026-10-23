@@ -95,10 +95,13 @@ enum TabularWorkoutImport {
 extension DraftExercise {
     public var fieldsToReview: [String] {
         var fields: [String] = []
-        if name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { fields.append(L10n.s("Exercise name")) }
+        if name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || name.utf8.count > 120 || name.unicodeScalars.contains(where: { CharacterSet.controlCharacters.contains($0) }) { fields.append(L10n.s("Exercise name")) }
         guard kind == .strength || (kind == nil && !sets.isEmpty && !reps.isEmpty) else {
             if kind == nil { fields.append(L10n.s("Activity type")) }
-            else if (try? exercise()) == nil { fields.append(L10n.s("Activity targets")) }
+            else {
+                if (try? exercise()) == nil { fields.append(L10n.s("Activity targets")) }
+                if !addedLoad.isEmpty && WeightUnit(rawValue: unit) == nil { fields.append(L10n.s("Unit")) }
+            }
             return fields
         }
         if Int(sets).map({ (1...20).contains($0) }) != true { fields.append(L10n.s("Sets")) }
@@ -106,6 +109,7 @@ extension DraftExercise {
         if !chooseLoadOnWatch, Double(weight.replacingOccurrences(of: ",", with: ".")).map({ $0.isFinite && (0...1000).contains($0) }) != true { fields.append(L10n.s("Load")) }
         if WeightUnit(rawValue: unit) == nil { fields.append(L10n.s("Unit")) }
         if Int(rest).map({ (0...1800).contains($0) }) != true { fields.append(L10n.s("Rest · seconds")) }
+        if convention == "bodyweight" && (chooseLoadOnWatch || Double(weight) != 0) { fields.append(L10n.s("Bodyweight must use zero external load")) }
         if (!comparisonID.isEmpty && convention.isEmpty) || (!comparisonID.isEmpty && !WorkoutPlan.validIdentifier(comparisonID)) || (!convention.isEmpty && LoadConvention(rawValue: convention) == nil) { fields.append(L10n.s("Load convention")) }
         return fields
     }
